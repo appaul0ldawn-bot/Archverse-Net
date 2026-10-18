@@ -1,0 +1,75 @@
+import React, { useState, useEffect } from 'react';
+
+export function MultiverseKarmaHUD({ currentUsername, socket }) {
+  const [karmaStats, setKarmaStats] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    socket.emit('request_multiverse_karma_snapshot', { username: currentUsername });
+    socket.on('multiverse_karma_payload', (data) => {
+      setKarmaStats(data);
+    });
+    return () => socket.off('multiverse_karma_payload');
+  }, [currentUsername, socket]);
+
+  const testRealityHop = async (targetEarth) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/multiverse/validate-hop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          destinationUniverseId: targetEarth
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🌌 Multiverse Transit Report:\nStatus: ${data.vortexStatus}\nMessage: ${data.message}`);
+      }
+    } catch (e) {
+      console.error("Multiverse connection handshake drop:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{
+      top: '10%', right: 'auto', left: '24px', width: '380px', maxHeight: '82%',
+      background: 'linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(234,179,8,0.03) 100%)',
+      border: '2px solid #ef4444', borderRadius: '24px', boxShadow: '0 0 25px rgba(239,68,68,0.15)' // Red Glow Shroud
+    }}>
+      <div className="store-header" style={{ borderColor: 'rgba(239,68,68,0.2)', paddingBottom: '10px' }}>
+        <h3 style={{ margin: 0, color: '#f87171', fontFamily: 'serif' }}>🌪️ Multiverse Karma & Yo-Yo Monitor</h3>
+        <span style={{ fontSize: '9px', color: '#94a3b8' }}>Universal Justice Ledger • Virtues Rank Oversight</span>
+      </div>
+
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- UNIVERSAL REPRIMAND AND JUSTICE DATA CARD --- */}
+        {karmaStats ? (
+          <div style={{ background: 'rgba(0,0,0,0.4)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(239,68,68,0.1)' }}>
+            <div className="metric-row"><span>🏠 Native Home Base:</span><strong>{karmaStats.nativeHome}</strong></div>
+            <div className="metric-row"><span>📍 Currently Tracking In:</span><strong style={{ color: '#38bdf8' }}>{karmaStats.currentUniverse}</strong></div>
+            <div className="metric-row" style={{ marginTop: '4px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px' }}>
+              <span>⚖️ Universal Cross-Karma Score:</span>
+              <span style={{ fontWeight: 'bold', color: karmaStats.karma >= 0 ? '#34d399' : '#ef4444' }}>{karmaStats.karma} Points</span>
+            </div>
+            <div className="metric-row"><span>🛡️ Space-Time Contract Status:</span><span style={{ color: karmaStats.contractActive ? '#34d399' : '#ef4444', fontWeight: 'bold' }}>{karmaStats.contractActive ? "VALID_MISSION_ACTIVE" : "NO_MISSION_CRITICAL_YOYO"}</span></div>
+          </div>
+        ) : (
+          <div style={{ color: '#64748b', fontStyle: 'italic' }}>Awaiting omniversal justice telemetry ingestion ticks...</div>
+        )}
+
+        {/* --- TRANSIT ACTION RIG CONTROLS --- */}
+        <div className="dashboard-section-title" style={{ color: '#fbbf24' }}>Test Cross-Reality Crossover Gates</div>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <button onClick={() => testRealityHop('EARTH_616')} disabled={isProcessing} className="buy-upgrade-btn" style={{ flex: 1, background: '#475569', fontSize: '10px' }}>⚡ Hop to Ω-616</button>
+          <button onClick={() => testRealityHop('EARTH_838')} disabled={isProcessing} className="buy-upgrade-btn" style={{ flex: 1, background: '#475569', fontSize: '10px' }}>⚡ Hop to Ω-838</button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
