@@ -1,0 +1,63 @@
+import React, { useState, useEffect } from 'react';
+
+export function EthicalCompassHUD({ currentUser, socket }) {
+  const [moralStats, setMoralStats] = useState(null);
+  const [activeVirtueMission, setActiveVirtueMission] = useState(null);
+
+  useEffect(() => {
+    socket.emit('request_moral_ledger_data', { username: currentUser.name });
+    socket.on('moral_ledger_payload', (data) => {
+      setMoralStats(data.ledger);
+      setActiveVirtueMission(data.mission);
+    });
+    return () => socket.off('moral_ledger_payload');
+  }, [currentUser, socket]);
+
+  return (
+    <div style={{ padding: '20px', background: '#020617', color: '#fff', textAlign: 'left', fontFamily: 'sans-serif' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+        <img 
+          src="https://researchgate.net" 
+          alt="The Noble Eightfold Path as a Mindful Moral Compass for Leaders" 
+          style={{ width: '80px', height: '80px', objectFit: 'contain', borderRadius: '50%' }}
+        />
+        <div>
+          <h3 style={{ margin: 0, color: '#fbbf24' }}>🧭 The Ethical Compass Ledger</h3>
+          <span style={{ fontSize: '11px', color: '#94a3b8' }}>Administered by the Virtues Rank • Balanced via Libra Grids</span>
+        </div>
+      </div>
+
+      {moralStats && (
+        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px' }}>
+          <div className="metric-row"><span>🧴 Holy Hygiene Cleansing Index:</span><span style={{ color: '#34d399', fontWeight: 'bold' }}>{moralStats.hygienePurityScore}%</span></div>
+          <div className="metric-row"><span>🏃 Physical Temple Exercise:</span><span>{moralStats.physicalKineticOutput} / 10000 Steps</span></div>
+          <div className="metric-row"><span>🤝 Mannerisms & Grace Index:</span><span>{moralStats.mannerismsGraceIndex.toFixed(2)} / 1.00</span></div>
+          
+          <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', marginTop: '4px', fontSize: '11px' }}>
+            <span>Sovereign Honor (No Theft): {moralStats.sovereignPropertyHonor ? '✅ SECTOR CLEAN' : '❌ ANOMALY'}</span>
+            <span>Sacred Life (No Murder): {moralStats.sacredLifePreservation ? '✅ SECTOR CLEAN' : '❌ ANOMALY'}</span>
+          </div>
+          
+          <div className="metric-row" style={{ marginTop: '4px', background: 'rgba(234,179,8,0.1)', padding: '6px', borderRadius: '6px', border: '1px solid #eab308' }}>
+            <span>⚖️ Libra Scale Equilibrium Status:</span>
+            <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>{moralStats.libraEquilibriumRatio === 1.0 ? "PERFECTLY BALANCED" : "CALIBRATING FREQUENCIES"}</span>
+          </div>
+        </div>
+      )}
+
+      {/* --- VIRTUOUS PROCEDURAL MISSION BOX --- */}
+      {activeVirtueMission && (
+        <div style={{ marginTop: '16px', background: 'rgba(16,185,129,0.05)', border: '1px dashed #10b981', padding: '12px', borderRadius: '12px' }}>
+          <strong style={{ color: '#34d399', fontSize: '13px', display: 'block' }}>👼 {activeVirtueMission.title}</strong>
+          <p style={{ margin: '4px 0 8px 0', fontSize: '11px', color: '#cbd5e1', lineHeight: 1.4 }}>{activeVirtueMission.instructions}</p>
+          <button 
+            onClick={() => socket.emit('seal_virtue_contract_request', { missionId: activeVirtueMission.missionId, username: currentUser.name })}
+            className="buy-upgrade-btn" style={{ width: '100%', background: '#10b981', color: '#fff', fontWeight: 'bold' }}
+          >
+            Complete Aligned Task (+{activeVirtueMission.tokenReward} AT)
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
