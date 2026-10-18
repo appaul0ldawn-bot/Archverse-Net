@@ -1,0 +1,72 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize Timeline schemas inside the testing memory sandbox cluster
+  mongoose.model('TimelineNode', new mongoose.Schema({
+    timelineId: String,
+    designatorCode: String,
+    resonanceFrequencyHz: Number,
+    environmentalShaderHex: String
+  }));
+
+  mongoose.model('ActiveUserTimelineState', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    currentTimelineId: String,
+    cachedPreviousTimelineId: String,
+    unlockedTimelineBadges: [String]
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('TimelineNode')) await mongoose.model('TimelineNode').deleteMany({});
+  if (mongoose.modelNames().includes('ActiveUserTimelineState')) await mongoose.model('ActiveUserTimelineState').deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 35: MULTI-VERSE FREQUENCY SLIDING & TOKENS GATING CHECKS
+// ==========================================================================
+describe('Archverse Parallel Timelines Sliders Remote Mod Verification Suite', () => {
+
+  it('should charge a user 300 tokens from their vault to unlock the Sliders Remote Mod if the badge asset is missing', async () => {
+    const user = await User.create({ username: 'UnawakenedSlider', tokens: 500, zodiacElement: 'Fire' });
+
+    // Seed target parallel reality node inside our memory cluster database tables
+    await mongoose.model('TimelineNode').create({
+      timelineId: "EARTH_616",
+      designatorCode: "Ω-616",
+      resonanceFrequencyHz: 528,
+      environmentalShaderHex: "#fbbf24"
+    });
+
+    const response = await request(app)
+      .post('/api/timeline/frequency-shift')
+      .send({
+        username: 'UnawakenedSlider',
+        targetTimelineId: 'EARTH_616'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.userRemainingTokens).toBe(200); // 500 base - 300 mod cost = 200 tokens remaining
+    expect(response.body.currentRealityProfile.code).toBe('Ω-616');
+
+    // Confirm that the visual state layer programmatically shifted to neon gold
+    const updatedUser = await User.findOne({ username: 'UnawakenedSlider' });
+    expect(updatedUser.activeVisualState).toBe('#fbbf24');
+  });
+});
