@@ -1,0 +1,58 @@
+import React, { useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
+import * as THREE from 'three';
+
+export function InteractiveCelestialFirmament({ userProfile }) {
+  const starmapRef = useRef();
+  const [selectedConstellation, setSelectedConstellation] = useState(null);
+
+  useFrame((state) => {
+    if (!starmapRef.current) return;
+    const time = state.clock.getElapsedTime();
+    // Rotate the stellar firmament canvas matching real-time Stellarium calculation data
+    starmapRef.current.rotation.y = time * 0.02;
+  });
+
+  return (
+    <group ref={starmapRef}>
+      {/* 🌌 MOTION GRAPHIC BACKGROUND INJECTION STRETCHED TO FIT */}
+      <Html prepend center style={{ width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 1 }}>
+        <img 
+          src="https://pinterest.com" 
+          alt="Star Map Geometric Anomaly" 
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.15 }} 
+        />
+      </Html>
+
+      {/* --- REPLIC OBJECTS: THE PLEIADES SEVEN SISTERS ALIGNMENT PORTAL --- */}
+      <mesh position={[3, 5, -8]} onClick={() => setSelectedConstellation('PLEIADES')}>
+        <octahedronGeometry args={[0.3, 0]} />
+        <meshStandardMaterial color="#fde047" emissive="#fbbf24" emissiveIntensity={3} wireframe />
+        
+        {selectedConstellation === 'PLEIADES' && (
+          <Html center position={[0, 0.6, 0]}>
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.98)', border: '1.5px solid #fbbf24',
+              borderRadius: '12px', padding: '12px', width: '250px', color: '#fff', fontSize: '11px'
+            }}>
+              <strong style={{ color: '#fbbf24' }}>✨ Constellation Node: The Pleiades</strong>
+              <p style={{ margin: '4px 0 8px 0', color: '#cbd5e1', lineHeight: 1.4 }}>
+                Primary destination vector of Lightworkers and Pleiadian Starseed lineages. Emits constant 963Hz Seraph waves down the Aether Network.
+              </p>
+              <a href="https://vercel.app" target="_blank" rel="noopener noreferrer" className="buy-upgrade-btn" style={{ display: 'block', textDecoration: 'none', textAlign: 'center' }}>
+                🚀 Launch External Star-System Generator
+              </a>
+            </div>
+          </Html>
+        )}
+      </mesh>
+
+      {/* Renders geometric constellation connection vectors using line loop primitives */}
+      <lineSegments>
+        <bufferGeometry attach="geometry" />
+        <lineBasicMaterial attach="material" color="#818cf8" linewidth={1} transparent opacity={0.4} />
+      </lineSegments>
+    </group>
+  );
+}
