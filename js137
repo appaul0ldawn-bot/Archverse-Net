@@ -1,0 +1,66 @@
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const User = require('./models/User');
+const { FinancialLedger, CorporateSponsor } = require('./models/FinancialLedger');
+
+// ==========================================================================
+// 🏢 1. REGISTER SPONSORS & DEVELOPER IDEAS (Father's Business)
+// ==========================================================================
+router.post('/api/corporate/join-fathers-business', async (req, res) => {
+  try {
+    const { companyName, capitalInvestmentUSD, coreDeveloperProposalText } = req.body;
+
+    const newSponsorNode = await CorporateSponsor.create({
+      sponsorId: `spon_${Date.now()}`,
+      brandName: companyName,
+      fundingContributionUSD: capitalInvestmentUSD,
+      activeCampaignTier: capitalInvestmentUSD >= 10000 ? 'CELESTIAL_PARTNER' : 'Ley_LINE_SPONSOR',
+      developerIdeaInclusionProposal: coreDeveloperProposalText
+    });
+
+    // Allocate 10% of funding values back into Archangel Raziel's Master Revenue Port
+    await mongoose.model('FinancialLedger').updateOne(
+      { 'razielTreasuryVault.isVaultHidden': true },
+      { \$inc: { 'razielTreasuryVault.accruedSponsorshipRevenueUSD': capitalInvestmentUSD } }
+    );
+
+    res.json({
+      success: true,
+      message: "💼 Corporate node successfully synchronized with Father's Business. Welcome to the Galactic Enterprise.",
+      assignedTier: newSponsorNode.activeCampaignTier
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Corporate onboarding matrix failure.' });
+  }
+});
+
+// ==========================================================================
+// 👼 2. REGISTER FOR TEACHING SECTORS (Angel School)
+// ==========================================================================
+router.post('/api/education/join-angel-school', async (req, res) => {
+  try {
+    const { applicantUsername, chosenClassSectorType } = req.body;
+    const user = await User.findOne({ username: applicantUsername });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User proxy profile invalid.' });
+
+    // Restrict specialized instructor assignments to high celestial orders
+    let instructorAssignedAngel = "Lesser Veil Watcher";
+    if (chosenClassSectorType === 'DIVINE_LORE') instructorAssignedAngel = "Archangel Raziel (Secrets Class)";
+    if (chosenClassSectorType === 'ATMOSPHERIC_SHADERS') instructorAssignedAngel = "Archangel Michael (Forge Class)";
+
+    user.characterBio += ` | Registered Scholar at Angel School [Sector: ${chosenClassSectorType}]. Class instructed by ${instructorAssignedAngel}.`;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `🎉 Onboarding complete for Angel School. Assigned Instructor: ${instructorAssignedAngel}.`,
+      academicStatus: "ACTIVE_SCHOLAR"
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Angel School onboarding breakdown.' });
+  }
+});
+
+module.exports = router;
