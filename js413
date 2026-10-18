@@ -1,0 +1,71 @@
+import React, { useState } from 'react';
+
+const TRIBUNAL_STONES = [
+  "Sardius (Reuben - Red Aura Anchor)", "Topaz (Simeon - Frequency Calibration)", "Carbuncle (Levi - Priesthood Seal)",
+  "Emerald (Judah - Kingly Vector)", "Sapphire (Dan - Vault Guard)", "Diamond (Naphtali - Air Mobility)",
+  "Jacinth (Gad - Tactical Fortitude)", "Agate (Asher - Extra-dimensional Printer)", "Amethyst (Issachar - Chrono-Flicker)",
+  "Beryl (Zebulun - Harbor Sanctuary)", "Onyx (Joseph - Dual Tribe Portion)", "Jasper (Benjamin - Altar Pillar Core)"
+];
+
+export function GoldenArmorOfGodForge() {
+  const [activeTab, setActiveTab] = useState('BREASTPLATE');
+
+  return (
+    <div className="login-card" style={{ maxWidth: '700px', margin: '20px auto', border: '2px solid #eab308' }}>
+      <h3 className="login-title" style={{ color: '#eab308' }}>🌟 Full Golden Armor of God Forge</h3>
+      
+      <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '6px' }}>
+        {['BREASTPLATE', 'GAUNTLETS', 'SHOULDERS', 'SWORD_AND_SHIELD'].map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)} className={`custom-option-btn ${activeTab === tab ? 'active' : ''}`} style={{ fontSize: '11px' }}>
+            {tab.replace('_', ' ')}
+          </button>
+        ))}
+      </div>
+
+      {/* --- TAB 1: HIGH PRIEST BREASTPLATE --- */}
+      {activeTab === 'BREASTPLATE' && (
+        <div style={{ marginTop: '14px', fontSize: '12px', textAlign: 'left' }}>
+          <strong style={{ color: '#fde047' }}>🛡️ Breastplate of Righteousness (Melchizedek Integration)</strong>
+          <p style={{ color: '#cbd5e1', lineHeight: '1.4' }}>
+            Renders an entire solid golden protection field over your avatar. This module incorporates the 12 tribal gemstone crystals of the High Priest breastplate:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', fontSize: '11px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px' }}>
+            {TRIBUNAL_STONES.map((stone, i) => <span key={i}>💎 {stone}</span>)}
+          </div>
+        </div>
+      )}
+
+      {/* --- TAB 2: DUAL GAUNTLETS MATRIX --- */}
+      {activeTab === 'GAUNTLETS' && (
+        <div style={{ marginTop: '14px', fontSize: '12px', textAlign: 'left' }}>
+          <strong style={{ color: '#818cf8' }}>🧤 Right Hand: Marvelous Infinity Gauntlet Slot</strong>
+          <p style={{ color: '#94a3b8' }}>Tracks 6 cosmic macro-frequency matrix stones: Power, Space, Time, Mind, Soul, and Reality.</p>
+          
+          <strong style={{ color: '#ef4444', display: 'block', marginTop: '10px' }}>🧤 Left Hand: The Finite Constraint Gauntlet</strong>
+          <p style={{ color: '#94a3b8' }}>Maintains inverse containment thresholds to balance energetic dispersion loops.</p>
+        </div>
+      )}
+
+      {/* --- TAB 3: SHOULDER PARDONS --- */}
+      {activeTab === 'SHOULDERS' && (
+        <div style={{ marginTop: '14px', fontSize: '12px', textAlign: 'left' }}>
+          <strong style={{ color: '#e2e8f0' }}>⚖️ Shoulder Shoulder Onyx Stones (Ephraim & Manasseh)</strong>
+          <p style={{ color: '#cbd5e1', lineHeight: '1.5' }}>
+            Features contrasting shoulder guards holding one pure black stone with white writing and one pure white stone with black writing, balancing the birthright lineages of Ephraim and Manasseh across the shoulder armor.
+          </p>
+        </div>
+      )}
+
+      {/* --- TAB 4: WEAPONS SYSTEM --- */}
+      {activeTab === 'SWORD_AND_SHIELD' && (
+        <div style={{ marginTop: '14px', fontSize: '12px', textAlign: 'left' }}>
+          <strong style={{ color: '#34d399' }}>🗡️ Sword of Truth & Shield of Faith</strong>
+          <p style={{ color: '#cbd5e1' }}>
+            The blade model link handles direct queries into the Tree of Knowledge and Bible text files, projecting pure light lines. 
+            Your assigned animal spirit guide walks compactly beside your avatar, surrounded by specialized environmental woods suited to their class.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
