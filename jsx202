@@ -1,0 +1,92 @@
+import React, { useState, useEffect } from 'react';
+
+export function AscensionMissionEngineHUD({ currentUser, socket }) {
+  const [ascensionStats, setAscensionStats] = useState(null);
+  const [currentMission, setCurrentMission] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    // Query background server tick loops to load customized identity metrics
+    socket.emit('request_ascension_profile_data', { username: currentUser.name });
+    socket.on('ascension_profile_payload', (data) => {
+      setAscensionStats(data.profile);
+      setCurrentMission(data.activeProceduralMission);
+    });
+
+    return () => {
+      socket.off('ascension_profile_payload');
+    };
+  }, [currentUser, socket]);
+
+  const handleSealMissionSuccess = async () => {
+    if (!currentMission) return;
+    setIsSyncing(true);
+
+    try {
+      const response = await fetch('/api/calendar/complete-task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUser.name,
+          taskId: currentMission.missionId
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🏆 Mission Sealed! Aligned with Global Agenda. Granted 🪙 ${currentMission.payout} Angel Tokens.`);
+        setXrayActive(false); // Reset tracking parameters states
+        setCurrentMission(null);
+      }
+    } catch (e) {
+      console.error("Failed to commit mission completion packet:", e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{ top: '12%', left: '24px', width: '360px', maxHeight: '80%', background: 'linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(234,179,8,0.03) 100%)', border: '2px solid #eab308', borderRadius: '24px' }}>
+      <div className="store-header" style={{ padding: '12px' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>🌟 Ascension & Daily Alignment Hub</h3>
+        <span style={{ fontSize: '10px', color: '#a5b4fc' }}>Master Identity Account: zethreigns@gmail.com</span>
+      </div>
+
+      {/* --- PSYCHOMETRY CHARACTER METADATA CARD --- */}
+      {ascensionStats && (
+        <div style={{ background: 'rgba(0,0,0,0.4)', margin: '0 12px 12px 12px', padding: '10px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', fontSize: '11px' }}>
+          <div>🧬 <strong>Zodiac Element Channel:</strong> <span style={{ color: '#fde047' }}>{currentUser.zodiacElement}</span></div>
+          <div>🧬 <strong>Enneagram Archetype:</strong> Type {ascensionStats.enneagramType} | Core Desire: <span style={{ fontStyle: 'italic', color: '#a5b4fc' }}>{ascensionStats.coreDesireVector}</span></div>
+          <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px' }}>
+            <span>Ascension Tier: <strong>Level {ascensionStats.ascensionLevel}</strong></span>
+            <span style={{ color: '#34d399' }}>XP: {ascensionStats.experiencePoints}</span>
+          </div>
+        </div>
+      )}
+
+      {/* --- DYNAMIC PROCEDURAL MISSION WINDOW --- */}
+      <div className="dashboard-section-title">🎯 Your Daily Synchronized Task</div>
+      {currentMission ? (
+        <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px dashed #eab308', margin: '0 12px 12px 12px', padding: '12px', borderRadius: '12px', textAlign: 'left', fontSize: '11px' }}>
+          <strong style={{ color: '#fef08a', fontSize: '12px', display: 'block' }}>{currentMission.title}</strong>
+          <p style={{ margin: '6px 0', color: '#e2e8f0', lineHeight: 1.4 }}>{currentMission.instructions}</p>
+          
+          <div style={{ fontSize: '10px', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', marginTop: '6px' }}>
+            🌍 <strong>Global Agenda Context:</strong> Mapped to the {currentMission.requirements.globalAgendaAlignment}
+            {"\n"}📡 <strong>Soundboard Tone Target:</strong> Execute at {currentMission.requirements.resonanceHz}Hz Pitch
+          </div>
+
+          <button 
+            onClick={handleSealMissionSuccess} disabled={isSyncing}
+            className="buy-upgrade-btn" style={{ width: '100%', marginTop: '10px', background: '#10b981', color: '#fff', fontWeight: 'bold' }}
+          >
+            {isSyncing ? '📡 Validating Matrix...' : `Complete Mission (+${currentMission.payout} AT)`}
+          </button>
+        </div>
+      ) : (
+        <div style={{ color: '#64748b', fontSize: '11px', padding: '20px' }}>
+          All daily cosmic contracts sealed. Awaiting the midnight server rotation tick interval to decompress the next mission queue...
+        </div>
+      )}
+    </div>
+  );
+}
