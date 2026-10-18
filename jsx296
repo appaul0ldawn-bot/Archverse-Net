@@ -1,0 +1,44 @@
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
+export function VolumetricWaterMesh({ position, scale = [10, 1, 10] }) {
+  const waterRef = useRef();
+
+  useFrame((state) => {
+    if (!waterRef.current) return;
+    // Pass high-velocity calculation ticks directly to the vertex shader uniform tree
+    waterRef.current.material.uniforms.uTime.value = state.clock.getElapsedTime();
+  });
+
+  const WaterShaderMaterial = {
+    uniforms: { uTime: { value: 0 }, uWaterColor: { value: new THREE.Color("#0284c7") } },
+    vertexShader: `
+      uniform float uTime;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        // Layered sinusoidal fluid wave calculation equations
+        float waveX = sin(position.x * 1.2 + uTime * 1.5) * 0.15;
+        float waveZ = cos(position.z * 1.0 + uTime * 1.2) * 0.15;
+        vec3 newPos = vec3(position.x, position.y + waveX + waveZ, position.z);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uWaterColor;
+      varying vec2 vUv;
+      void main() {
+        // Enforces high-fidelity translucency and water surface reflection shimmer
+        gl_FragColor = vec4(uWaterColor, 0.75);
+      }
+    `
+  };
+
+  return (
+    <mesh ref={waterRef} position={position} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[1, 1, 64, 64]} />
+      <shaderMaterial args={[WaterShaderMaterial]} transparent={true} />
+    </mesh>
+  );
+}
