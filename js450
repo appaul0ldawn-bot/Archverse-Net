@@ -1,0 +1,18 @@
+import React from 'react';
+
+export function checkBirthdayBadgeUnlock(birthdateString) {
+  const date = new Date(birthdateString);
+  const now = new Date();
+  
+  const isBirthdayMonth = date.getMonth() === now.getMonth();
+  
+  if (isBirthdayMonth) {
+    return {
+      hasActiveBadge: true,
+      badgeTitle: "🎂 Solar Return: Alpha Ascension",
+      unlockedAbility: "Seraphic_Burst_Aura" // Grants temporary bonus speed or radius capabilities
+    };
+  }
+  
+  return { hasActiveBadge: false, badgeTitle: null, unlockedAbility: null };
+}
