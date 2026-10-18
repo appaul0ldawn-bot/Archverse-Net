@@ -1,0 +1,86 @@
+import React, { useState } from 'react';
+
+export function AdminMatchmakerModHUD({ adminEmail, selectedPlayerName }) {
+  const [prioritizeElement, setPrioritizeElement] = useState(true);
+  const [strictAlignment, setStrictAlignment] = useState(false);
+  const [toleranceRadius, setToleranceRadius] = useState(0.5);
+  const [candidates, setCandidates] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const executeMatchmakerAudit = async () => {
+    if (!selectedPlayerName) return;
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/api/matchmaker/evaluate-candidates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminEmail: adminEmail,
+          sourceUsername: selectedPlayerName,
+          filterPreferenceModifiers: {
+            prioritizeElement,
+            strictAlignmentMatch: strictAlignment,
+            radiusTolerance: toleranceRadius
+          }
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setCandidates(data.recommendedCandidates);
+      }
+    } catch (e) {
+      console.error("Matchmaker configuration data retrieval failure", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', right: '760px', width: '360px', borderColor: '#a5b4fc' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#a5b4fc' }}>💞 Matchmaker Mod Settings</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Tweak matching parameters for groups, teams, and dating pages. Adjust weighting sliders to realign affinity algorithms.
+      </p>
+
+      {/* Tweak Tweak Mod Sliders and Switches */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', marginBottom: '12px', textAlign: 'left' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '11px', color: '#cbd5e1' }}>Prioritize Cosmic Elements:</span>
+          <input type="checkbox" checked={prioritizeElement} onChange={(e) => setPrioritizeElement(e.target.checked)} style={{ accentColor: '#a5b4fc' }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '11px', color: '#cbd5e1' }}>Strict Angel/Demon Alignment:</span>
+          <input type="checkbox" checked={strictAlignment} onChange={(e) => setStrictAlignment(e.target.checked)} style={{ accentColor: '#ef4444' }} />
+        </div>
+        <div className="metric-row" style={{ marginTop: '4px' }}>
+          <span style={{ fontSize: '11px' }}>Personality Variance Window:</span>
+          <input type="range" min="0" max="1" step="0.1" value={toleranceRadius} onChange={(e) => setToleranceRadius(parseFloat(e.target.value))} style={{ width: '120px', accentColor: '#a5b4fc' }} />
+        </div>
+      </div>
+
+      <button onClick={executeMatchmakerAudit} disabled={isProcessing} className="buy-upgrade-btn" style={{ width: '100%', background: '#a5b4fc', color: '#0f172a', fontWeight: 'bold' }}>
+        {isProcessing ? '⚡ Correlating Resonance Maps...' : '👁️ Run Advanced Matchmaker Scan'}
+      </button>
+
+      {/* Target Candidates Listing Map Result Array Output */}
+      {candidates.length > 0 && (
+        <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <span style={{ fontSize: '10px', color: '#a5b4fc', display: 'block', textAlign: 'left', fontWeight: 'bold' }}>TOP SYNCHRONIZED CANDIDATES:</span>
+          {candidates.map(c => (
+            <div key={c.username} style={{ background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
+              <div style={{ textAlign: 'left' }}>
+                <span style={{ fontWeight: 'bold', color: '#fff' }}>{c.username}</span>
+                <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8' }}>{c.rank} • {c.zodiacElement}</span>
+              </div>
+              <span style={{ fontWeight: 'bold', color: '#34d399' }}>{c.computedAffinityPercentage}% Match</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
