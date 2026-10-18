@@ -1,0 +1,19 @@
+
+The Multi-Source Paranormal, Cryptid, and Angel Encounter Engine (paranormalEngine.js)
+
+To overlay Ghost Sightings, Haunted Locations, Cryptid Trackers, and Angel Encounters onto The Archverse real-time 3D Google Tiles map layout, the server deploys a Multi-Source Aggregator & Geo-Ingestion Pipeline. This background collector aggregates crowd-sourced telemetry, historical databases, open-data registries, and verified localized scripts on a continuous daily rotation loop.
+       [ THE ARCHVERSE SUPERNATURAL GEOLOCATION ENGINE ]
+                                |
+    +---------------------------+---------------------------+
+
+    |                           |                           |
+[ Ghost & Haunted ]     [ Cryptid Trackers ]     [ Angel Encounters ]
+ - Shadow Remnants       - Cryptids Near Me API   - Solfeggio 963Hz Aura
+ - Residual Echoes       - Cryptozoology Network  - Prophetic Witnesses
+
+    |                           |                           |
+    +---------------------------+---------------------------+
+                                |
+                 [ CENTRAL REDIS INGESTION TICK ]
+                                |
+             [ VISUAL WEBGL MAP COORDINATE SHADERS ]
