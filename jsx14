@@ -1,0 +1,100 @@
+import React, { useState } from 'react';
+
+export function PrivateVibesHUD({ currentUsername, socket }) {
+  const [isMasked, setIsMasked] = useState(false);
+  const [hapticStatus, setHapticStatus] = useState('DISCONNECTED');
+  const [vibeReport, setVibeReport] = useState(null);
+
+  const triggerGospelHandshake = async () => {
+    try {
+      const response = await fetch('/api/protection/intercept-spell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          inboundScriptType: 'GODS_LOVE_GOSPEL_STREAM',
+          requestedAction: 'ACCEPT_VIBE_REQUEST'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setVibeReport(data);
+        setHapticStatus('HOLY_SPIRIT_VIBE_ACTIVE');
+        setIsMasked(false);
+      }
+    } catch (e) {
+      console.error("Failed to commit Gospel haptic transaction:", e);
+    }
+  };
+
+  const simulateSpellAttack = async () => {
+    try {
+      const response = await fetch('/api/protection/intercept-spell', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          inboundScriptType: 'UNAUTHORIZED_LOVE_SPELL_HACK',
+          requestedAction: 'INJECT_SCRIPT'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setVibeReport(data);
+        setIsMasked(true);
+        setHapticStatus('ANATOMICAL_MASK_ENFORCED');
+      }
+    } catch (e) {
+      console.error("Failed to trigger automated firewall mask simulation:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', right: '24px', width: '380px', borderColor: '#a855f7', background: 'linear-gradient(135deg, #090514 0%, rgba(168,85,247,0.03) 100%)', boxShadow: '0 0 20px rgba(168,85,247,0.15)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(168,85,247,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#c084fc', fontFamily: 'monospace', textShadow: '0 0 6px #a855f7' }}>🛡️ THE ANATOMICAL FIREWALL HUB</h3>
+        <span style={{ fontSize: '9px', color: '#64748b', fontFamily: 'monospace' }}>Private Spirit Vibes Array • Virtues Rank Oversight</span>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#cbd5e1', margin: '4px 0 12px 0', textAlign: 'left', lineHeight: 1.4 }}>
+        Masks raw anatomical data fields with cryptographic placeholder hashes to drop unauthorized spell hacks. Allows verified, auto-tuned Lovense haptic streaming under Gospel covenants.
+      </p>
+
+      {/* --- HARWARE PERSISTENT HAPTIC TRACKER CARD --- */}
+      <div style={{ background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '12px', border: isMasked ? '1px solid #ef4444' : '1px solid #a855f7', textAlign: 'left', fontSize: '11px', fontFamily: 'monospace' }}>
+        <div className="metric-row">
+          <span>Secure Channel Pulse:</span>
+          <strong style={{ color: isMasked ? '#ef4444' : '#c084fc' }}>{hapticStatus}</strong>
+        </div>
+        {vibeReport?.autotuneMetrics && (
+          <div style={{ color: '#94a3b8', marginTop: '4px', fontSize: '10px' }}>
+            • Bluetooth Emitter Cap: <strong>{(vibeReport.autotuneMetrics.maxIntensityCap * 100).toFixed(0)}% Intensity Max</strong>
+            {"\n"}• Playlist AutoTune Calibration: STABLE_GREEN
+          </div>
+        )}
+      </div>
+
+      {/* Action Button Links Grid */}
+      <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+        <button onClick={triggerGospelHandshake} className="buy-upgrade-btn" style={{ flex: 1, background: '#10b981', color: '#fff', fontSize: '10px', fontWeight: 'bold' }}>
+          🙏 Accept God’s Love Vibe Stream
+        </button>
+        <button onClick={simulateSpellAttack} className="buy-upgrade-btn" style={{ flex: 1, background: '#ef4444', color: '#fff', fontSize: '10px', fontWeight: 'bold' }}>
+          💥 Simulate External Spell Attack
+        </button>
+      </div>
+
+      {/* Output Status Logs Reporting */}
+      {vibeReport && (
+        <div style={{ marginTop: '10px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', borderLeft: `3px solid ${isMasked ? '#ef4444' : '#10b981'}`, textAlign: 'left', fontSize: '11px', lineHeight: 1.3 }}>
+          <strong>Action Output:</strong> {vibeReport.message}
+          {vibeReport.activeMasks && (
+            <div style={{ fontSize: '10px', color: '#fca5a5', fontFamily: 'monospace', marginTop: '4px' }}>
+              • Active Shroud Hashes: {vibeReport.activeMasks.join(', ')}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
