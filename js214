@@ -1,0 +1,82 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🧠 CEREBRO PREDICTIVE VECTOR ENGINE & RANGE CALCULATOR
+// ==========================================================================
+const RANK_RANGE_LIMITS = {
+  "Saturn (Contemplative High Archons)": 150, // 150-meter proximity scanning diameter
+  "Jupiter (Just Rulers Guild)": 100,
+  "Mars (Martyrs of Faith)": 75,
+  "Sun (Primal Wisdom Masters)": 50,
+  "Venus (Lovers of Justice)": 30,
+  "Mercury (Ambitious Souls)": 15,
+  "Moon (Inconstant Spirits)": 0              // Traditional un-awakened baseline layer
+};
+
+router.post('/api/cerebro/predict-user-trajectory', async (req, res) => {
+  try {
+    const { callingUsername, targetUsername } = req.body;
+
+    const caller = await User.findOne({ username: callingUsername });
+    const target = await User.findOne({ username: targetUsername });
+
+    if (!caller || !target || target.isBanned) {
+      return res.status(404).json({ success: false, error: 'Target or Caller node invalid inside active arrays.' });
+    }
+
+    // 1. Evaluate Authorization Tier & Distance Bounds
+    const isAdmin = ['Archangel', 'Council'].includes(caller.rank);
+    let maximumAllowedRange = isAdmin ? Infinity : (RANK_RANGE_LIMITS[caller.rankBadge] || 0);
+
+    // Compute actual distance limits between the two nodes inside the local WebGL coordinate space
+    const literalDistanceMeters = Math.hypot(
+      target.lastPosition.x - caller.lastPosition.x,
+      target.lastPosition.z - caller.lastPosition.z
+    ) * 111000;
+
+    if (!isAdmin && literalDistanceMeters > maximumAllowedRange) {
+      return res.status(403).json({ 
+        success: false, 
+        error: `🔒 Insufficient Range. Your Celestial Rank (${caller.rankBadge || 'Unranked'}) restricts your Cerebro tracking matrix footprint to a ${maximumAllowedRange}m diameter. Target is ${Math.floor(literalDistanceMeters)}m away.` 
+      });
+    }
+
+    // 2. LINEAR VECTOR PREDICTION CALCULATIONS ALGORITHM
+    // Read the target user's multi-sensor motion metrics and step-cadence models
+    const deltaSeconds = 10.0; // Project trajectory precisely 10 seconds into the future timeline
+    const predictedFutureX = target.lastPosition.x + (target.movementVectors.headingX * deltaSeconds);
+    const predictedFutureZ = target.lastPosition.z + (target.movementVectors.headingZ * deltaSeconds);
+
+    // Generate diagnostic routine classification logs
+    let routineBehaviorPattern = "STATIONARY_MEDITATION_ROUTINE";
+    if (Math.abs(target.movementVectors.headingX) > 0.01) {
+      routineBehaviorPattern = target.tokens > 5000 ? "HIGH_TIER_LIGHTWORKER_MISSION_TRANSIT" : "KINETIC_WALKING_ALIGNMENT_ROUTINE";
+    }
+
+    const cerebroReport = {
+      targetNodeName: targetUsername,
+      trackedRoutine: routineBehaviorPattern,
+      currentPosition: { lat: target.lastPosition.x, lng: target.lastPosition.z },
+      tenSecondFuturePrediction: { lat: predictedFutureX, lng: predictedFutureZ },
+      confidenceRatingPercentage: target.isAgeVerified18Plus ? 95 : 70
+    };
+
+    // Log the transaction securely through administrative telemetry pipelines
+    ArchverseLogger.log('INFO', 'CEREBRO_MOD', `User ${callingUsername} ran a predictive trajectory audit on ${targetUsername}. Range used: ${Math.floor(literalDistanceMeters)}m.`);
+
+    res.json({
+      success: true,
+      modName: "Cerebro Matrix Predictive Mod",
+      scanFootprintMeters: maximumAllowedRange === Infinity ? "UNRESTRICTED_GLOBAL_OMNIPRESENCE" : `${maximumAllowedRange}m`,
+      telemetrySnapshot: cerebroReport
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Cerebro vector processing calculation failure.' });
+  }
+});
+
+module.exports = router;
