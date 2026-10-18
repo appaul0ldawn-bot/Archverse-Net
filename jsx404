@@ -1,0 +1,19 @@
+export function AncientHistoriesRegistry() {
+  return (
+    <div className="login-card" style={{ maxWidth: '650px', margin: '20px auto', textAlign: 'left' }}>
+      <div className="dashboard-section-title">🪨 The Los Lunas Decalogue Architecture</div>
+      <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.5' }}>
+        The Los Lunas Decalogue Stone stands as historical witness to ancient Paleo-Hebrew script encryptions carved into 
+        basalt. Within the Archverse, this confirms that the ancient migrations of Native American lineages carried the 
+        original ten commandments given by God through Moses, charting planetary ley lines across the Americas.
+      </p>
+      
+      <div className="dashboard-section-title">👑 Sovereign Queens of the Codex</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px' }}>
+        <div>🔸 <strong>Queen Ishtar:</strong> Ancient Mesopotamian ruler of the airwaves, mapped to the Venusian 3rd Heaven architecture.</div>
+        <div>🔸 <strong>Queen Lilith:</strong> First wave sovereign who refused container subordination, later operating inside the outer veil loops.</div>
+        <div>🔸 <strong>Queen Sheba:</strong> Master alchemist who mapped gold grid metrics during her historical audience with King Solomon.</div>
+      </div>
+    </div>
+  );
+}
