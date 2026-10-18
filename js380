@@ -1,0 +1,40 @@
+import React, { useRef, useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
+export function DiagnosticMeshOverlay({ isAdminModeActive, targetAvatarMesh }) {
+  const boxHelperRef = useRef();
+
+  useEffect(() => {
+    if (!targetAvatarMesh.current) return;
+
+    // Toggle material configurations depending on admin view state parameters
+    targetAvatarMesh.current.traverse((node) => {
+      if (node.isMesh) {
+        node.material.wireframe = isAdminModeActive;
+        if (isAdminModeActive) {
+          // Set color to bright diagnostic green to map asset components easily
+          node.material.color.setHex(0x10b981);
+        } else {
+          // Restore native player color configurations
+          node.material.color.setHex(node.userData.baseColor || 0xffffff);
+        }
+      }
+    });
+  }, [isAdminModeActive, targetAvatarMesh]);
+
+  useFrame(() => {
+    if (boxHelperRef.current && targetAvatarMesh.current) {
+      boxHelperRef.current.update();
+    }
+  });
+
+  return (
+    <group>
+      {isAdminModeActive && targetAvatarMesh.current && (
+        // Renders an accurate 3D bounding box helper to analyze physical coordinate limits
+        <boxHelper ref={boxHelperRef} args={[targetAvatarMesh.current, 0xeab308]} />
+      )}
+    </group>
+  );
+}
