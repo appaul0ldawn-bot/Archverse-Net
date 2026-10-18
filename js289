@@ -1,0 +1,68 @@
+const express = require('express');
+const router = express.Router();
+const { UserToDoTask, CosmicEvent } = require('./models/CosmicCalendar');
+const User = require('./models/User');
+
+// ==========================================================================
+// 📅 WORKSPACE GOOGLE CALENDAR & COSMIC TIMELINE RECONCILER
+// ==========================================================================
+router.post('/api/calendar/sync-task', async (req, res) => {
+  try {
+    const { username, taskText, targetDateISO, googleEventId } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User profile node invalid.' });
+
+    // 1. Conflict Check: Verify target slot doesn't collide with a critical Cyclic Law Shift
+    const temporalConflict = await CosmicEvent.findOne({
+      category: 'CYCLIC_LAW_SHIFT',
+      triggerTimestamp: {
+        \(gte: new Date(new Date(targetDateISO).getTime() - 30 * 60 * 1000), // 30-min threshold window\)lte: new Date(new Date(targetDateISO).getTime() + 30 * 60 * 1000)
+      }
+    });
+
+    // 2. Commit task node to the persistent MongoDB To-Do collection
+    const newTask = await UserToDoTask.findOneAndUpdate(
+      { linkedCalendarEventId: googleEventId },
+      {
+        userId: user._id,
+        taskText: taskText,
+        linkedCalendarEventId: googleEventId,
+        targetDeadline: new Date(targetDateISO),
+        isCompleted: false
+      },
+      { upsert: true, new: true }
+    );
+
+    let serverNotice = "Task synced securely with your Google Calendar timeline.";
+    if (temporalConflict) {
+      serverNotice += ` ⚠️ Warning: This slot intersects with [${temporalConflict.title}]. Global aura tracking colors will shift to ${temporalConflict.alignmentModifiers.globalAuraColor}.`;
+    }
+
+    res.json({ success: true, message: serverNotice, taskNode: newTask });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Calendar synchronization processing failure.' });
+  }
+});
+
+// Endpoint to handle task fulfillment: Yields +100 Angel Tokens for completed missions
+router.post('/api/calendar/complete-task', async (req, res) => {
+  const { username, taskId } = req.body;
+  const user = await User.findOne({ username });
+  const task = await UserToDoTask.findById(taskId);
+
+  if (user && task && !task.isCompleted) {
+    task.isCompleted = true;
+    await task.save();
+
+    user.tokens += 100; // Payout reward for completing aligned tasks
+    user.karmaScore += 25;
+    await user.save();
+
+    global.stateHasChanged = true; // Synchronize with the 22Hz tick engines
+    return res.json({ success: true, message: "🪙 Task sealed. 100 AT allocated to your wallet.", currentBalance: user.tokens });
+  }
+  res.status(400).json({ success: false, error: 'Task already completed or invalid.' });
+});
+
+module.exports = router;
