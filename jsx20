@@ -1,0 +1,86 @@
+import React, { useState } from 'react';
+
+export function HistoricalPunsHUD({ currentUsername, currentTokensBalance }) {
+  const [jokeText, setJokeText] = useState('Click below to let the local grid NPC cast a celestial joke constellation...');
+  const [patternKey, setPatternKey] = useState('WAITING_FOR_CIPHER');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const fetchProWritingPadJoke = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/arcade/generate-historical-pun', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          currentCoordinates: [31.7683, 35.2137],
+          requestedStyleFilter: 'STANDARD_CELESTIAL_HUMOR'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setJokeText(data.unlockedJokePayload);
+        setPatternKey(data.patternRecognitionData.vowelFreeKey);
+
+        // TEXT-TO-SPEECH ACCENT AUDIO GATEWAY
+        // Speaks the historical joke out loud using a beautiful, melodic Pleiadian accent voice [14.11]
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(data.unlockedJokePayload);
+          utterance.lang = "en-GB"; // Selects beautiful British-melodic accent parameters [14.11]
+          utterance.rate = 0.88;   // Measured, deliberate ancient pacing [14.11]
+          utterance.pitch = 1.0;
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+    } catch (e) {
+      console.error("Pro Writing Pad API connection dropped:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{
+      top: '12%', right: '24px', width: '380px', maxHeight: '80%',
+      background: 'linear-gradient(135deg, #0b1329 0%, rgba(234,179,8,0.03) 100%)', // Gold Wood-Fire Shroud
+      border: '2px solid #eab308', borderRadius: '24px', boxShadow: '0 0 20px rgba(234,179,8,0.15)'
+    }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px dashed #eab308', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>📜 Historical Pun & Constellation Terminal</h3>
+        <span style={{ fontSize: '10px', color: '#fcd34d' }}>Pro Writing Pad Ingestor • Utility Wallet: 🪙 {currentTokensBalance} ST</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- CONNECT-THE-DOTS GRAPHICS MATRIX VISUAL AD ANCHOR --- */}
+        <div style={{ background: '#000', borderRadius: '12px', height: '80px', padding: '10px', position: 'relative', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <span style={{ fontSize: '8px', color: '#64748b', display: 'block', textTransform: 'uppercase' }}>WebGL Constellation Trajectory Tracker</span>
+          <div style={{ position: 'absolute', left: '20%', top: '40%', width: '6px', height: '6px', borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 8px #fbbf24' }} />
+          <div style={{ position: 'absolute', left: '50%', top: '25%', width: '6px', height: '6px', borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 8px #fbbf24' }} />
+          <div style={{ position: 'absolute', left: '80%', top: '65%', width: '6px', height: '6px', borderRadius: '50%', background: '#fbbf24', boxShadow: '0 0 8px #fbbf24' }} />
+          {/* Neon connection vector lines */}
+          <div style={{ position: 'absolute', left: '22%', top: '43%', width: '100px', height: '1px', background: 'dashed #fbbf24', transform: 'rotate(15deg)', opacity: isProcessing ? 1.0 : 0.2 }} />
+        </div>
+
+        {/* --- LIVE TEXT TICKER CONTAINER OVERLAY --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '12px', borderRadius: '12px', borderLeft: '3px solid #fbbf24', fontStyle: 'italic', color: '#e2e8f0', lineHeight: 1.4 }}>
+          "{jokeText}"
+        </div>
+
+        <div style={{ background: 'rgba(255,255,255,0.01)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.03)' }}>
+          <div>• Pattern Recognition Cipher: <strong style={{ color: '#a5b4fc', fontFamily: 'monospace' }}>{patternKey}</strong></div>
+          <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>Vowels omitted to secure structural linguistic metrics [14.11].</div>
+        </div>
+
+        <button 
+          onClick={fetchProWritingPadJoke} disabled={isProcessing}
+          className="buy-upgrade-btn" style={{ width: '100%', background: 'linear-gradient(45deg, #b45309, #d97706)', color: '#fff', fontWeight: 'bold', padding: '10px', fontSize: '12px' }}
+        >
+          {isProcessing ? '🔄 Decompressing Pro Writing Pad API...' : '🗣️ Command Neighboring NPC to Tell Joke'}
+        </button>
+
+      </div>
+    </div>
+  );
+}
