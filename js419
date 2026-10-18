@@ -1,0 +1,30 @@
+import React from 'react';
+
+export function EternalThanksPage() {
+  const googleDriveLink = "https://google.com";
+
+  return (
+    <div style={{ maxWidth: '650px', margin: '40px auto', color: '#fff', fontFamily: 'sans-serif' }}>
+      {/* Eternal Computing Segment */}
+      <div className="login-card" style={{ marginBottom: '24px', borderColor: '#4f46e5' }}>
+        <h3 className="login-title" style={{ color: '#818cf8' }}>💾 Eternal Computing Infrastructure</h3>
+        <p style={{ fontSize: '12px', color: '#cbd5e1' }}>Direct link synchronization mapping to back up master server file trees.</p>
+        <a href={googleDriveLink} target="_blank" rel="noopener noreferrer" className="buy-upgrade-btn" style={{ display: 'block', textDecoration: 'none', textAlign: 'center', background: '#4f46e5' }}>
+          📂 Access appaul0ldawn@gmail.com Google Drive Vault
+        </a>
+      </div>
+
+      {/* Thanks & Donations Segment */}
+      <div className="login-card" style={{ borderColor: '#10b981' }}>
+        <h3 className="login-title" style={{ color: '#34d399' }}>🙏 Patrons & Thanksgiving Portal</h3>
+        <p style={{ fontSize: '13px', color: '#cbd5e1' }}>
+          Support platform scaling and hardware cluster expansion. Direct contributions are routed to the central server developer account.
+        </p>
+        <div style={{ background: 'rgba(16,185,129,0.1)', padding: '14px', borderRadius: '12px', border: '1px solid #10b981', textAlign: 'center' }}>
+          <span style={{ fontSize: '16px', color: '#34d399', fontWeight: 'bold' }}>Cashtag: $Sephraines</span>
+          <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#94a3b8' }}>Include your Username as a memo to unlock 100 ST per dollar donated.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
