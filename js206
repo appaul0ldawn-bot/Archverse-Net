@@ -1,0 +1,65 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the master omniversal asset tracking model inside our sandbox
+  mongoose.model('OmniAsset', new mongoose.Schema({
+    assetId: String,
+    name: String,
+    category: String,
+    tokenCost: Number,
+    vibrationalProperties: { resonanceHz: Number, quantumStateHash: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('OmniAsset')) {
+    await mongoose.model('OmniAsset').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 30: OMNIVERSAL CORE ASSET & DATA INTEGRITY CHECKS
+// ==========================================================================
+describe('Archverse Master Omniversal Asset Ingestion and Purchase Testing Suite', () => {
+
+  it('should successfully buy an elite weapon relic from the marketplace, deducting tokens from the vault correctly', async () => {
+    // 1. Initialize admin profile node with sufficient treasury balance
+    const adminUser = await User.create({
+      username: 'MasterSovereign',
+      tokens: 3000,
+      rank: 'Council'
+    });
+
+    const mockAsset = await mongoose.model('OmniAsset').create({
+      assetId: "wp_truth_sword",
+      name: "Sword of Truth",
+      category: "WEAPON",
+      tokenCost: 2500,
+      vibrationalProperties: { resonanceHz: 528, quantumStateHash: "q_hash_truth_999" }
+    });
+
+    // 2. Dispatch a transaction payload directly over the server purchase routers
+    const response = await request(app)
+      .post('/api/marketplace/purchase-omni-asset') // Simulated endpoint mapping
+      .send({ username: 'MasterSovereign', assetId: 'wp_truth_sword' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.newBalance).toBe(500); // 3000 base - 2500 cost = 500 ST total remaining
+  });
+});
