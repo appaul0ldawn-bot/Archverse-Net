@@ -1,0 +1,41 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧬 ETYMO-GENEALOGICAL PROFILE EXTRACTION SCHEMA
+// ==========================================================================
+const IdentityCodexSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // Broken-down name fields telemetry inputs
+  profileNameFields: {
+    givenName: { type: String, required: true },
+    middleName: { type: String, default: '' },
+    surName: { type: String, required: true },
+    spiritualMoniker: { type: String, default: '' }
+  },
+
+  // Compiled Etymological Tracing
+  linguisticEtymology: {
+    rootOriginLanguage: { type: String, default: 'Hebrew' }, // e.g., Aramaic, Greek, Paleo-Hebrew
+    primordialMeaningText: String,
+    congruentMythologicalArchetype: String
+  },
+
+  // Compiled Genealogical Tracing
+  ancestralGenealogy: {
+    assignedIsraeliteTribe: { type: String, enum: ['JUDAH', 'LEVI', 'EPHRAIM', 'MANASSEH', 'BENJAMIN', 'DAN', 'REUBEN', 'SIMEON', 'GAD', 'ASHER', 'ISSACHAR', 'ZEBULUN'], default: 'JUDAH' },
+    bloodlineGenerationIndex: { type: Number, default: 1 },
+    generationalCurseStatus: { type: String, enum: ['CLEANSED_BY_COVENANT', 'ACTIVE_ANOMALY'], default: 'CLEANSED_BY_COVENANT' }
+  },
+
+  // Injected Attribute Multipliers
+  proceduralAttributes: {
+    baseResonanceHz: { type: Number, default: 432 },
+    auraShaderTintHex: { type: String, default: '#38bdf8' },
+    unlockedSuperabilityId: { type: String, default: 'TELEPATHY_GATE' }
+  },
+
+  lastIdentityAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('IdentityCodex', IdentityCodexSchema);
