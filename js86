@@ -1,0 +1,84 @@
+import React, { useState, useEffect } from 'react';
+
+export function OraclePokerHUD({ currentUser, activeRoomId, socket }) {
+  const [tableData, setTableData] = useState(null);
+  const [wagerInput, setWagerInput] = useState(50);
+  const [favorIndex, setFavorIndex] = useState(1.0);
+
+  useEffect(() => {
+    socket.emit('request_poker_table_sync', { roomId: activeRoomId });
+    socket.on('poker_table_state_payload', (data) => {
+      setTableData(data);
+    });
+    return () => socket.off('poker_table_state_payload');
+  }, [activeRoomId, socket]);
+
+  const executeTableAction = async (action) => {
+    try {
+      const response = await fetch('/api/poker/fold-or-bet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: activeRoomId || "room_daily_poker",
+          username: currentUser.name,
+          actionType: action,
+          tokenRaiseAmount: wagerInput
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setFavorIndex(data.calculatedDivineFavor);
+        alert(`🃏 Arena Update: Bet updated successfully. Total Pot: 🪙 ${data.currentPotSize} ST`);
+      }
+    } catch (e) {
+      console.error("Failed to commit poker table transaction:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', left: '380px', width: '380px', maxHeight: '80%', background: 'linear-gradient(135deg, #0f172a 0%, rgba(234,179,8,0.04) 100%)', border: '2px solid #eab308', borderRadius: '16px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid #eab308', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>🃏 Angelic Oracle Poker Arena</h3>
+        <span style={{ fontSize: '10px', color: '#94a3b8' }}>Daily Tournament Match Mode • Pot: 🪙 {tableData?.totalTokenPot || 0} ST</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        
+        {/* --- DIVINE FAVOR & LUCK RADAR METER --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(234,179,8,0.1)', fontSize: '11px', textAlign: 'left' }}>
+          <span style={{ color: '#fbbf24', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>🔮 Prophetic Telemetry Sensors</span>
+          <div className="metric-row"><span>Active Divine Favor Index:</span><strong style={{ color: '#34d399' }}>{favorIndex}x Coefficient</strong></div>
+          <div className="metric-row"><span>Daily Prize Pool Allocation:</span><span style={{ color: '#eab308', fontWeight: 'bold' }}>+5,000 ST Grand Prize</span></div>
+        </div>
+
+        {/* --- PLAYER HAND DECK DISPLAY --- */}
+        <div className="dashboard-section-title">Your Foreseen Decision Hand</div>
+        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', margin: '6px 0' }}>
+          <div style={{ width: '60px', height: '90px', background: 'rgba(255,255,255,0.02)', border: '1px solid #fbbf24', borderRadius: '6px', fontSize: '10px', padding: '4px', textAlign: 'center', color: '#fff' }}>
+            <strong>🛡️ Michael</strong><span style={{ display: 'block', fontSize: '8px', color: '#64748b', marginTop: '30px' }}>Rank 7</span>
+          </div>
+          <div style={{ width: '60px', height: '90px', background: 'rgba(255,255,255,0.02)', border: '1px solid #fbbf24', borderRadius: '6px', fontSize: '10px', padding: '4px', textAlign: 'center', color: '#fff' }}>
+            <strong>📡 Gabriel</strong><span style={{ display: 'block', fontSize: '8px', color: '#64748b', marginTop: '30px' }}>Rank 6</span>
+          </div>
+        </div>
+
+        {/* Wager Bet Input Slider */}
+        <div className="metric-row" style={{ marginTop: '4px' }}>
+          <span style={{ fontSize: '12px' }}>Bet Stake Raise:</span>
+          <input type="range" min="10" max="500" step="10" value={wagerInput} onChange={(e) => setWagerInput(parseInt(e.target.value))} style={{ width: '130px', accentColor: '#fbbf24' }} />
+          <span style={{ fontSize: '12px', fontWeight: 'bold' }}>🪙 {wagerInput} ST</span>
+        </div>
+
+        {/* Betting Action Button Links */}
+        <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+          <button onClick={() => executeTableAction('RAISE_BET')} className="buy-upgrade-btn" style={{ flex: 1, background: '#10b981', padding: '8px' }}>👍 Raise Bet</button>
+          <button onClick={() => executeTableAction('FOLD')} className="buy-upgrade-btn" style={{ flex: 1, background: '#475569', padding: '8px' }}>✕ Fold</button>
+        </div>
+        
+        <button onClick={() => executeTableAction('DECLARE_STALEMATE')} className="buy-upgrade-btn" style={{ width: '100%', background: '#ef4444', fontSize: '10px', padding: '4px' }}>
+          ⚠️ Flag Table Stalemate Dispute (House Claims Pot)
+        </button>
+      </div>
+    </div>
+  );
+}
