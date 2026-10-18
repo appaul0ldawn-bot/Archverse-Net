@@ -1,0 +1,38 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🔕 DO NOT DISTURB & PERSISTENT CHRONO-STATUS SCHEMA
+// ==========================================================================
+const DndStatusSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // Master Status Configuration Gating
+  currentPrivacyMode: { 
+    type: String, 
+    enum: ['AVAILABLE_ALIGNMENT', 'DO_NOT_DISTURB_ACTIVE', 'SLEEP_CYCLE_HUSH', 'AWAY_MODE'], 
+    default: 'AVAILABLE_ALIGNMENT' 
+  },
+  
+  // Automated Device Sleep & Alarm Synchronization Knowledge
+  syncedDeviceAlarm: {
+    nextAlarmTimestamp: Date,
+    isSleepTrackingActive: { type: Boolean, default: false }
+  },
+
+  // Custom User Scheduled Hush Time Parameters
+  scheduledHushWindows: [{
+    startHourMinute: String, // e.g., "22:00" (Quiet Hours Guardrail Verification)
+    endHourMinute: String,   // e.g., "06:00"
+    daysOfWeek: [Number]      // 0 = Sunday, 1 = Monday, etc.
+  }],
+
+  // Messaging Auto-Response Text Core
+  customAwayMessageText: { 
+    type: String, 
+    default: "✨ [Aether Network Silence]: My avatar container is currently undergoing a Solfeggio memory reset. Telepathic packet cached inside the Akashic Records." 
+  },
+  
+  updatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('DndStatus', DndStatusSchema);
