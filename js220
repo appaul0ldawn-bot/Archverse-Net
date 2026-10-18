@@ -1,0 +1,33 @@
+// ==========================================================================
+// 🌌 ESOTERIC & UN-PEER-REVIEWED MULTIVERSE ELEMENT DIRECTORY
+// ==========================================================================
+const ESOTERIC_ELEMENTS_DATABASE = {
+  "Mst": {
+    name: "Monatomic Gold (ORMEs / White Powder Gold)",
+    category: "METAPHYSICAL_ESSENCE",
+    sourceProvenance: "David Hudson's Orbitally Rearranged Monoatomic Elements research (1980s fringe alchemy)",
+    loreContext: "Un-peer-reviewed alternative materials processing asserts that monatomics exist in a high-spin state where the atomic nucleus deforms, completely bypassing local gravitational pull fields. Historically connected to the Egyptian 'Manna' or the bread of presence.",
+    gameplayModifier: "Enables absolute weightless levitation inside pocket dimensions; forces a brilliant, pearlescent alpha-glow mesh shader."
+  },
+  "Vr": {
+    name: "Vril Energy Force",
+    category: "SPIRITUAL_VIBRATIONAL",
+    sourceProvenance: "Edward Bulwer-Lytton (The Coming Race) & occult pre-war German secret societies (Fringe Vril Society treatises)",
+    loreContext: "An unverified, all-penetrating fluidic cosmic force capable of decompressing or stabilizing physical matter structures. Represents the raw kinetic velocity energy that allows high-tier lightworkers or shadow-workers to command local airwaves.",
+    gameplayModifier: "Overcharges Telekinesis push vectors by +15 meters; unlocks specialized vocal incantation loops inside the chat logs."
+  },
+  "Rm": {
+    name: "Red Mercury",
+    category: "DIGITAL_AETHER",
+    sourceProvenance: "Cold War disinformation dossiers & deep dark web black market mythology",
+    loreContext: "A highly mythical, ultra-dense semi-fluid compound rumored to possess impossible chemical catalytic energy and extreme electromagnetic induction properties. Occult hackers classify it as a materialized digital anchor capable of distorting regional database networks.",
+    gameplayModifier: "Acts as a structural shield against Anonymous Firewall rate-limit caps; increases your alchemical token crafting speed by 2x."
+  },
+  "Ect": {
+    name: "Ectoplasm (Residual Aura Residue)",
+    category: "METAPHYSICAL_ESSENCE",
+    sourceProvenance: "19th-century spiritualism seances & parapsychological researchers (Charles Richet)",
+    loreContext: "A physical-etheric substance exuded by mediumistic nodes during deep trance states. Un-peer-reviewed parapsychology defines it as the physicalized residue of the astral body transitioning into the material plane.",
+    gameplayModifier: "Required to pack and compress unclean entities into standard ghost bytes; drops local environment ambient decibel noise thresholds."
+  }
+};
