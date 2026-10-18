@@ -1,0 +1,28 @@
+import React from 'react';
+
+export function ChannelingHub() {
+  return (
+    <div style={{ padding: '20px', color: '#fff', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="login-card" style={{ borderColor: '#fbbf24', background: 'rgba(15,23,42,0.9)' }}>
+        <h3 style={{ color: '#fbbf24', margin: '0 0 6px 0' }}>👁️ Watchers of the Veil Command</h3>
+        <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.5' }}>
+          Premium VIP members ($10 monthly subscription) ascend to formal <strong>Watcher of the Veil Status</strong>. 
+          This unlocks advanced rendering capabilities, exclusive custom-carved staffs, broken-off unicorn horned wands, and enchanted ring cosmetics inside the Divine Marketplace. 
+          Furthermore, Watchers are granted an active profile listing on the public Channeled Summoners directory board.
+        </p>
+        <button className="buy-upgrade-btn" style={{ width: '100%' }} onClick={() => alert("Redirecting to secure subscription portal...")}>
+          Sign Up for Premium VIP ($10/mo)
+        </button>
+      </div>
+
+      <div className="dashboard-section-title">🔮 Active Channeled Summoners Directory</div>
+      <div className="store-item-card">
+        <div>
+          <strong>Summoner_Zadkiel_77</strong>
+          <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#94a3b8' }}>Channeling Vector: Pleiadian Starseed Consciousness Matrix</p>
+        </div>
+        <span className="badge-indicator" style={{ backgroundColor: 'rgba(234,179,8,0.2)', color: '#fbbf24' }}>Watcher Tier</span>
+      </div>
+    </div>
+  );
+}
