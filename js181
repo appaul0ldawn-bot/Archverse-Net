@@ -1,0 +1,61 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the analytics tracker model within our testing sandbox memory cluster
+  mongoose.model('AuraAnalytics', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    historicalRoutines: { sleepStateHoursAverage: Number, predominantPostSentimentScore: Number },
+    computedAuraMatrix: { activeMoodColorHex: String, vibrationalStateTag: String, recommendedGuildPath: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('AuraAnalytics')) {
+    await mongoose.model('AuraAnalytics').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧬 SUITE 22: BEHAVIORAL MOOD PATTERN RECOGNITION & AURA SHADERS
+// ==========================================================================
+describe('Archverse Sentient Aura Pattern Learning Engine', () => {
+
+  it('should process toxic sleep/sentiment drops, automatically tinting the aura shader to deep volatile crimson', async () => {
+    const userNode = await User.create({ username: 'ExhaustedSeraph', tokens: 10 });
+
+    // Seed low-vibrational lifestyle metrics profile data elements
+    await mongoose.model('AuraAnalytics').create({
+      userId: userNode._id,
+      historicalRoutines: {
+        sleepStateHoursAverage: 4.2,         // Critical lack of sleep
+        predominantPostSentimentScore: -0.6  // Heavily distressed text indicators
+      },
+      computedAuraMatrix: { activeMoodColorHex: '#38bdf8', vibrationalStateTag: 'CALIBRATING_RESONANCE' }
+    });
+
+    // Request recalculation through the production data endpoints loops
+    const response = await request(app)
+      .post('/api/analytics/recompile-aura') // Simulated backend routing trigger
+      .send({ username: 'ExhaustedSeraph' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.colorOutput).toBe('#ef4444'); // Asserts color flipped to Crimson correctly
+    expect(response.body.assignedGuild).toBe('ABYSSAL_SHADOW_WORKERS'); // Asserts correct guild targeting routing
+  });
+});
