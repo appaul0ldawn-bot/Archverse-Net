@@ -1,0 +1,55 @@
+import React, { useState } from 'react';
+
+export function ElementalServicesHUD({ username, currentLat, currentLng }) {
+  const [activeStationLog, setActiveStationLog] = useState(null);
+
+  const processServiceCall = async (id) => {
+    try {
+      const response = await fetch('/api/elements/use-service', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          stationId: id,
+          playerLat: currentLat,
+          playerLng: currentLng
+        })
+      });
+      const data = await response.json();
+      setActiveStationLog(data);
+    } catch (e) {
+      console.error("Failed to query elemental database network node:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '24px', width: '340px', borderColor: '#38bdf8' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#38bdf8' }}>🌍 Global Elemental Service Hub</h3>
+      </div>
+      
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Identifies surrounding planetary alignment stations. Walk within a 30m radius limits gate to synchronize attributes.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <button onClick={() => processServiceCall('srv_water_01')} className="custom-option-btn" style={{ borderColor: '#0284c7', fontSize: '11px', textAlign: 'left' }}>
+          💧 Solfeggio Grotto Well (Water / Jerusalem)
+        </button>
+        <button onClick={() => processServiceCall('srv_fire_01')} className="custom-option-btn" style={{ borderColor: '#ea580c', fontSize: '11px', textAlign: 'left' }}>
+          🔥 Brimstone Smelter Core (Fire / Local Node)
+        </button>
+      </div>
+
+      {activeStationLog && (
+        <div style={{ marginTop: '10px', background: 'rgba(56,189,248,0.06)', border: '1px solid #38bdf8', padding: '8px', borderRadius: '6px', fontSize: '11px', textAlign: 'left' }}>
+          {activeStationLog.success ? (
+            <span style={{ color: '#34d399' }}>✅ {activeStationLog.message}</span>
+          ) : (
+            <span style={{ color: '#f87171' }}>❌ {activeStationLog.error}</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
