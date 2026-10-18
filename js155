@@ -1,0 +1,64 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the DND Status tracking model within our testing sandbox memory cluster
+  mongoose.model('DndStatus', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    currentPrivacyMode: String,
+    syncedDeviceAlarm: { nextAlarmTimestamp: Date, isSleepTrackingActive: Boolean },
+    scheduledHushWindows: [{ startHourMinute: String, endHourMinute: String }],
+    customAwayMessageText: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('DndStatus')) {
+    await mongoose.model('DndStatus').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🔕 SUITE 25: PRIVACY BUFFER & TELEPATHIC INTERCEPTION GATES
+// ==========================================================================
+describe('Archverse Do-Not-Disturb and Away Message Auto-Response Engine', () => {
+
+  it('should successfully intercept telepathic packets and return away messages if the target recipient has DND active', async () => {
+    const sender = await User.create({ username: 'SenderSeraph', tokens: 10 });
+    const recipient = await User.create({ username: 'SleepingCherub', tokens: 10 });
+
+    // Seed the target recipient with explicit active DND parameters
+    await mongoose.model('DndStatus').create({
+      userId: recipient._id,
+      currentPrivacyMode: 'DO_NOT_DISTURB_ACTIVE',
+      syncedDeviceAlarm: { isSleepTrackingActive: true },
+      customAwayMessageText: "Testing auto response away text."
+    });
+
+    const response = await request(app)
+      .post('/api/comms/send-telepathy-packet')
+      .send({
+        senderUsername: 'SenderSeraph',
+        recipientUsername: 'SleepingCherub',
+        textMessagePayload: 'Awaken from your slumber, node!'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.deliveryStatus).toBe('EACH_PACKET_CACHED_IN_VEIL'); // Packet diverted successfully
+    expect(response.body.awayAutoResponse).toBe('Testing auto response away text.');
+  });
+});
