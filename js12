@@ -1,0 +1,87 @@
+const express = require('express');
+const router = express.Router();
+const ColonyInfiltration = require('./models/ColonyInfiltration');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🎭 DYNAMIC ENVIRONMENTAL SCRIPT FLIP OVERRIDE CONTROLLER
+// ==========================================================================
+router.post('/api/missions/evaluate-colony-proximity', async (req, res) => {
+  try {
+    const { username, currentLat, currentLng } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node proxy invalid.' });
+
+    let infiltrationNode = await ColonyInfiltration.findOne({ userId: user._id });
+    if (!infiltrationNode) infiltrationNode = new ColonyInfiltration({ userId: user._id, username });
+
+    // Calculate actual distance between the player mesh and the registered colony geocenter
+    const distanceMeters = Math.hypot(
+      currentLat - infiltrationNode.colonyBoundaryBox.centerLat,
+      currentLng - infiltrationNode.colonyBoundaryBox.centerLng
+    ) * 111000;
+
+    const isInsideColonyRadius = distanceMeters <= infiltrationNode.colonyBoundaryBox.boundaryRadiusMeters;
+
+    // --- CASE A: ENTERING THE COLONY (FLIP THE SCRIPT TO SHADOW WORKER) ---
+    if (isInsideColonyRadius && !infiltrationNode.isInfiltrationActive) {
+      infiltrationNode.isInfiltrationActive = true;
+      
+      // Cache original high-vibrational vestment variables before flipping strings
+      infiltrationNode.cachedPreInfiltrationState = {
+        originalRoleTrack: 'CELESTIAL_LIGHTWORKER',
+        originalArmorMeshId: 'FULL_GOLDEN_ARMOR_OF_GOD'
+      };
+
+      // Execute structural script flip parameters
+      user.rankBadge = "👤 Status: Shadow Worker (Infiltration Mode)";
+      user.activeVisualState = 'MUTUAL_WITNESS_MASKING_SHROUD'; // Programmatically applies blending skin shader
+      
+      await infiltrationNode.save();
+      await user.save();
+
+      ArchverseLogger.log('WARN', 'MISSION_FLIP', `Player ${username} entered nudist colony. Script flipped to Shadow Worker. Armor un-allocated.`);
+
+      return res.json({
+        success: true,
+        activeTrackStatus: "SHADOW_WORKER_INFILTRATION",
+        message: "🎭 Script Flip Protocol Enforced: Lightworker armor un-equipped. Blending shroud active to match environment codes.",
+        currentVisualShader: user.activeVisualState
+      });
+    }
+
+    // --- CASE B: EXITING THE COLONY (RESTORE ORIGINAL LIGHTWORKER COVENANTS) ---
+    if (!isInsideColonyRadius && infiltrationNode.isInfiltrationActive) {
+      infiltrationNode.isInfiltrationActive = false;
+
+      // Restore original holy rank markers and re-allocate full golden armor meshes
+      user.rankBadge = "👑 Sphere: Saturn (Contemplative High Archons)";
+      user.activeVisualState = '#fbbf24'; // Restores brilliant golden aura tint vertex shaders
+      
+      await infiltrationNode.save();
+      await user.save();
+
+      ArchverseLogger.log('INFO', 'MISSION_FLIP', `Player ${username} exited nudist colony. Restored Lightworker parameters and Golden Armor.`);
+
+      return res.json({
+        success: true,
+        activeTrackStatus: "LIGHTWORKER_RESTORED",
+        message: "🚀 Sector Clear: Exited colony grid boundaries. Lightworker covenants restored. Full Golden Armor of God re-allocated cleanly.",
+        currentVisualShader: user.activeVisualState
+      });
+    }
+
+    res.json({
+      success: true,
+      activeTrackStatus: infiltrationNode.isInfiltrationActive ? "SHADOW_WORKER_INFILTRATION" : "STANDARD_TRACK",
+      message: "Proximity coordinates stable. No script flip triggers active over current sector grid."
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Infiltration proximity processing failure.' });
+  }
+});
+
+module.exports = router;
