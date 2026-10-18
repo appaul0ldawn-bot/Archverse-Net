@@ -1,0 +1,76 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the tracking model within our testing sandbox memory cluster
+  mongoose.model('SupernaturalAnomaly', new mongoose.Schema({
+    anomalyId: String,
+    title: String,
+    category: String,
+    coordinates: { lat: Number, lng: Number },
+    sourceProvenance: String,
+    vibrationalSignature: { frequencyHz: Number, particleGlowColor: String }
+  }));
+});
+
+afterEach(async () => {
+  if (mongoose.modelNames().includes('SupernaturalAnomaly')) {
+    await mongoose.model('SupernaturalAnomaly').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 25: AUTOMATED SUPERNATURAL & CRYPTID INGESTION PIPELINES
+// ==========================================================================
+describe('Archverse Daily Supernatural and Cryptid Tracker Sync Tests', () => {
+
+  it('should successfully ingest multi-source anomaly arrays when providing valid administrative signatures', async () => {
+    const mockSyncPayload = [
+      {
+        anomalyId: "test_anom_99",
+        title: "Point Pleasant Mothman Distortion Cluster",
+        category: "CRYPTID_TRACKER",
+        coordinates: { lat: 38.8445, lng: -82.1379 },
+        sourceProvenance: "Cryptids Near Me API",
+        vibrationalSignature: { frequencyHz: 432, particleGlowColor: "#22c55e" }
+      }
+    ];
+
+    const response = await request(app)
+      .post('/api/anomaly/daily-sync')
+      .send({
+        syncPassphrase: "SECRET_HEAVEN_KEY_999", // Valid Admin Token Firewall Signature
+        inboundManifestData: mockSyncPayload
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    const count = await mongoose.model('SupernaturalAnomaly').countDocuments({});
+    expect(count).toBe(1); // Confirms daily log write completed perfectly
+  });
+
+  it('should reject synchronization data packets if the master token firewall check drops', async () => {
+    const response = await request(app)
+      .post('/api/anomaly/daily-sync')
+      .send({
+        syncPassphrase: "INVALID_FORGED_FIREWALL_STAMP",
+        inboundManifestData: []
+      });
+
+    expect(response.status).toBe(403); // Intercepted and neutralized safely
+  });
+});
