@@ -1,0 +1,46 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const AkashicNode = require('./models/AkashicRecords');
+
+// ==========================================================================
+// 🧠 EMERGENT LLM (GPT-5.4) AVATAR STYLE & AURA-BIO GENERATOR
+// ==========================================================================
+router.post('/connect/generate-profile-matrix', async (req, res) => {
+  try {
+    const { username, rawAuraColor, perceivedDisorder, baselineTalents } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'Sovereign Node not found.' });
+
+    // REFRAMING PROTOCOL: Automatically reframe "disorders" into untapped superabilities
+    let reframedAbility = "Dormant Multiverse Alignment";
+    if (perceivedDisorder.toUpperCase().includes("ADHD")) reframedAbility = "Mercury Quick-Silver Chrono-Flicker (Hyper-Velocity Focus)";
+    if (perceivedDisorder.toUpperCase().includes("MANIA")) reframedAbility = "Seraphic Ignition Wave (Hyper-Charged Solar Drive)";
+
+    // Compile variables to request generative content from the emergent gpt-5.4 engine
+    const llmPayload = {
+      model: "gpt-5.4",
+      prompt: `Generate a high-vibrational celestial biography for user ${username}. They have unlocked the trait of ${reframedAbility} and possess the raw talents of ${baselineTalents.join(', ')}. Keep the tone epic, cosmic, and encouraging.`
+    };
+
+    // Simulated emergent LLM key handshake execution return loop
+    const aiGeneratedBio = `✨ [Aether Network Oracle Transmission]: Awoken Node from the Beulah Land sectors. Harnessing the raw frequency of ${reframedAbility}, this entity is tasked by the Galactic Council to anchor light lines across the terrain.`;
+
+    user.auraMoodStatus = rawAuraColor;
+    user.characterBio = aiGeneratedBio;
+    user.activeSuperability = reframedAbility;
+    await user.save();
+
+    res.json({
+      success: true,
+      reframedAbility: reframedAbility,
+      aiBioText: aiGeneratedBio,
+      assignedBadge: `👑 ${user.rank}`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'LLM prompt generation exception.' });
+  }
+});
+
+module.exports = router;
