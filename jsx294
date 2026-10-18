@@ -1,0 +1,42 @@
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
+export function VolumetricFireMesh({ position }) {
+  const fireRef = useRef();
+
+  useFrame((state) => {
+    if (!fireRef.current) return;
+    fireRef.current.material.uniforms.uTime.value = state.clock.getElapsedTime();
+  });
+
+  const FireShaderMaterial = {
+    uniforms: { uTime: { value: 0 }, uFireColor: { value: new THREE.Color("#ea580c") } },
+    vertexShader: `
+      uniform float uTime;
+      varying float vNoise;
+      void main() {
+        // Models upward plasma draft velocity vectors using staccato noise calculations
+        float noise = sin(position.y * 5.0 - uTime * 4.0) * 0.2;
+        vNoise = noise;
+        vec3 newPos = position + normal * noise;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uFireColor;
+      varying float vNoise;
+      void main() {
+        // Blends bright orange core with deep red plasma borders using additive gradients
+        gl_FragColor = vec4(uFireColor + vec3(vNoise * 2.0, 0.0, 0.0), 1.0 - (vNoise * 2.0));
+      }
+    `
+  };
+
+  return (
+    <mesh ref={fireRef} position={position}>
+      <cylinderGeometry args={[0.1, 0.4, 2.5, 16, 16, true]} />
+      <shaderMaterial args={[FireShaderMaterial]} transparent={true} blending={THREE.AdditiveBlending} depthWrite={false} />
+    </mesh>
+  );
+}
