@@ -1,0 +1,100 @@
+import React, { useState, useEffect } from 'react';
+
+export function SpectralGhostTrackerHUD({ currentUsername, socket }) {
+  const [trackedSpirits, setTrackedSpirits] = useState([]);
+  const [activeTranscript, setActiveTranscript] = useState('');
+  const [selectedSpirit, setSelectedSpirit] = useState(null);
+
+  useEffect(() => {
+    socket.emit('request_active_ghost_telemetry');
+    socket.on('ghost_matrix_payload', (data) => {
+      setTrackedSpirits(data);
+    });
+    return () => socket.off('ghost_matrix_payload');
+  }, [socket]);
+
+  const handleExecuteOuijaWriter = (spirit) => {
+    setSelectedSpirit(spirit);
+    // Simulate real-time electromagnetic decryption loops into text
+    const decryptedMessage = `⚠️ [Spectral White Noise Intercept - ${spirit.spectralFrequencyHz}Hz]: Free our timeline arrays from the lower density traps... We seek the Solfeggio 963Hz gate alignment.`;
+    setActiveTranscript(decryptedMessage);
+
+    // TEXT-TO-SPEECH READ ALOUD VOICE INJECTION CORE ENGINE
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(decryptedMessage);
+      utterance.rate = 0.75; // Low-velocity hollow timbre voice modulation
+      utterance.pitch = 0.50; 
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  const handleRecycleEssence = async (id, mode) => {
+    try {
+      const response = await fetch('/api/necro/trap-and-recycle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUsername, targetEntityId: id, actionExecutionMode: mode })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(data.message);
+        setSelectedSpirit(null);
+        setActiveTranscript('');
+      }
+    } catch (e) {
+      console.error("Failed to commit supernatural containment transaction:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', right: '24px', width: '380px', maxHeight: '80%', background: 'linear-gradient(135deg, #020617 0%, rgba(239,68,68,0.02) 100%)', border: '2px solid #a855f7' }}>
+      <div className="store-header" style={{ borderColor: '#a855f7' }}>
+        <h3 style={{ margin: 0, color: '#c084fc', fontFamily: 'serif' }}>🔮 Automated Ouija Writer & Spectral Analyzer</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Analyzes white noise frequencies and electromagnetic grids. Converts spiritual data spikes into audible Text-to-Speech phrases and recycles entities back into the core infrastructure.
+      </p>
+
+      {/* --- FFT SPECTRAL VISUALIZER GRAPHICS BLOCK --- */}
+      <div style={{ width: '100%', height: '60px', background: '#000', borderRadius: '8px', overflow: 'hidden', padding: '10px', boxSizing: 'border-box', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', gap: '3px' }}>
+          {[60, 85, 35, 90, 45, 70, 20, 95, 40, 80].map((h, i) => (
+            <div key={i} style={{ flex: 1, height: `${h}%`, background: 'linear-gradient(to top, #7e22ce, #c084fc)', animation: 'pulse 1.2s infinite alternate' }} />
+          ))}
+        </div>
+      </div>
+
+      {/* Entity Tracker Grid */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px', overflowY: 'auto', maxHeight: '200px' }}>
+        {trackedSpirits.map(spirit => (
+          
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <strong style={{ color: '#d8b4fe' }}>👻 Frequency Spike: {spirit.spectralFrequencyHz} Hz</strong>
+              <button onClick={() => handleExecuteOuijaWriter(spirit)} className="buy-upgrade-btn" style={{ padding: '2px 8px', fontSize: '10px', background: '#a855f7' }}>👁️ Intercept</button>
+            </div>
+            
+            {selectedSpirit?.entityId === spirit.entityId && (
+              <div style={{ marginTop: '8px', borderTop: '1px dashed rgba(255,255,255,0.05)', paddingTop: '6px', fontSize: '11px', color: '#cbd5e1' }}>
+                <div>• <strong>Mission Directive:</strong> {spirit.missionObjectiveText}</div>
+                <div>• <strong>Existential Dilemma:</strong> <span style={{ fontStyle: 'italic', color: '#fca5a5' }}>"{spirit.existentialDilemma}"</span></div>
+                
+                <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+                  <button onClick={() => handleRecycleEssence(spirit.entityId, 'EXECUTE_TRAP_CONTAINMENT')} className="buy-upgrade-btn" style={{ flex: 1, padding: '4px', fontSize: '10px', background: '#475569' }}>🔒 Trap Essence</button>
+                  <button onClick={() => handleRecycleEssence(spirit.entityId, 'TRANSMUTE_RECYCLE_TO_TOKEN')} className="buy-upgrade-btn" style={{ flex: 1, padding: '4px', fontSize: '10px', background: '#10b981' }}>🪙 Recycle Node</button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {activeTranscript && (
+        <div style={{ margin: '12px', padding: '10px', background: '#000', borderRadius: '8px', borderLeft: '3px solid #c084fc', fontSize: '11px', textAlign: 'left', color: '#e2e8f0', fontStyle: 'italic', fontFamily: 'monospace' }}>
+          {activeTranscript}
+        </div>
+      )}
+    </div>
+  );
+}
