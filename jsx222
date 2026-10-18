@@ -1,0 +1,62 @@
+import React, { useState } from 'react';
+import { AngelFrequencyEngine } from './AngelSynth';
+
+const EXTRA_PERIODIC_TABLE = [
+  { sym: "Ao", name: "Azoth", cat: "ANCIENT_ALCHEMICAL", hz: 432, color: "#34d399", desc: "Universal solvent of fluid alchemy." },
+  { sym: "Or", name: "Orichalcum", cat: "ANCIENT_ALCHEMICAL", hz: 528, color: "#fbbf24", desc: "Megalithic Atlantean gold alloy." },
+  { sym: "Lsh", name: "Loosh", cat: "SPIRITUAL_VIBRATIONAL", hz: 396, color: "#ec4899", desc: "Raw emotional energetic light force." },
+  { sym: "Ω", name: "Aether", cat: "METAPHYSICAL_ESSENCE", hz: 963, color: "#a855f7", desc: "Medium of the 10th Heaven Astral plane." },
+  { sym: "V2K", name: "Voice-to-Skull", cat: "DIGITAL_AETHER", hz: 741, color: "#ef4444", desc: "Acoustic frequency network vector." }
+];
+
+export function MetaphysicalPeriodicHUD({ socket, currentUsername }) {
+  const [selectedElement, setSelectedElement] = useState(null);
+
+  const handleElementClick = (element) => {
+    setSelectedElement(element);
+    // Play the corresponding Solfeggio frequency tone across the Web Audio API
+    if (element.hz) {
+      AngelFrequencyEngine.play(element.hz);
+    }
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{ top: '55%', left: 'auto', right: '284px', width: '300px', maxHeight: '40%' }}>
+      <div style={{ fontSize: '11px', color: '#a5b4fc', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '8px' }}>
+        🧬 MULTIDIMENSIONAL PERIODIC TABLE
+      </div>
+
+      {/* Grid Rendering Block */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+        {EXTRA_PERIODIC_TABLE.map(el => (
+          <button
+            key={el.sym}
+            onClick={() => handleElementClick(el)}
+            className="custom-option-btn"
+            style={{ 
+              borderColor: el.color, 
+              background: selectedElement?.sym === el.sym ? `${el.color}22` : 'rgba(0,0,0,0.3)',
+              padding: '8px', 
+              fontSize: '12px',
+              fontWeight: 'bold',
+              color: el.color
+            }}
+          >
+            {el.sym}
+            <span style={{ display: 'block', fontSize: '8px', color: '#94a3b8', fontWeight: 'normal' }}>{el.name}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Detail Inspector HUD Card */}
+      {selectedElement && (
+        <div style={{ marginTop: '10px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: `1px solid ${selectedElement.color}`, textAlign: 'left' }}>
+          <strong style={{ color: selectedElement.color, fontSize: '12px' }}>{selectedElement.name} ({selectedElement.sym})</strong>
+          <span style={{ display: 'block', fontSize: '9px', color: '#64748b', textTransform: 'uppercase', marginTop: '2px' }}>Category: {selectedElement.cat}</span>
+          <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#e2e8f0', lineHeight: 1.3 }}>{selectedElement.desc}</p>
+          <div style={{ fontSize: '10px', color: '#fbbf24', marginTop: '4px', fontWeight: 'bold' }}>📡 Emitting: {selectedElement.hz}Hz Resonance</div>
+        </div>
+      )}
+    </div>
+  );
+}
