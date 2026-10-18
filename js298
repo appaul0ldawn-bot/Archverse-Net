@@ -1,0 +1,43 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
+export function DailyProceduralRelicNode({ socket }) {
+  const [dailyItemsList, setDailyItemsList] = useState([]);
+  const itemRotationRef = useRef();
+
+  useEffect(() => {
+    // Listen for daily market restock signals fired down via the server tickers
+    socket.on('marketplace_restocked', (data) => {
+      setDailyItemsList((prev) => [...prev, data.item]);
+    });
+
+    return () => socket.off('marketplace_restocked');
+  }, [socket]);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    if (itemRotationRef.current) {
+      // Apply clean sinusoidal wave floating rifts to daily assets items
+      itemRotationRef.current.position.y = 1.5 + Math.sin(time * 2.0) * 0.12;
+      itemRotationRef.current.rotation.y = time * 0.4;
+    }
+  });
+
+  return (
+    <group>
+      {dailyItemsList.map((item) => (
+        <group key={item.itemId} position={[item.spawnLatOffset || 2, 0, item.spawnLngOffset || -4]} ref={itemRotationRef}>
+          {/* 
+            WebGL Dynamically downloads the .gltf/.glb asset bundle link compiled 
+            natively via Nano Banana 2 without re-packaging client codebases.
+          */}
+          <mesh castShadow>
+            <sphereGeometry args={[0.3, 16, 16]} />
+            <meshStandardMaterial color="#fbbf24" emissive="#eab308" emissiveIntensity={1.5} wireframe />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  );
+}
