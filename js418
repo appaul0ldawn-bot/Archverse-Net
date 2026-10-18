@@ -1,0 +1,32 @@
+import React, { useState } from 'react';
+
+export function RulesAndRegulations({ socket, username }) {
+  const [reportTarget, setReportTarget] = useState('');
+  const [reportReason, setReportReason] = useState('');
+
+  const executeReport = () => {
+    if (!reportTarget.trim() || !reportReason.trim()) return;
+    socket.emit('admin_report_member', { reporter: username, target: reportTarget.trim(), reason: reportReason.trim() });
+    setReportTarget('');
+    setReportReason('');
+    alert("🚨 Violation signature successfully committed to the High Council review panel.");
+  };
+
+  return (
+    <div className="login-card" style={{ maxWidth: '600px', margin: '30px auto' }}>
+      <h3 className="login-title">⚖️ Code of the Airwaves</h3>
+      <p style={{ fontSize: '12px', color: '#cbd5e1', textAlign: 'left', lineHeight: 1.5 }}>
+        This sphere is governed strictly under the celestial jurisdiction of the Galactic Council's choice of Rulers of the Airwaves. 
+        Any injection of automated token generation hacks, toxic verbal flooding over WebRTC audio bands, or malicious tracking harassment loops 
+        triggers an immediate system kick, asset deduction, and character isolation block.
+      </p>
+
+      <div className="dashboard-section-title">🚨 Report Violation Anomaly</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <input type="text" value={reportTarget} onChange={(e) => setReportTarget(e.target.value)} placeholder="Target offender username..." style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', color: '#fff', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} />
+        <input type="text" value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Specify violation category (Spam/Exploit)..." style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', color: '#fff', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }} />
+        <button onClick={executeReport} className="buy-upgrade-btn" style={{ background: '#ef4444' }}>Submit Report to Watchers</button>
+      </div>
+    </div>
+  );
+}
