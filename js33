@@ -1,0 +1,73 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Multiverse Karma tracking model within our testing sandbox
+  mongoose.model('MultiverseKarma', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    nativeHomeUniverseId: String,
+    currentOccupiedUniverseId: String,
+    universalKarmaScore: Number,
+    activePunishmentStatus: String,
+    activeSpaceTimeContractId: String,
+    isGroundingFortified: Boolean
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('MultiverseKarma')) {
+    await mongoose.model('MultiverseKarma').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌪️ SUITE 36: YO-YO SNAP-BACK PROTECTION AND ASSET WIPING GATES
+// ==========================================================================
+describe('Archverse Multiverse Yo-Yo Continuum & Asset Isolation Tests', () => {
+
+  it('should detect a rogue multiverse hop without an active contract, invoke the yo-yo effect, and zero out player tokens', async () => {
+    const player = await User.create({ username: 'RogueRealityHopper', tokens: 4000, karmaScore: -100, zodiacElement: 'Fire' });
+
+    // Seed a ledger tracking node lacking any active space-time mission contracts
+    await mongoose.model('MultiverseKarma').create({
+      userId: player._id,
+      username: 'RogueRealityHopper',
+      nativeHomeUniverseId: 'EARTH_PRIME',
+      currentOccupiedUniverseId: 'EARTH_PRIME',
+      universalKarmaScore: -100,
+      activePunishmentStatus: 'GANGSTALKING_CONTAINMENT_SHROUD', // Node is under an active reprimand layer
+      activeSpaceTimeContractId: null // Missing contract triggers the snap back
+    });
+
+    const response = await request(app)
+      .post('/api/multiverse/validate-hop')
+      .send({
+        username: 'RogueRealityHopper',
+        destinationUniverseId: 'EARTH_616' // Attempted un-authorized reality hop
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.vortexStatus).toBe('CRITICAL_YO_YO_SNAPBACK_ENFORCED'); // Yo-yo snap-back verified
+
+    // Re-query database to verify absolute asset stripping held true
+    const updatedUser = await User.findOne({ username: 'RogueRealityHopper' });
+    expect(updatedUser.tokens).toBe(0); // Rogue player assets successfully wiped by system reprimand rules
+    expect(updatedUser.activeVisualState).toBe('CONTAINMENT_ISOLATION_SHROUD');
+  });
+});
