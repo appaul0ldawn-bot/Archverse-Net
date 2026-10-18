@@ -1,0 +1,41 @@
+import React, { useState } from 'react';
+
+export function PublicArtGallery() {
+  const [artFiles, setArtFiles] = useState([]);
+  const [commentInput, setCommentInput] = useState('');
+
+  const handleStrictPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    // HARD ENFORCEMENT LAYER: Only authorize photographic formats (no audio/video uploads permitted)
+    if (file && file.type.startsWith('image/')) {
+      const localUrl = URL.createObjectURL(file);
+      setArtFiles(prev => [...prev, { id: Date.now(), src: localUrl, likes: 0, comments: [] }]);
+    } else {
+      alert("❌ Validation Error: Only authentic photographic imagery (PNG, JPG, JPEG) is accepted inside this album.");
+    }
+  };
+
+  return (
+    <div style={{ padding: '20px', background: '#0f172a', color: '#fff', minHeight: '100vh' }}>
+      <div className="page-media-header" style={{ marginBottom: '20px' }}>
+        <h2>🎨 Public Art Albums Gallery</h2>
+      </div>
+
+      <div style={{ marginBottom: '20px', background: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px' }}>
+        <label className="input-label" style={{ display: 'block', marginBottom: '8px' }}>Upload New Masterpiece (Photos Only)</label>
+        <input type="file" accept="image/*" onChange={handleStrictPhotoUpload} style={{ color: '#94a3b8' }} />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        {artFiles.map(art => (
+          <div key={art.id} style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px' }}>
+            <img src={art.src} alt="User Submission" style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+              <button className="buy-upgrade-btn" style={{ padding: '4px 10px' }} onClick={() => art.likes++}>❤️ Like ({art.likes})</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
