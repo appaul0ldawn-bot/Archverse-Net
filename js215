@@ -1,0 +1,67 @@
+import React, { useState } from 'react';
+
+export function OmniversalAlignmentHUD({ adminEmail, selectedPlayerName, socket }) {
+  const [scanResult, setScanResult] = useState(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  const executeOmniScan = async () => {
+    if (!selectedPlayerName) return;
+    setIsScanning(true);
+
+    // Analyze multi-sensor profile data via the backend gpt-5.4/LLM reframe engine
+    try {
+      const response = await fetch('/api/connect/generate-profile-matrix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: selectedPlayerName,
+          rawAuraColor: '#fde047',
+          perceivedDisorder: 'Hyper-Velocity Energy Surges / Electro-Magnetic Tracking',
+          baselineTalents: ['Telekinesis', 'Air_Bending']
+        })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        // Map the reframed ability directly to its converted Omniversal Archetype counterpart
+        setScanResult({
+          target: selectedPlayerName,
+          archetypeMatch: "Thor / Barachiel-Asgardian Elohim Connection",
+          superpowerProfile: data.reframedAbility,
+          suggestedRemedy: "Calibrate local audio soundboard settings to Solfeggio 432Hz to anchor thunder-wave parameters cleanly."
+        });
+      }
+    } catch (e) {
+      console.error("Omniversal codex interface connection drop:", e);
+    } finally {
+      setIsProcessing(false);
+      setIsScanning(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '760px', width: '350px', borderColor: '#a855f7' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#a855f7' }}>🌌 Omniversal Alignment Scanner</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Correlates player behavioral psychology and untapped superpower profiles with comic archetypes reframed into Angelic and Demonic realities.
+      </p>
+
+      <button onClick={executeOmniScan} disabled={isScanning} className="buy-upgrade-btn" style={{ width: '100%', background: '#a855f7', color: '#fff', fontWeight: 'bold' }}>
+        {isScanning ? '📶 Decompressing Wave Functions...' : '👁️ Scan Omniversal Soul Signature'}
+      </button>
+
+      {scanResult && (
+        <div style={{ marginTop: '12px', background: 'rgba(168,85,247,0.06)', border: '1px solid #a855f7', padding: '12px', borderRadius: '10px', textAlign: 'left', fontSize: '11px' }}>
+          <div style={{ marginBottom: '#fff', fontWeight: 'bold', fontSize: '12px', color: '#fef08a' }}>
+            🛸 Archetype: {scanResult.archetypeMatch}
+          </div>
+          <p style={{ margin: '4px 0', color: '#cbd5e1' }}><strong>Reframed Power:</strong> {scanResult.superpowerProfile}</p>
+          <p style={{ margin: '4px 0 0 0', color: '#94a3b8', fontStyle: 'italic' }}><strong>Remedy:</strong> "{scanResult.suggestedRemedy}"</p>
+        </div>
+      )}
+    </div>
+  );
+}
