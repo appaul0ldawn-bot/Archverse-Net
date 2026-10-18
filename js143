@@ -1,0 +1,26 @@
+// ==========================================================================
+// 👃 BIOCHEMICAL AURA SCENT CORRELATOR
+// ==========================================================================
+export function analyzeOlfactoryReaction(biometricPayload, currentZoneElement) {
+  const { skinConductanceLevel, heartRateBpm } = biometricPayload;
+  
+  let detectedScentSignature = "Neutral Baseline Airwaves";
+  let energeticVolatility = 0.5;
+
+  // 🧪 Pattern Recognition rules mapping chemical anxiety/serenity states
+  if (skinConductanceLevel > 4.5 && heartRateBpm > 95) {
+    // High-stress adrenal panic loops trigger an inverse chemical release signature
+    detectedScentSignature = "🔥 Oxidized Sulfur & Heavy Brimstone Resonances";
+    energeticVolatility = 0.9;
+  } else if (skinConductanceLevel <= 1.8 && currentZoneElement === 'Water') {
+    // Deep meditation states close to Solfeggio Wells trigger sweet, cleansing notes
+    detectedScentSignature = "🌿 Translucent Frankincense & Fresh Manna Blossom";
+    energeticVolatility = 0.1;
+  }
+
+  return {
+    scentTag: detectedScentSignature,
+    volatilityIndex: energeticVolatility,
+    recommendedAlchemicalCounter: energeticVolatility > 0.7 ? "Tincture of Solar Eleuthero" : "None Required"
+  };
+}
