@@ -1,0 +1,16 @@
+const BALANCED_SHADOW_MISSIONS = [
+  {
+    missionId: 'sh_ms_04',
+    title: '🎭 Operation: Christian-Witch's Forked Road',
+    difficulty: 'CRITICAL_ELITE',
+    description: 'Infiltrate the 10th Heaven Astral Plane boundary governed by Patriarch Asher and Astaroth. Intercept the extra-dimensional printing matrix queues to redirect smoky prayer offerings safely into the hidden Beulah Land pocket grid without alerting the Watchers.',
+    tokenReward: 400
+  },
+  {
+    missionId: 'sh_ms_05',
+    title: '🌋 Containment Fracture: Pandorium Descent',
+    difficulty: 'ARCH_DEMON_TIER',
+    description: 'Navigate the vertical Limbo Route down into the subterranean fire and brimstone fields of Pandorium. Use an unlocked alchemical warp modification to temporarily mask your vector presence while stabilizing a leaky thermal core valve before structural damage cascades.',
+    tokenReward: 450
+  }
+];
