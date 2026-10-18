@@ -1,0 +1,72 @@
+import React, { useState, useEffect } from 'react';
+
+export function CosmicCalendarHUD({ currentUser, socket }) {
+  const [todoList, setTodoList] = useState([]);
+  const [cosmicNews, setCosmicNews] = useState([]);
+  const [newTaskInput, setNewTaskInput] = useState('');
+
+  useEffect(() => {
+    // Request current timeline metrics from the server tick routers
+    socket.emit('get_active_cosmic_timeline');
+    socket.on('cosmic_timeline_data', (data) => {
+      setTodoList(data.userTasks);
+      setCosmicNews(data.activeEvents);
+    });
+
+    return () => {
+      socket.off('cosmic_timeline_data');
+    };
+  }, [socket]);
+
+  const handleCreateLocalTask = () => {
+    if (!newTaskInput.trim()) return;
+    // Dispatch new task across the productivity channels loop
+    socket.emit('create_calendar_task', { text: newTaskInput.trim(), username: currentUser.name });
+    setNewTaskInput('');
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{ top: '12%', left: '24px', width: '350px', maxHeight: '75%' }}>
+      <div className="dashboard-section-title">📅 Cosmic Calendar & Tickers</div>
+      
+      {/* --- CELLSTIAL NEWS & CYCLIC LAWS DISPLAY TICKER --- */}
+      <div style={{ background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.2)', padding: '10px', borderRadius: '10px', marginBottom: '12px', fontSize: '11px', textAlign: 'left' }}>
+        <strong style={{ color: '#fbbf24', display: 'block' }}>📢 Galactic Federation News Stream:</strong>
+        <div style={{ maxHeight: '60px', overflowY: 'auto', marginTop: '4px', lineHeight: 1.4, color: '#e2e8f0' }}>
+          • 🧭 [Ancient Holiday]: Feast of Michaelmas Active — 963Hz Seraph fields overcharging.
+          {"\n"}• ♈ [Horoscope Shift]: Solar Return Badge active on profiles holding October birthdays.
+        </div>
+      </div>
+
+      {/* --- USER INTEGRATED TO-DO LIST MODULE --- */}
+      <div className="dashboard-section-title">☑️ Aligned Task Management</div>
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+        <input 
+          type="text" value={newTaskInput} onChange={(e) => setNewTaskInput(e.target.value)}
+          placeholder="Log new mission or calendar task..."
+          style={{ flex: 1, background: 'rgba(0,0,0,0.4)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px', fontSize: '11px' }}
+        />
+        <button onClick={handleCreateLocalTask} className="buy-upgrade-btn" style={{ padding: '8px' }}>Add</button>
+      </div>
+
+      {/* Render Tasks List */}
+      <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {todoList.map(task => (
+          <div key={task._id} style={{ background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px' }}>
+            <span style={{ color: task.isCompleted ? '#64748b' : '#fff', textDecoration: task.isCompleted ? 'line-through' : 'none', textAlign: 'left' }}>
+              🎯 {task.taskText}
+            </span>
+            {!task.isCompleted && (
+              <button 
+                onClick={() => socket.emit('complete_calendar_task_request', { taskId: task._id, username: currentUser.name })}
+                className="buy-upgrade-btn" style={{ padding: '2px 6px', background: '#10b981', fontSize: '10px' }}
+              >
+                Seal (+100 AT)
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
