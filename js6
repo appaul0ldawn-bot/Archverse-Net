@@ -1,0 +1,27 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🕊️ OPHAN'S OVERLOOK: MERCY AND GRACE LEDGER SCHEMA
+// ==========================================================================
+const OphansOverlookSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+
+  // Accumulated Telemetry Mitigation Logs
+  graceFrictionTracking: {
+    absorbedDailyFrictionIndex: { type: Number, default: 0 },
+    overlookedAnomaliesCount: { type: Number, default: 0 },
+    subsurfaceGoodFinderRatio: { type: Number, default: 1.0 } // Scale prioritizing structural lightcodes
+  },
+
+  // Dynamic Equation Multipliers
+  mercyMitigationCalculated: {
+    graceCoefficientMultiplier: { type: Number, default: 1.5 }, // Scales up to buffer character damage curves
+    activeAuraRestorationShader: { type: String, default: '#38bdf8' }, // Cyan light shield tint
+    overlookStatus: { type: String, enum: ['HARMONIC_MERCY_ENGAGED', 'EQUILIBRIUM_CALIBRATING'], default: 'HARMONIC_MERCY_ENGAGED' }
+  },
+
+  lastOverlookAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('OphansOverlook', OphansOverlookSchema);
