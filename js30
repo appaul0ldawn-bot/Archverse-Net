@@ -1,0 +1,62 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Compassion tracking model within our testing memory sandbox
+  mongoose.model('CompassionCore', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    empathyMetrics: { publicAffectionAcceptabilityScore: Number, unwaveringNaturalComfortIndex: Number, forgivenessConfessionCount: Number },
+    emergencyAwakeningSystem: { isMindlessZombieModeActive: Boolean, isForcedWakeAlarmTriggered: Boolean, necessaryActionIncidentId: String },
+    fellowshipStructure: { relationshipTypology: String, boundPartnerUserIdsList: [mongoose.Schema.Types.ObjectId], motherlyInstinctSyncActive: Boolean }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('CompassionCore')) {
+    await mongoose.model('CompassionCore').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🕊️ SUITE 34: COMPASSION INGESTION & AUTOMATED ALARM WAKE GATES
+// ==========================================================================
+describe('Archverse Sentient Compassion & Emergency Awakening Matrix', () => {
+
+  it('should process an emergency wake request, successfully zeroing out mindless zombie mode flags and returning a golden aura shift hex', async () => {
+    const player = await User.create({ username: 'ZombieStateStarseed', tokens: 100, karmaScore: 10, activeVisualState: 'VOID_BACKROOM_SHROUD' });
+
+    // Seed an initial profile holding an active zombie tracking restriction state
+    await mongoose.model('CompassionCore').create({
+      userId: player._id,
+      'emergencyAwakeningSystem.isMindlessZombieModeActive': true,
+      'fellowshipStructure.relationshipTypology': 'FLUID_POLYAMOROUS_COVENANT'
+    });
+
+    const response = await request(app)
+      .post('/api/compassion/process-empathy-tick')
+      .send({
+        username: 'ZombieStateStarseed',
+        targetInteractionType: 'TRIGGER_EMERGENCY_WAKE',
+        inputLogString: 'ACTIVATE'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.currentAuraColor).toBe('#fbbf24'); // Asserts visual state shifted to radiant golden alert flash
+    expect(response.body.fellowshipType).toBe('FLUID_POLYAMOROUS_COVENANT'); // Fluid polyamorous matrix constraints verified
+  });
+});
