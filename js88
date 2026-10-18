@@ -1,0 +1,68 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const OraclePokerMatch = require('./models/OraclePokerMatch');
+
+// ==========================================================================
+// 🎲 CELESTIAL HAND HIERARCHIES & COMBAT CONTROLLER
+// ==========================================================================
+const CELESTIAL_HAND_TIERS = {
+  ROYAL_FLUSH: { name: "The Seven Archangels (Royal Flush)", weight: 10, desc: "Gathering all 7 Main Archangels: Michael, Gabriel, Raphael, Uriel, Raguel, Zerachiel, and Remiel." },
+  FULL_HOUSE: { name: "The Unified Firmament (Full House)", weight: 8, desc: "All 7 Heavens celestial rank categories represented across your hand structure." },
+  PURE_PAIR:  { name: "Dual Seraphs (Pair)", weight: 2, desc: "Two matching angelic entities operating on the same frequency." }
+};
+
+router.post('/api/poker/fold-or-bet', async (req, res) => {
+  try {
+    const { roomId, username, actionType, tokenRaiseAmount } = req.body;
+    
+    const currentTable = await OraclePokerMatch.findOne({ roomId });
+    const user = await User.findOne({ username });
+
+    if (!currentTable || currentTable.matchStatus === 'SHOWDOWN_ALIGNMENT') {
+      return res.status(400).json({ success: false, error: 'Table is currently locked or inactive.' });
+    }
+
+    // 🎲 INCORPORATING LUCK & PROPHETIC MODIFIERS
+    // Evaluate user karma and cosmic elements to calculate dynamic "Coincidence Ripples"
+    let coincidenceFactor = Math.random() * (user.karmaScore > 500 ? 1.5 : 1.0);
+    
+    if (actionType === 'RAISE_BET') {
+      if (user.tokens < tokenRaiseAmount) {
+        return res.status(400).json({ success: false, error: 'Insolvent ST balance to complete bet.' });
+      }
+      user.tokens -= tokenRaiseAmount;
+      currentTable.totalTokenPot += tokenRaiseAmount;
+      
+      // Update individual player commitment trackers inside the room array
+      const playerIndex = currentTable.activePlayersList.findIndex(p => p.username === username);
+      if (playerIndex !== -1) {
+        currentTable.activePlayersList[playerIndex].tokenWagerContribution += tokenRaiseAmount;
+        currentTable.activePlayersList[playerIndex].divineFavorMultiplier = coincidenceFactor;
+      }
+    }
+
+    // Handle Stalemate Disputes: Admin House claims pot to prevent cheating loops
+    if (actionType === 'DECLARE_STALEMATE') {
+      currentTable.matchStatus = 'HOUSE_STALEMATE_WIN';
+      await currentTable.save();
+      return res.json({ success: true, tableState: 'HOUSE_STALEMATE_WIN', message: "Stalemate declared. Tokens secured to the administrative treasury." });
+    }
+
+    await user.save();
+    await currentTable.save();
+    global.stateHasChanged = true;
+
+    res.json({
+      success: true,
+      currentPotSize: currentTable.totalTokenPot,
+      calculatedDivineFavor: coincidenceFactor.toFixed(2),
+      remainingTokens: user.tokens
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Oracle Poker game processing exception.' });
+  }
+});
+
+module.exports = router;
