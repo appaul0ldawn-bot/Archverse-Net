@@ -1,0 +1,92 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const PoketanjelProfile = require('./models/PoketanjelProfile');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🎰 POCKET CUBE MECHANICAL CAPTURE & LEDGER GATEWAY
+// ==========================================================================
+router.post('/api/arcade/poketanjel-capture', async (req, res) => {
+  try {
+    const { username, targetMonstarName, rawFrequencyHz } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'User proxy profile unaligned.' });
+
+    let profile = await PoketanjelProfile.findOne({ userId: user._id });
+    if (!profile) profile = new PoketanjelProfile({ userId: user._id });
+
+    // 🧠 TRANSFORMATION LIGHTCODE: Convert dark frequency elements into harmonized stats
+    const monstarUniqueId = `mst_${Date.now()}`;
+    const newJournalEntry = {
+      monstarId: monstarUniqueId,
+      name: targetMonstarName || "Abyssal_Gargoyle",
+      originalSpectralHz: rawFrequencyHz || 396,
+      transmutedToGoodStatus: true
+    };
+
+    // Auto-populate the Demadek Journal
+    profile.demadekAutofillerJournal.push(newJournalEntry);
+    await profile.save();
+
+    // Reward player with immediate gameplay progression variables
+    user.karmaScore += 150;
+    await user.save();
+
+    ArchverseLogger.log('INFO', 'POKETANJEL_ENG', `Asher (CatchEMP) captured ${targetMonstarName} inside a Pocket Cube. Demadek entry committed.`);
+
+    res.json({
+      success: true,
+      captureState: "CONTAINED_AND_TRANSMUTED",
+      journalCount: profile.demadekAutofillerJournal.length,
+      message: `🎯 [Pocket Cube Seal]: Captured ${targetMonstarName}! Transmuted via Dreidel's resonance fields to serve the main grid.`
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Poketanjel capture sequence failure.' });
+  }
+});
+
+// ==========================================================================
+// 📜 LIBRARY WEB LINK DATABASE SYNCHRONIZATION ENDPOINT
+// ==========================================================================
+router.post('/api/arcade/poketanjel-lib-sync', async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    const user = await User.findOne({ username });
+    const profile = await PoketanjelProfile.findOne({ userId: user?._id });
+
+    if (!profile || profile.demadekAutofillerJournal.length === 0) {
+      return res.status(400).json({ success: false, error: 'No un-uploaded journal data found inside the Demadek buffer.' });
+    }
+
+    // Calculate database synchronization token payouts (yields 100 Angel Tokens per indexed spirit)
+    const pendingUploadsCount = profile.demadekAutofillerJournal.length;
+    const calculatedTokenBonus = pendingUploadsCount * 100;
+
+    user.tokens += calculatedTokenBonus;
+    profile.lastLibWebDatabaseSyncAt = new Date();
+    
+    // Clear out local buffer post database upload settlement
+    profile.demadekAutofillerJournal = [];
+
+    await user.save();
+    await profile.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    res.json({
+      success: true,
+      synchronizedSpiritsCount: pendingUploadsCount,
+      tokenPayoutGranted: calculatedTokenBonus,
+      updatedTokensBalance: user.tokens
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Lib-Web sync execution crash.' });
+  }
+});
+
+module.exports = router;
