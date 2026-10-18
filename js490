@@ -1,0 +1,24 @@
+export function RafielsAlchemyStation() {
+  return (
+    <div style={{ marginTop: '40px', padding: '20px', background: 'rgba(15, 23, 42, 0.8)', borderRadius: '16px', border: '1px solid #34d399' }}>
+      <h3 style={{ color: '#34d399', margin: '0 0 6px 0' }}>🧪 Rafiel's Arcana Alchemy Station</h3>
+      <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.5' }}>
+        Step into the shoes of a budding alchemist, and brew increasingly tricky potions by combining colorful ingredients. Progress through this brief adventure to uncover the story behind your work.
+      </p>
+      
+      <a href="https://dabikuru.itch.io/potion-mixer" target="_blank" rel="noopener noreferrer" className="buy-upgrade-btn" style={{ background: '#10b981', display: 'inline-block', textDecoration: 'none' }}>
+        Enter Potion Mixer Engine
+      </a>
+
+      <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '14px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '10px' }}>
+        <strong>Historical Record:</strong> Archangel Rafiel operates as the Angel of Healing and Supreme Medicine Chief of the Celestial Host, maintaining the famed <em>Rafiel's Medicine Cabinet</em>. His profound archaeobotanical compendium, translated into earthly dimensions as the enigmatic <strong>Voynich Manuscript</strong>, contains the direct algorithmic equations for matching high-vibrational herbs with stellar elemental states.
+      </div>
+      
+      <div style={{ marginTop: '16px' }}>
+        <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="dashboard-toggle-btn" style={{ display: 'inline-block', textDecoration: 'none' }}>
+          💬 Establish Live Shaman Communication Tunnel
+        </a>
+      </div>
+    </div>
+  );
+}
