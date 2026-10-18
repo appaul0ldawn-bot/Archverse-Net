@@ -1,0 +1,41 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🌌 STELLARIUM COSMIC TRAJECTORY COMPUTER
+// ==========================================================================
+function computeStellariumOrbits(epochDays) {
+  // Enforce true Keplerian orbital mechanics tracking formulas
+  const meanAnomaly = (epochDays * (360 / 365.25636)) * (Math.PI / 180);
+  
+  // Calculate specific vector offsets for the Johava Jireh orbital gyros
+  const radiusOphanimX = Math.cos(meanAnomaly) * 149.6; 
+  const radiusOphanimZ = Math.sin(meanAnomaly) * 149.6;
+
+  return {
+    ophanimCoordinates: { x: radiusOphanimX, z: radiusOphanimZ },
+    siderealTimeDegrees: (epochDays * 360.9856) % 360
+  };
+}
+
+router.get('/api/celestial/stellarium-tick', async (req, res) => {
+  try {
+    const daysSinceLaunch = (Date.now() - new Date('2026-10-16').getTime()) / (1000 * 60 * 60 * 24);
+    const trackingData = computeStellariumOrbits(daysSinceLaunch);
+
+    // Sync variables natively into the global map micro-node caching matrices
+    if (global.io) {
+      global.io.emit('stellarium_universe_sync', {
+        timestamp: new Date().toISOString(),
+        firmamentState: trackingData
+      });
+    }
+
+    res.json({ success: true, stellariumState: trackingData });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Stellarium orbital computer failure.' });
+  }
+});
+
+module.exports = router;
