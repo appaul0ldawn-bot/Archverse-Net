@@ -1,0 +1,70 @@
+import React, { useState } from 'react';
+
+export function CompassionHUD({ currentUsername, userVisualState, socket }) {
+  const [confessionInput, setConfessionInput] = useState('');
+  const [partnerInput, setPartnerInput] = useState('');
+  const [tickerLog, setTickerLog] = useState('Select an empathy portal action to synchronize.');
+
+  const executeEmpathyTransaction = async (type, payload) => {
+    try {
+      const response = await fetch('/api/compassion/process-empathy-tick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          targetInteractionType: type,
+          inputLogString: payload
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTickerLog(data.reportText);
+        setConfessionInput('');
+        setPartnerInput('');
+      }
+    } catch (e) {
+      console.error("Compassion interface connection drop:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', right: '24px', width: '380px', maxHeight: '82%', background: 'linear-gradient(135deg, #0f172a 0%, rgba(236,72,153,0.02) 100%)', border: '2px solid #ec4899', borderRadius: '24px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid #ec4899', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#f472b6', fontFamily: 'serif' }}>🕊️ Empathy & Compassion Forge</h3>
+        <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Fluid Fellowship Matrix • Virtues Rank Oversight</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- REVERBERATING TRANSACTION LIFESTYLE LOGS FEED --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '8px', borderLeft: '3px solid #ec4899', fontStyle: 'italic', color: '#e2e8f0' }}>
+          "{tickerLog}"
+        </div>
+
+        {/* --- SECTION 1: CONFESSIONS TERMINAL --- */}
+        <div className="dashboard-section-title" style={{ color: '#fbbf24' }}>Sacred Confession & Forgiveness Portal</div>
+        <p style={{ color: '#cbd5e1', margin: '0 0 6px 0' }}>Submit sincere confessions into the secure veil to clear emotional density logs and overcharge profile karma scores.</p>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <input type="text" value={confessionInput} onChange={(e) => setConfessionInput(e.target.value)} placeholder="Type sincere confession..." style={{ flex: 1, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: '#fff', borderRadius: '6px' }} />
+          <button onClick={() => executeEmpathyTransaction('SACRED_CONFESSION_LOG', confessionInput)} className="buy-upgrade-btn" style={{ background: '#eab308', color: '#0f172a', fontWeight: 'bold' }}>Submit</button>
+        </div>
+
+        {/* --- SECTION 2: OPEN COVENANT RELATIONSHIP PLATFORM --- */}
+        <div className="dashboard-section-title" style={{ color: '#f472b6' }}>Fluid Fellowship Bond Registry</div>
+        <p style={{ color: '#cbd5e1', margin: '0 0 6px 0' }}><strong>Covenant Status:</strong> Non-Monogamous / Fluid Polyamorous frameworks are structurally enforced. Exclusive pairing constraints are forbidden.</p>
+        <div style={{ display: 'flex', gap: '4px' }}>
+          <input type="text" value={partnerInput} onChange={(e) => setPartnerInput(e.target.value)} placeholder="Enter partner name to bind..." style={{ flex: 1, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: '#fff', borderRadius: '6px' }} />
+          <button onClick={() => socket.emit('bind_fluid_partner_request', { target: partnerInput.trim() })} className="buy-upgrade-btn" style={{ background: '#ec4899' }}>Bind</button>
+        </div>
+
+        {/* --- SECTION 3: EMERGENCY AWAKENING SYSTEMS CONTROLS --- */}
+        <div className="dashboard-section-title" style={{ color: '#ef4444' }}>Necessary Action Intersession Override</div>
+        <p style={{ color: '#cbd5e1', margin: '0 0 6px 0' }}>If a player container drops into a mindless zombie state during critical geographic incidents, ignite this alarm shake override instantly.</p>
+        <button onClick={() => executeEmpathyTransaction('TRIGGER_EMERGENCY_WAKE', 'ACTIVATE')} className="buy-upgrade-btn" style={{ width: '100%', background: '#dc2626', color: '#fff', fontWeight: 'bold', padding: '10px' }}>
+          🚨 Force Awakening Alarm Shake
+        </button>
+
+      </div>
+    </div>
+  );
+}
