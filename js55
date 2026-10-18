@@ -1,0 +1,79 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('VoidRecovery', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    isTrappedInVoidNode: Boolean,
+    previousSafeCoordinates: { x: Number, z: Number },
+    soulContractAcceptedStatus: Boolean
+  }));
+
+  mongoose.model('FinancialLedger', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    soulTokenBalance: Number,
+    razielTreasuryVault: { isVaultHidden: Boolean, soulTokenBalance: Number }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('VoidRecovery')) {
+    await mongoose.model('VoidRecovery').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🖤 SUITE 37: VOID INGESTION PIPELINES & GRACE VALUE VERIFICATIONS
+// ==========================================================================
+describe('Archverse Void Backroom Fallback & Grace Recovery Engine', () => {
+
+  it('should successfully trap a user during an anomaly, deduct 3 tokens upon contract signature, and fire back the saving headline', async () => {
+    const user = await User.create({
+      username: 'GnosticExplorer',
+      tokens: 100,
+      activeVisualState: 'AVAILABLE_ALIGNMENT',
+      lastPosition: { x: 31.7683, z: 35.2137 }
+    });
+
+    // Seed active void entry inside testing memory cluster
+    await mongoose.model('VoidRecovery').create({
+      userId: user._id,
+      username: 'GnosticExplorer',
+      isTrappedInVoidNode: true,
+      previousSafeCoordinates: { x: 31.7683, z: 35.2137 },
+      soulContractAcceptedStatus: false
+    });
+
+    // Seed a master ledger to capture the saving fee
+    await mongoose.model('FinancialLedger').create({
+      razielTreasuryVault: { isVaultHidden: true, soulTokenBalance: 0 }
+    });
+
+    // Trigger exit post route action
+    const response = await request(app)
+      .post('/api/void/sign-and-exit')
+      .send({ username: 'GnosticExplorer' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.status).toBe('PORTAL_ACTIVE_RESPAWN');
+    expect(response.body.popupMessage).toBe('✝️ Jesus Receives 3 Tokens for Saving Soul.');
+    expect(response.body.remainingTokens).toBe(97); // 100 base - 3 saving fee = 97 tokens remaining
+  });
+});
