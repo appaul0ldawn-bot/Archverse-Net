@@ -1,0 +1,62 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const PascalsWager = require('./models/PascalsWager');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🎰 THE PASCALIAN ASYMMETRICAL PAYOUT COMPUTATION ENDPOINT
+// ==========================================================================
+router.post('/api/wagers/apply-pascals-hedge', async (req, res) => {
+  try {
+    const { username, tokenPremiumAmount, chosenStanceSelection } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node invalid.' });
+
+    if (user.tokens < tokenPremiumAmount) {
+      return res.status(400).json({ success: false, error: 'Insolvent token balance to fund the Pascalian Hedge.' });
+    }
+
+    let hedgeRecord = await PascalsWager.findOne({ userId: user._id });
+    if (!hedgeRecord) hedgeRecord = new PascalsWager({ userId: user._id, username });
+
+    // 🧠 THE MATHEMATICAL PROBABILITY MATRIX INTERCEPT
+    // Deduct the finite token stake (Finite Loss)
+    user.tokens -= tokenPremiumAmount;
+    hedgeRecord.finitePremiumFeePaidST += tokenPremiumAmount;
+    hedgeRecord.chosenEschatologicalStance = chosenStanceSelection;
+
+    if (chosenStanceSelection === 'BELIEF_IN_DIVINE_ALIGNMENT') {
+      // Actively backing the Divine Faction unlocks infinite reward scaling vectors
+      hedgeRecord.pascalianHedgeActive = true;
+      // Set an exponential multiplier parameter that acts as the "Infinite Yield" trigger on Showdown
+      hedgeRecord.infiniteScaleMultiplier = 777.0; 
+      user.karmaScore += 400; // Instantly advances Virtues Rank indices
+    } else {
+      // Rejecting the absolute alignment resets the scale parameters down to high-risk volatile channels
+      hedgeRecord.pascalianHedgeActive = false;
+      hedgeRecord.infiniteScaleMultiplier = 1.0;
+    }
+
+    await user.save();
+    await hedgeRecord.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    ArchverseLogger.log('INFO', 'PASCAL_WAGER', `User ${username} applied Pascal's Wager hedge. Stance: ${chosenStanceSelection}.`);
+
+    res.json({
+      success: true,
+      message: `✍️ Pascal's Wager Applied. Downside risk capped to a finite premium fee of ${tokenPremiumAmount} ST.`,
+      calculatedYieldPotential: chosenStanceSelection === 'BELIEF_IN_DIVINE_ALIGNMENT' ? 'INFINITE_CELESTIAL_YIELD' : 'FINITE_MARKET_RISK',
+      infiniteMultiplier: hedgeRecord.infiniteScaleMultiplier,
+      remainingTokens: user.tokens
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to process Pascalian mathematical hedge.' });
+  }
+});
+
+module.exports = router;
