@@ -1,0 +1,54 @@
+import React, { useState, useEffect } from 'react';
+
+const SEVEN_HEAVENS_TIERS = [
+  { level: 7, name: "Saturn (Contemplative High Archons)", minTokens: 10000 },
+  { level: 6, name: "Jupiter (Just Rulers Guild)", minTokens: 7500 },
+  { level: 5, name: "Mars (Martyrs of Faith)", minTokens: 5000 },
+  { level: 4, name: "Sun (Primal Wisdom Masters)", minTokens: 3000 },
+  { level: 3, name: "Venus (Lovers of Justice)", minTokens: 1500 },
+  { level: 2, name: "Mercury (Ambitious Souls)", minTokens: 500 },
+  { level: 1, name: "Moon (Inconstant Spirits)", minTokens: 0 }
+];
+
+export function RanksAndCompetition({ currentUser, socket }) {
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  useEffect(() => {
+    socket.emit('get_competition_leaderboard');
+    socket.on('competition_leaderboard_data', (data) => {
+      setLeaderboard(data); // Expects array of top tier scorers matching ranks
+    });
+    return () => socket.off('competition_leaderboard_data');
+  }, [socket]);
+
+  return (
+    <div className="chat-log-sidebar" style={{ left: '380px', top: '12%', width: '380px', maxHeight: '75%' }}>
+      <div className="dashboard-section-title">🛡️ 7 Heavens Celestial Ranks</div>
+      <div style={{ fontSize: '12px', marginBottom: '12px' }}>
+        Your Rank Badge: <span className="badge-indicator" style={{ backgroundColor: 'rgba(234,179,8,0.2)', color: '#fbbf24', fontWeight: 'bold' }}>{currentUser.rank}</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+        {SEVEN_HEAVENS_TIERS.map(tier => (
+          <div key={tier.level} style={{ fontSize: '11px', display: 'flex', justifyContent: 'space-between', padding: '4px', background: currentUser.tokens >= tier.minTokens ? 'rgba(16,185,129,0.1)' : 'transparent' }}>
+            <span>⚡ {tier.name}</span>
+            <span style={{ color: '#eab308' }}>{tier.minTokens} ST</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="dashboard-section-title">🏆 Divine Competition Arena</div>
+      <div style={{ overflowY: 'auto', flex: 1 }}>
+        {leaderboard.map((player, idx) => (
+          <div key={player.username} className="store-item-card" style={{ padding: '8px' }}>
+            <div style={{ fontSize: '12px' }}>
+              <strong>#{idx + 1} {player.username}</strong>
+              <div style={{ fontSize: '10px', color: '#94a3b8' }}>{player.rank}</div>
+            </div>
+            <span style={{ fontWeight: 'bold', color: '#fef08a' }}>🪙 {player.tokens} ST</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
