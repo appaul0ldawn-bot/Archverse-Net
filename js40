@@ -1,0 +1,57 @@
+const express = require('express');
+const router = express.Router();
+const SensoryAnalytics = require('./models/SensoryAnalytics');
+const User = require('./models/User');
+
+// ==========================================================================
+// 👅 SENSORY CLASSIFICATION AND ATTRIBUTE MUTATION ROUTER
+// ==========================================================================
+router.post('/api/sensory/log-interaction', async (req, res) => {
+  try {
+    const { username, observedExpression, witnessedAcousticReaction, dbLevel } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Target user node invalid.' });
+
+    let sensoryRecord = await SensoryAnalytics.findOne({ userId: user._id });
+    if (!sensoryRecord) sensoryRecord = new SensoryAnalytics({ userId: user._id });
+
+    // 1. EVALUATE TASTE VIA MICRO-EXPRESSIONS
+    if (observedExpression === 'ZYGOMATIC_ELEVATION') {
+      sensoryRecord.tasteProfileLogs = { inferredTasteSensation: 'SWEET_MANNA', facialMicroExpressionVector: observedExpression, perceivedPalatabilityScore: 1.8 };
+      user.activeVisualState = '#fbbf24'; // Radiant golden aura tint override
+    } else if (observedExpression === 'GLABELLAR_FROWN') {
+      sensoryRecord.tasteProfileLogs = { inferredTasteSensation: 'BITTER_ABSINTHE', facialMicroExpressionVector: observedExpression, perceivedPalatabilityScore: 0.1 };
+      user.activeVisualState = '#ef4444'; // Volatile crimson aura tint override
+    }
+
+    // 2. EVALUATE TOUCH THROUGH AUDITORY TELEMETRY
+    sensoryRecord.tactileTouchLogs.vocalReactionClassification = witnessedAcousticReaction;
+    sensoryRecord.tactileTouchLogs.measuredDecibelLevelDb = dbLevel;
+
+    if (witnessedAcousticReaction === 'EXCITEMENT_BURST' || witnessedAcousticReaction === 'MOAN_RESONANCE') {
+      sensoryRecord.tactileTouchLogs.perceivedTextureFeel = 'SMOOTH_PEARLESCENT_GLASS';
+      sensoryRecord.tactileTouchLogs.calculatedTactileIntensity = 0.85;
+      user.karmaScore += 50; // Allocates spiritual progression variables
+    } else if (witnessedAcousticReaction === 'CRY_DISTRESS' || witnessedAcousticReaction === 'ANGER_VOCAL_SPIKE') {
+      sensoryRecord.tactileTouchLogs.perceivedTextureFeel = 'ROUGH_ABYSSAL_BRIMSTONE';
+      sensoryRecord.tactileTouchLogs.calculatedTactileIntensity = 0.95;
+    }
+
+    await sensoryRecord.save();
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    res.json({
+      success: true,
+      computedTasteSensation: sensoryRecord.tasteProfileLogs.inferredTasteSensation,
+      computedTouchFeel: sensoryRecord.tactileTouchLogs.perceivedTextureFeel,
+      vortexAuraShiftColor: user.activeVisualState
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Sensory pipeline aggregation failure.' });
+  }
+});
+
+module.exports = router;
