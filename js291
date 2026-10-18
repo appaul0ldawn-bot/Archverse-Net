@@ -1,0 +1,51 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🌍 GLOBAL ELEMENTAL SERVICE STATION REGISTRY
+// ==========================================================================
+const GLOBAL_ELEMENTAL_STATIONS = [
+  { stationId: "srv_water_01", name: "Solfeggio Grotto Well", element: "Water", lat: 31.7683, lng: 35.2137, service: "POTION_BREWING_AMPLIFIER" }, // New Jerusalem
+  { stationId: "srv_fire_01", name: "Brimstone Smelter Core", element: "Fire", lat: 35.8129, lng: -79.8059, service: "ARMOR_FORGE_IGNITION" },   // Local Staging Node
+  { stationId: "srv_earth_01", name: "Megalithic Grounding Pillar", element: "Earth", lat: 32.8801, lng: 35.5911, service: "GENIE_LAMP_SEALING" } // Sea of Galilee Grid
+];
+
+router.post('/api/elements/use-service', async (req, res) => {
+  try {
+    const { username, stationId, playerLat, playerLng } = req.body;
+    const user = await User.findOne({ username });
+    const station = GLOBAL_ELEMENTAL_STATIONS.find(s => s.stationId === stationId);
+
+    if (!user || !station) {
+      return res.status(404).json({ success: false, error: 'User or Station parameters invalid.' });
+    }
+
+    // Proximity Verification Calculation Loop: Enforce 30-meter operational radius
+    const distance = Math.hypot(playerLat - station.lat, playerLng - station.lng) * 111000; // Rough degree-to-meters translation
+    if (distance > 30) {
+      return res.status(400).json({ success: false, error: `Too far from ${station.name}. You must be within a 30m radius limits gate to process service.` });
+    }
+
+    // Apply specific service payout updates to user profile data fields
+    user.tokens += 150; // Allocates adequacy reward tokens for tracking localized elemental tasks
+    user.karmaScore += 50;
+    
+    if (station.element === 'Water') user.activeVisualState = 'HYDRO_SHIELD_ACTIVE';
+    if (station.element === 'Fire') user.activeVisualState = 'PLASMA_BLADE_IGNITED';
+    
+    await user.save();
+    global.stateHasChanged = true;
+
+    res.json({
+      success: true,
+      message: `Successfully charged data loops at ${station.name}. Unlocked service: ${station.service}.`,
+      updatedState: user.activeVisualState
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Elemental service station processing failure.' });
+  }
+});
+
+module.exports = router;
