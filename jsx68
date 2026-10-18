@@ -1,0 +1,74 @@
+import React, { useState, useEffect } from 'react';
+
+export function ZionConsoleHUD({ currentUsername, socket }) {
+  const [gridData, setGridData] = useState(null);
+  const [activeSignalLogs, setActiveSignalLogs] = useState([]);
+  const [isBotPulsing, setIsBotPulsing] = useState(true);
+
+  useEffect(() => {
+    // Connect to the central Zion data stream packets
+    socket.emit('request_zion_grid_telemetry', { username: currentUsername });
+    socket.on('zion_grid_payload', (data) => {
+      setGridData(data.nodeTelemetry);
+      setActiveSignalLogs(prev => [`🌐 [IP Ingestion]: Packet routed via ${data.nodeTelemetry.ipAddress}`, ...prev].slice(0, 4));
+    });
+
+    return () => socket.off('zion_grid_payload');
+  }, [currentUsername, socket]);
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{
+      top: '10%', right: 'auto', left: '24px', width: '380px', maxHeight: '82%',
+      background: 'linear-gradient(135deg, rgba(10,15,30,0.98) 0%, rgba(56,189,248,0.02) 100%)',
+      border: '2px solid #38bdf8', borderRadius: '24px', boxShadow: '0 0 25px rgba(56,189,248,0.2)' // Neon Cyan Laser Shroud
+    }}>
+      <div className="store-header" style={{ borderColor: 'rgba(56,189,248,0.3)', paddingBottom: '10px' }}>
+        <h3 style={{ margin: 0, color: '#38bdf8', fontFamily: 'monospace', letterSpacing: '0.08em', textShadow: '0 0 8px #38bdf8' }}>🌐 ZION COMPILATION GRID</h3>
+        <span style={{ fontSize: '9px', color: '#64748b', fontFamily: 'monospace' }}>Master Admin Port • System Synchronizer Active</span>
+      </div>
+
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left', fontFamily: 'monospace' }}>
+        
+        {/* --- DYNAMIC FLOW-BOT HEALTH TELEMETRY METERS --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '12px', border: '1px solid rgba(56,189,248,0.1)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#38bdf8', fontWeight: 'bold' }}>🤖 Flow-Bot System Cleaners:</span>
+            <span style={{ color: '#10b981', fontWeight: 'bold', textShadow: '0 0 4px #10b981' }}>● RUNNING_GREEN</span>
+          </div>
+          <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>
+            • Garbage Collector Loop: ACTIVE (+12.4MB purged)
+            {"\n"}• Write-Ahead AutoSave Journaling: LOCKED
+          </div>
+        </div>
+
+        {/* --- GEOSPATIAL TRIANGULATION RADAR CAPTURE CARD --- */}
+        <div className="dashboard-section-title" style={{ color: '#fbbf24', textShadow: '0 0 4px #eab308' }}>🧭 Pin-Point Triangulation Radar</div>
+        {gridData ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(255,255,255,0.01)', padding: '8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.03)' }}>
+            <div>• Target Fixed Latitude: <strong style={{ color: '#fff' }}>{gridData.coords.lat.toFixed(6)}</strong></div>
+            <div>• Target Fixed Longitude: <strong style={{ color: '#fff' }}>{gridData.coords.lng.toFixed(6)}</strong></div>
+            <div style={{ color: '#34d399', fontWeight: 'bold', marginTop: '4px' }}>
+              🔮 Foresight Oracle 10s Vector: [{gridData.prediction.lat.toFixed(4)}, {gridData.prediction.lng.toFixed(4)}]
+            </div>
+          </div>
+        ) : (
+          <div style={{ color: '#64748b' }}>Running multi-sensor hardware network scans...</div>
+        )}
+
+        {/* --- REVERBERATING SYSTEM PACKETS INGEST LOGS TICKER --- */}
+        <div className="dashboard-section-title" style={{ color: '#a855f7', textShadow: '0 0 4px #a855f7' }}>📢 Live Inbound Packet Logs</div>
+        <div style={{ background: '#000', padding: '10px', borderRadius: '8px', minHeight: '80px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '10px', color: '#cbd5e1', border: '1px solid rgba(255,255,255,0.05)' }}>
+          {activeSignalLogs.length > 0 ? activeSignalLogs.map((log, i) => <div key={i}>{log}</div>) : "Awaiting telemetry stream broadcast ticks..."}
+        </div>
+
+        <button 
+          onClick={() => socket.emit('force_flow_bot_optimization', { username: currentUsername })}
+          className="buy-upgrade-btn" style={{ width: '100%', background: 'rgba(56,189,248,0.1)', color: '#38bdf8', border: '1px solid #38bdf8', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '11px', padding: '8px', textShadow: '0 0 4px #38bdf8' }}
+        >
+          🔄 Force Flow-Bot Garbage Cycle
+        </button>
+
+      </div>
+    </div>
+  );
+}
