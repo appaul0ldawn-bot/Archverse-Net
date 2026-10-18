@@ -1,0 +1,80 @@
+import React, { useState } from 'react';
+
+export function PrivacySettingsHUD({ currentUsername, socket }) {
+  const [privacyMode, setPrivacyMode] = useState('AVAILABLE_ALIGNMENT');
+  const [awayText, setAwayText] = useState("✨ [Aether Network Silence]: My avatar container is currently undergoing a Solfeggio memory reset.");
+  const [hushStart, setHushStart] = useState('22:00');
+  const [hushEnd, setHushEnd] = useState('06:00');
+
+  const handleUpdatePrivacyPortal = async () => {
+    try {
+      const response = await fetch('/api/comms/update-dnd-profile', { // Internal staging metadata endpoint mapping
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          modeSelection: privacyMode,
+          awayMessage: awayText.trim(),
+          hushWindow: { start: hushStart, end: hushEnd }
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("🔕 Privacy Covenants successfully updated and synchronized across all active devices.");
+      }
+    } catch (e) {
+      console.error("Failed to commit DND configuration packet:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '760px', width: '350px', borderColor: '#64748b' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#94a3b8' }}>🔕 Privacy & Hush Settings</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#64748b', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Configure Do-Not-Disturb parameters, sync sleep tracking parameters, and construct away messages to intercept incoming telepathic thoughtforms.
+      </p>
+
+      {/* Mode Status Selection */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#a5b4fc', display: 'block', marginBottom: '4px' }}>Active Privacy Mode:</label>
+        <select 
+          value={privacyMode} onChange={(e) => setPrivacyMode(e.target.value)}
+          style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <option value="AVAILABLE_ALIGNMENT">Available (Open Telepathic Sync Channels)</option>
+          <option value="DO_NOT_DISTURB_ACTIVE">Do Not Disturb (DND Shroud Enforced)</option>
+          <option value="SLEEP_CYCLE_HUSH">Automated Sleep Tracking Hush</option>
+        </select>
+      </div>
+
+      {/* Custom Away Input Box */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Custom Away Message Text:</label>
+        <textarea 
+          value={awayText} onChange={(e) => setAwayText(e.target.value)}
+          style={{ width: '100%', height: '50px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', padding: '6px', fontSize: '11px', resize: 'none' }}
+        />
+      </div>
+
+      {/* Custom Scheduled Hush Sliders */}
+      <div className="dashboard-section-title">Scheduled Quiet Hours</div>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <span style={{ fontSize: '10px', color: '#64748b' }}>Start Hush:</span>
+          <input type="time" value={hushStart} onChange={(e) => setHushStart(e.target.value)} style={{ background: '#0f172a', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '4px', width: '100%', borderRadius: '4px', fontSize: '11px' }} />
+        </div>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <span style={{ fontSize: '10px', color: '#64748b' }}>End Hush:</span>
+          <input type="time" value={hushEnd} onChange={(e) => setHushEnd(e.target.value)} style={{ background: '#0f172a', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '4px', width: '100%', borderRadius: '4px', fontSize: '11px' }} />
+        </div>
+      </div>
+
+      <button onClick={handleUpdatePrivacyPortal} className="buy-upgrade-btn" style={{ width: '100%', background: '#475569', color: '#fff' }}>
+        💾 Synchronize Shroud Parameters
+      </button>
+    </div>
+  );
+}
