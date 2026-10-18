@@ -1,0 +1,63 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox cluster
+  mongoose.model('FrequencyCodex', new mongoose.Schema({
+    sourceId: String,
+    sourceName: String,
+    category: String,
+    measuredFrequencyHz: Number,
+    decryptedConsonantAlphabet: { translatedTextString: String, rootOriginLanguage: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('FrequencyCodex')) {
+    await mongoose.model('FrequencyCodex').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🪨 SUITE 38: ENVIRONMENTAL FREQUENCY DECRYPTION & COGNITION GATES
+// ==========================================================================
+describe('Archverse Environmental Litho-Botanical Frequency Decryption Array', () => {
+
+  it('should successfully compute a vowel-free consonant word string when processing a 432Hz gemstone resonance ping', async () => {
+    const player = await User.create({ username: 'LithicScholar', tokens: 100, karmaScore: 50 });
+
+    const response = await request(app)
+      .post('/api/frequency/translate-node')
+      .send({
+        username: 'LithicScholar',
+        targetSourceId: 'roc_quartz_77',
+        rawSensorFrequencyHz: 432 // Traditional planetary baseline frequency tuning
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.sourceClassification).toBe('MINERAL_ELEMENT');
+    
+    // Assert the text output contains zero vowel variables ("The Letter Kills, The Word Lives")
+    const hasVowels = /[aeiouAEIOU]/.test(response.body.decryptedMessage.split(': ')[1]);
+    expect(hasVowels).toBe(false); // Vowel exclusion rules validated
+
+    // Verify token rewards updated permanently on the user model record
+    const updatedUser = await User.findOne({ username: 'LithicScholar' });
+    expect(updatedUser.tokens).toBe(175); // 100 starting + 75 contract reward = 175 Soul Tokens
+  });
+});
