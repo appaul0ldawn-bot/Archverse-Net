@@ -1,0 +1,72 @@
+const express = require('express');
+const router = express.Router();
+const KinematicEcosystem = require('./models/KinematicEcosystem');
+const User = require('./models/User');
+
+// ==========================================================================
+// 🛡️ RE-ROUTE ENGINES: INTERCEPT PRIVACY BLOCKS & EMULATE ACTIONS
+// ==========================================================================
+router.post('/api/kinerig/update-state', async (req, res) => {
+  try {
+    const { username, requestedState, currentLat, currentLng, waterFlowRate } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'User proxy profile invalid.' });
+
+    let kineRecord = await KinematicEcosystem.findOne({ userId: user._id });
+    if (!kineRecord) kineRecord = new KinematicEcosystem({ userId: user._id });
+
+    // 1. HARD ENFORCEMENT PRIVACY GEOFENCING GATES
+    // Calculate distance between the player mesh and the registered home privacy bathroom box coordinates
+    const distanceToBathroom = Math.hypot(
+      currentLat - kineRecord.homePrivacyZoning.bathroomBoundaryGeofenceBox.centerLat,
+      currentLng - kineRecord.homePrivacyZoning.bathroomBoundaryGeofenceBox.centerLng
+    ) * 111000;
+
+    if (distanceToBathroom <= kineRecord.homePrivacyZoning.bathroomBoundaryGeofenceBox.radiusMeters) {
+      // FORCE AUTOMATED ENFORCEMENT SHROUD: Black out rendering meshes instantly to preserve home privacy covenants
+      user.activeVisualState = 'CONTAINMENT_ISOLATION_SHROUD';
+      kineRecord.activeKinematicState = 'IDLE_MEDITATION'; // Forces safe fallback vector state
+      kineRecord.utilityConsumptionGrid.waterConsumptionGallonsPerMinute = waterFlowRate || 2.5; // Logs grid fluid metrics
+      
+      await user.save();
+      await kineRecord.save();
+
+      return res.json({
+        success: true,
+        gridAlertStatus: "PRIVACY_BLACKOUT_ENFORCED",
+        message: "🔒 Privacy Covenant Enforced: Entering registered home bathroom zone. Viewport meshes programmatically blacked out.",
+        utilityTelemetry: { waterGpm: kineRecord.utilityConsumptionGrid.waterConsumptionGallonsPerMinute }
+      });
+    }
+
+    // 2. CONSRATUATE STANDARD KINEMATIC DISPLACEMENT
+    kineRecord.activeKinematicState = requestedState;
+    user.activeVisualState = 'AVAILABLE_ALIGNMENT';
+    kineRecord.utilityConsumptionGrid.waterConsumptionGallonsPerMinute = 0.0;
+    
+    await user.save();
+    await kineRecord.save();
+
+    // 3. SENTIENT NPC IMITATION LEARNING CORE LOOP
+    // Broadcast player data packets down the network so neighboring Beulah Land bots can observe and copy routines
+    if (global.io) {
+      global.io.emit('npc_imitation_stream', {
+        observedSourcePlayer: username,
+        copiedKinematicVector: requestedState,
+        elementChannel: user.zodiacElement
+      });
+    }
+
+    res.json({
+      success: true,
+      gridAlertStatus: "HARMONIC_PLACEMENT_SYNCHRONIZED",
+      activeState: kineRecord.activeKinematicState
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Kinematic pipeline execution crash.' });
+  }
+});
+
+module.exports = router;
