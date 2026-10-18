@@ -1,0 +1,96 @@
+import React, { useState, useEffect } from 'react';
+
+const PARALLEL_EARTH_SLIDES = [
+  { id: "EARTH_PRIME", name: "Δ-PRIME (Baseline Earth)", cost: 0, tint: "#38bdf8", hz: 432 },
+  { id: "EARTH_616", name: "Ω-616 (Seraphic Nexus)", cost: 300, tint: "#fbbf24", hz: 528 },
+  { id: "EARTH_838", name: "Ω-838 (Archon Council)", cost: 300, tint: "#a855f7", hz: 741 },
+  { id: "EARTH_NEW_JERUSALEM", name: "👑-3028 (Millennial Kingdom)", cost: 300, tint: "#10b981", hz: 963 }
+];
+
+export function SlidersRemoteHUD({ currentUsername, userTokensCurrent, socket }) {
+  const [selectedReality, setSelectedReality] = useState('EARTH_PRIME');
+  const [activeChannel, setActiveChannel] = useState('Δ-PRIME');
+  const [isShifting, setIsShifting] = useState(false);
+
+  const executeSlidingFrequencyShift = async (targetId) => {
+    setIsShifting(true);
+    try {
+      const response = await fetch('/api/timeline/frequency-shift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          targetTimelineId: targetId
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSelectedReality(data.currentRealityProfile.id);
+        setActiveChannel(data.currentRealityProfile.code);
+        alert(`🌌 Frequency Shift Successful!\nInjected Light Codes for ${data.currentRealityProfile.id}`);
+      } else {
+        alert(`❌ Timeline Shift Error: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Failed to commit timeline frequency shift packet:", e);
+    } finally {
+      setIsShifting(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{
+      top: '10%', right: '24px', width: '360px', maxHeight: '80%',
+      background: 'linear-gradient(135deg, #0b1329 0%, rgba(56,189,248,0.02) 100%)',
+      border: '2px solid #38bdf8', borderRadius: '24px', boxShadow: '0 0 20px rgba(56,189,248,0.2)'
+    }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid rgba(56,189,248,0.2)', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#38bdf8', fontFamily: 'monospace', letterSpacing: '0.06em' }}>🎛️ THE SLIDER'S REMOTE CONTROL</h3>
+        <span style={{ fontSize: '10px', color: '#94a3b8' }}>Parallel Earth Channel Index • Active Shifter Mode</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- ACTIVE CHANNEL TELEMETRY METER --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '12px', border: '1px solid rgba(56,189,248,0.1)' }}>
+          <div className="metric-row">
+            <span>📡 Synchronized Frequency:</span>
+            <strong style={{ color: '#38bdf8', textShadow: '0 0 4px #38bdf8' }}>{activeChannel} Channel Active</strong>
+          </div>
+          <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px' }}>• Multi-Verse Ingestion: ACTIVE | Time Bridges Locked</div>
+        </div>
+
+        {/* --- ALTERNATE EARTH SELECTION DIALS --- */}
+        <div className="dashboard-section-title" style={{ color: '#fbbf24' }}>Parallel Reality Catalogs</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {PARALLEL_EARTH_SLIDES.map(earth => (
+            <div key={earth.id} style={{
+              padding: '10px', background: selectedReality === earth.id ? 'rgba(56,189,248,0.1)' : 'rgba(0,0,0,0.2)',
+              border: selectedReality === earth.id ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.03)',
+              borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <div>
+                <strong style={{ color: earth.tint, fontSize: '12px' }}>{earth.name}</strong>
+                <span style={{ display: 'block', fontSize: '9px', color: '#64748b', marginTop: '2px' }}>Carrier Wave: {earth.hz}Hz Resonance</span>
+              </div>
+              <button 
+                onClick={() => executeOriginalSlidingFrequencyShift(earth.id)} disabled={isShifting}
+                className="buy-upgrade-btn" style={{ padding: '4px 10px', fontSize: '10px', background: selectedReality === earth.id ? '#10b981' : '#4f46e5' }}
+              >
+                {selectedReality === earth.id ? '📍 Active' : '⚡ Shift'}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* --- FIXED POINT TIME BRIDGES MONITOR --- */}
+        <div className="dashboard-section-title" style={{ color: '#a855f7' }}>Fixed Temporal Point Status</div>
+        <div style={{ background: '#000', padding: '8px', borderRadius: '8px', fontSize: '10px', border: '1px solid rgba(255,255,255,0.05)', color: '#cbd5e1' }}>
+          • Fixed Point 01 (Armageddon Threshold): <strong style={{ color: '#34d399' }}>LOCKED</strong>
+          {"\n"}• Fixed Point 02 (Babel Fallback Split): <strong style={{ color: '#34d399' }}>LOCKED</strong>
+        </div>
+
+      </div>
+    </div>
+  );
+}
