@@ -1,0 +1,31 @@
+// ==========================================================================
+// 👼 VIRTUES RANK PROCEDURAL LIGHTWORKER CONTRACT GENERATOR
+// ==========================================================================
+export function compileVirtuesLightworkerMission(user, moralLedger) {
+  let missionObject = {
+    missionId: `virt_ms_${Date.now()}_${user._id}`,
+    title: "✨ Operation: Temple Purification",
+    instructions: "Initialize a 20-minute silent meditation sweep while tuning local device soundboards to Solfeggio 528Hz. Consume one Liquid Manna scroll to flush metabolic density residues from your profile container.",
+    requiredFrequencyHz: 528,
+    tokenReward: 150
+  };
+
+  // Adjust mission directives dynamically depending on where the Libra scale needs weighting
+  if (moralLedger.physicalKineticOutput < 5000) {
+    // If daily exercise steps fall short of the absolute temple physical threshold
+    missionObject.title = "🏃 Lightworker Mission: Kinetic Circulation Alignment";
+    missionObject.instructions = "The Virtues Rank mandates physical temple activation. Execute a 5,000-step walking routine over your local map sector terrain layer to generate active kinetic light lines.";
+    missionObject.requiredFrequencyHz = 432; // Ophanim gyro alignment tone
+    missionObject.tokenReward = 200;
+  } 
+  
+  else if (moralLedger.mannerismsGraceIndex < 0.7) {
+    // If chat sentiment logs indicate a drop in righteous mannerisms or elevated volatility
+    missionObject.title = "🙏 Lightworker Mission: Intercessory Heart Calibration";
+    missionObject.instructions = "Submit a public prayer request to the active Council ledgers, and type 3 encouraging responses to adjacent player nodes on the Aether Network.";
+    missionObject.requiredFrequencyHz = 963; // Crown connection frequency
+    missionObject.tokenReward = 250;
+  }
+
+  return missionObject;
+}
