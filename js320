@@ -1,0 +1,58 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 💖 "LOVE METER MOD" — BEHAVIORAL RESONANCE ALIGNMENT ENGINE
+// ==========================================================================
+router.post('/api/admin/evaluate-resonance', async (req, res) => {
+  try {
+    const { adminEmail, playerOneUsername, playerTwoUsername } = req.body;
+
+    // 1. Enforce strict administrative credential whitelisting rules
+    const AUTHORIZED_ADMINS = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!AUTHORIZED_ADMINS.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const playerOne = await User.findOne({ username: playerOneUsername });
+    const playerTwo = await User.findOne({ username: playerTwoUsername });
+
+    if (!playerOne || !playerTwo) {
+      return res.status(404).json({ success: false, error: 'One or both target player nodes not found.' });
+    }
+
+    // 2. PATTERN RECOGNITION PATTERN CORRELATION LOOPS
+    // Evaluate if their equipped clothing categories align (e.g., matching Golden Armor sets or complementary elements)
+    const apparelMatch = playerOne.equippedInventory?.headgear === playerTwo.equippedInventory?.headgear ? 30 : 10;
+    
+    // Evaluate if their active mental postures and routines match (e.g., both running/walking via health app)
+    const routineMatch = playerOne.activeVisualState === playerTwo.activeVisualState ? 40 : 15;
+    
+    // Evaluate baseline aura alignment compatibility
+    const auraMatch = playerOne.auraMoodStatus === playerTwo.auraMoodStatus ? 30 : 20;
+
+    // Calculate absolute compatibility scoring threshold
+    const cumulativeResonanceScore = apparelMatch + routineMatch + auraMatch;
+
+    let synchronizationReport = "Frequencies are operating on baseline unaligned channels.";
+    if (cumulativeResonanceScore >= 75) {
+      synchronizationReport = "✨ [High Seraph Resonance]: Harmonic alignment detected. Their active behavioral routines are tightly synchronized across the Aether Network.";
+    } else if (cumulativeResonanceScore >= 45) {
+      synchronizationReport = "⚖️ [Stable Balance]: Intermediate synchronization found. Minor frequency calibration recommended via Solfeggio 432Hz loops.";
+    }
+
+    res.json({
+      success: true,
+      modName: "Love Meter Mod — Resonance Alignment",
+      nodesEvaluated: [playerOneUsername, playerTwoUsername],
+      resonanceScorePercentage: cumulativeResonanceScore,
+      diagnosticReport: synchronizationReport
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Resonance evaluation processing breakdown.' });
+  }
+});
+
+module.exports = router;
