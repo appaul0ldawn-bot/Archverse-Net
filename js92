@@ -1,0 +1,29 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🃏 CELESTIAL ORACLE POKER MATCH SCHEMA
+// ==========================================================================
+const OraclePokerMatchSchema = new mongoose.Schema({
+  roomId: { type: String, required: true, unique: true, index: true },
+  activePlayersList: [{
+    username: String,
+    currentHandCards: [String], // Array of drawn Angelic Oracle cards
+    tokenWagerContribution: { type: Number, default: 0 },
+    divineFavorMultiplier: { type: Number, default: 1.0 } // Luck/Coincidence index modifier
+  }],
+  
+  totalTokenPot: { type: Number, default: 0 },
+  communityProphecyCards: [String], // Shared center table cards
+  
+  matchStatus: { 
+    type: String, 
+    enum: ['MATCHMAKING_QUEUE', 'DEALING_THE_VEIL', 'FLOP_OF_PROPHECY', 'SHOWDOWN_ALIGNMENT', 'HOUSE_STALEMATE_WIN'], 
+    default: 'MATCHMAKING_QUEUE' 
+  },
+  
+  dailyPrizePoolST: { type: Number, default: 5000 }, // Bonus tokens allocated for the daily tournament
+  currentTurnUserEmail: String,
+  updatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('OraclePokerMatch', OraclePokerMatchSchema);
