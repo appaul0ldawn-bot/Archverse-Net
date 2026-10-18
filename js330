@@ -1,0 +1,76 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🧬 ANATOMICAL TEXTURE RESOLUTION & SKELETAL PHYSICS ENGINE
+// ==========================================================================
+const ANATOMY_ASSET_MATRIX = {
+  "CBBE_STANDARD": {
+    diffuseTexture: "/assets/textures/CBBE/CbbeBase_d.dds",
+    normalMap: "/assets/textures/CBBE/CbbeBase_n.dds",
+    labiaOverlayPath: "/assets/textures/Labia_Texture/CustomLabia_d.dds", // Binds folder asset to specific model layers
+    handFramework: "CBBE_EQUIVALENT_COLLISION_HANDS",
+    physicsProfile: "HDT_PHYSICS_EXTENSIONS"
+  },
+  "UNP_BASE": {
+    diffuseTexture: "/assets/textures/UNP/UnpBase_d.dds",
+    normalMap: "/assets/textures/UNP/UnpBase_n.dds",
+    labiaOverlayPath: "/assets/textures/UNP/UnpVagina_d.dds",
+    handFramework: "STANDARD_UNP_HANDS",
+    physicsProfile: "STATIC_MESH"
+  },
+  "UUNP_ADVANCED": {
+    diffuseTexture: "/assets/textures/UNP/UnpBase_d.dds",
+    normalMap: "/assets/textures/UNP/UnpBase_n.dds",
+    labiaOverlayPath: "/assets/textures/UNP/UnpVagina_d.dds",
+    handFramework: "UUNP_SPECIAL_HANDS_COLLISION", // Restricts parameter to support active physical touch vectors
+    physicsProfile: "HDT_PHYSICS_EXTENSIONS"
+  }
+};
+
+router.post('/api/admin/compile-xray-anatomy', async (req, res) => {
+  try {
+    const { adminEmail, targetUsername, chosenPreset, enableClamsMod } = req.body;
+    
+    // 1. Verify administrative access credentials
+    const AUTHORIZED_ADMINS = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!AUTHORIZED_ADMINS.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const selectedAssetConfig = ANATOMY_ASSET_MATRIX[chosenPreset];
+    if (!selectedAssetConfig) {
+      return res.status(400).json({ success: false, error: 'Invalid anatomical preset structure.' });
+    }
+
+    // 2. Compute Clams of Skyrim conditional validation constraints
+    let activeClamsStatus = "DISABLED";
+    if (enableClamsMod && selectedAssetConfig.physicsProfile === "HDT_PHYSICS_EXTENSIONS") {
+      activeClamsStatus = "CLAMS_OF_SKYRIM_ACTIVE_INJECTION";
+    }
+
+    // 3. Emit structural layout settings across network WebSockets loops
+    if (global.io) {
+      global.io.emit('apply_diagnostic_anatomy', {
+        player: targetUsername,
+        presetData: selectedAssetConfig,
+        clamsModule: activeClamsStatus
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Anatomical validation successful. ${chosenPreset} compiled with ${activeClamsStatus}.`,
+      infrastructureRequirements: {
+        physicsDriver: selectedAssetConfig.physicsProfile,
+        handCollisionSkeleton: selectedAssetConfig.handFramework
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Anatomical compilation loop exception.' });
+  }
+});
+
+module.exports = router;
