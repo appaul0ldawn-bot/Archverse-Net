@@ -1,0 +1,33 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 👁️ "EYES OF SUPERMAN" X-RAY MOD TOGGLE CONTROLLER
+// ==========================================================================
+router.post('/api/admin/toggle-xray-vision', async (req, res) => {
+  try {
+    const { adminEmail, targetUsername, toggleState } = req.body;
+    const sanitizedEmail = adminEmail.toLowerCase().trim();
+
+    // 1. Enforce strict administrative credential whitelisting rules
+    const AUTHORIZED_ADMINS = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!AUTHORIZED_ADMINS.includes(sanitizedEmail)) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    // 2. Broadcast the state change through WebSocket pipelines to alter client-side renderers
+    if (global.io) {
+      global.io.emit('xray_vision_state_change', {
+        targetPlayer: targetUsername,
+        isXrayActive: toggleState // true = strip cosmetic meshes, false = standard render
+      });
+    }
+
+    res.json({ success: true, modName: "Eyes of Superman - X-Ray Vision", activeState: toggleState });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'X-Ray mod initialization breakdown.' });
+  }
+});
+
+module.exports = router;
