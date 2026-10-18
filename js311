@@ -1,0 +1,45 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧬 SUITE 22: ENDOCRINE CALCULATION ENGINE CURVE VALIDATIONS
+// ==========================================================================
+describe('Archverse Endocrine Cycle Calculation Tests', () => {
+
+  it('should calculate peak estrogen levels and unlock the peak attraction perk on timeline day 14', async () => {
+    await User.create({ username: 'HormoneTesterNode', tokens: 100 });
+
+    const response = await request(app)
+      .post('/api/telemetry/calculate-hormones')
+      .send({
+        username: 'HormoneTesterNode',
+        targetGenderTrack: 'FEMALE_ESTROGEN',
+        daysSinceEpochReset: 14 // Peak day of the standard 28-day statistical cycle
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.currentCycleDay).toBe(14);
+    expect(response.body.unlockedAbility).toContain('Peak Seraphic Attraction');
+    expect(response.body.metrics.estrogen).toBeGreaterThan(70); // Confirms estrogen peak calculation is accurate
+  });
+});
