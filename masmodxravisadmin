@@ -1,0 +1,8 @@
+
+Alternative Mod: "Eyes of Superman - Attribute & Armor X-Ray"
+
+This administrative modifier lets you bypass cosmetic vanity slots or outmost armor geometry in the 3D map viewport. It exposes the underlying asset structure, base level geometry, and current equipment matrices so you can audit player progress and calculate exactly what upgrades or rewards to deliver.
+
+1. Server-Side Administrative Authorization Toggle (xrayMod.js)
+
+This Express endpoint manages the activation state of the X-Ray diagnostic filter, verifying the request against your whitelisted administrative master profiles (zethreigns@gmail.com, appaul0ldawn@gmail.com, sephraines@gmail.com):
