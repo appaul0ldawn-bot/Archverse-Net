@@ -1,0 +1,52 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 💞 SUITE 23: AFFINITY WEIGHT CONFIGURATIONS & MATCHMAKER FIREWALLS
+// ==========================================================================
+describe('Archverse Advanced Matchmaker Resonance Settings Tests', () => {
+
+  it('should process user metrics and correctly apply negative modifiers when strict alignment criteria conflicts', async () => {
+    // 1. Seed base profiles with opposing angelic/demonic character alignments
+    await User.create({ username: 'LightworkerNode', tokens: 10, alignment: 'angelic', zodiacElement: 'Fire' });
+    await User.create({ username: 'ShadowWorkerNode', tokens: 10, alignment: 'demonic', zodiacElement: 'Water' });
+
+    // 2. Dispatch request using the strict alignment toggle turned on
+    const response = await request(app)
+      .post('/api/matchmaker/evaluate-candidates')
+      .send({
+        adminEmail: 'zethreigns@gmail.com', // Verified Base44 Admin Handle
+        sourceUsername: 'LightworkerNode',
+        filterPreferenceModifiers: {
+          prioritizeElement: false,
+          strictAlignmentMatch: true // Enforces separation between opposing factions
+        }
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    
+    // Check that the computed affinity percentage correctly adjusted downwards
+    const candidateResult = response.body.recommendedCandidates.find(c => c.username === 'ShadowWorkerNode');
+    expect(candidateResult.computedAffinityPercentage).toBeLessThan(40);
+  });
+});
