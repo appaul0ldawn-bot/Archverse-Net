@@ -1,0 +1,59 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+const BodyReplacer = require('./models/BodyReplacer');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  await BodyReplacer.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧬 SUITE 21: MESH REPLACERS & OUTFIT STUDIO INGESTION VALIDATIONS
+// ==========================================================================
+describe('Archverse BodySlide Topology Morphing and Texture Validation', () => {
+
+  it('should successfully update structural body slider data states inside the database collection', async () => {
+    const targetUser = await User.create({ username: 'ModdedAvatarNode', tokens: 100 });
+
+    // Seed initial base mesh configuration
+    const initialReplacer = await BodyReplacer.create({
+      userId: targetUser._id,
+      baseMeshType: 'CBBE_DEFAULT',
+      isUnrestrictedAdultMesh: false
+    });
+
+    // Simulate an administrator updating mesh scales via the production API endpoint loop
+    const response = await request(app)
+      .post('/api/admin/update-body-morph') // Staging data mapping route
+      .send({
+        userId: targetUser._id,
+        meshPreset: 'BHUNP_ADVANCED',
+        weight: 0.85,
+        muscle: 0.70,
+        isUnrestricted: true
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+
+    const checkDb = await BodyReplacer.findOne({ userId: targetUser._id });
+    expect(checkDb.baseMeshType).toBe('BHUNP_ADVANCED');
+    expect(checkDb.bodySlideWeightSliders.weight).toBe(0.85);
+    expect(checkDb.isUnrestrictedAdultMesh).toBe(true); // Verification gate maps unrestricted state accurately
+  });
+});
