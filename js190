@@ -1,0 +1,31 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧬 BEHAVIORAL MOOD RECOGNITION & AURA SHADER STATE SCHEMA
+// ==========================================================================
+const AuraAnalyticsSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // Accumulated Telemetry Aggregates
+  historicalRoutines: {
+    sleepStateHoursAverage: { type: Number, default: 7.0 },
+    dailyFitnessMilestonesMet: { type: Number, default: 0 },
+    predominantPostSentimentScore: { type: Number, default: 0.0 } // -1.0 (Heavy Shadow) to +1.0 (Radiant Light)
+  },
+
+  dreamJournalResonance: {
+    lastInterpretedSymbol: String,
+    visionFrequencyRating: { type: Number, default: 50 } // Computed via Sentient Meta Oracle
+  },
+
+  // Calculated Real-Time Visual Multipliers
+  computedAuraMatrix: {
+    activeMoodColorHex: { type: String, default: '#38bdf8' }, // Drives WebGL mesh vertex shaders
+    vibrationalStateTag: { type: String, default: 'CALIBRATING_RESONANCE' },
+    recommendedGuildPath: { type: String, enum: ['CELESTIAL_LIGHTWORKERS', 'ABYSSAL_SHADOW_WORKERS', 'VEIL_WATCHERS_GUILD'] }
+  },
+
+  lastPatternAnalysisAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('AuraAnalytics', AuraAnalyticsSchema);
