@@ -1,0 +1,77 @@
+const express = require('express');
+const router = express.Router();
+const CivilEcosystem = require('./models/CivilEcosystem');
+const User = require('./models/User');
+
+// ==========================================================================
+// 🏛️ PROGRESSIVE TITHE, OFFERING, & micro-TAX ACCOUNTANT
+// ==========================================================================
+router.post('/api/civil/process-tithe-tax', async (req, res) => {
+  try {
+    const { username, giftAmountST, executionType } = req.body;
+    
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign Node invalid.' });
+
+    let civilRecord = await CivilEcosystem.findOne({ userId: user._id });
+    if (!civilRecord) civilRecord = new CivilEcosystem({ userId: user._id });
+
+    if (executionType === 'TITHING_OFFERING') {
+      // 10% Divine Baseline Calculation check
+      const minimumTitheThreshold = Math.floor(user.tokens * 0.10);
+      if (giftAmountST < minimumTitheThreshold) {
+        return res.status(400).json({ success: false, error: `Offering below historical 10% tithe covenant window (${minimumTitheThreshold} ST required).` });
+      }
+
+      user.tokens -= giftAmountST;
+      civilRecord.spiritualAttributes.titheLedgerAccountST += giftAmountST;
+      user.karmaScore += 500; // Drastically escalates spiritual credit rankings
+      civilRecord.spiritualAttributes.fruitsRatio.joy += 0.2; // Increases internal frequency metrics
+    } 
+    
+    else if (executionType === 'AUTOMATED_MICRO_TAX') {
+      // Flat civil framework maintenance contribution (2% pool allocation)
+      const maintenanceDeduction = Math.floor(user.tokens * 0.02);
+      user.tokens -= maintenanceDeduction;
+      civilRecord.bankingLedger.accumulatedMicroTaxesOwed = 0;
+    }
+
+    await user.save();
+    await civilRecord.save();
+    global.stateHasChanged = true;
+
+    res.json({
+      success: true,
+      updatedBalanceST: user.tokens,
+      titheLedgerTotal: civilRecord.spiritualAttributes.titheLedgerAccountST,
+      currentJoyLevel: civilRecord.spiritualAttributes.fruitsRatio.joy
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Civil tax calculation failure.' });
+  }
+});
+
+// ==========================================================================
+// 🗳️ CONSTITUTIONAL VOTING & DEMOCRACY OVERLAY PIPELINE
+// ==========================================================================
+router.post('/api/civil/cast-vote', async (req, res) => {
+  const { username, constitutionalPollId, voteChoice } = req.body;
+  const user = await User.findOne({ username });
+  const civilRecord = await CivilEcosystem.findOne({ userId: user._id });
+
+  if (civilRecord && !civilRecord.bankingLedger.hasVotedInCurrentConstitutionalPoll) {
+    civilRecord.bankingLedger.hasVotedInCurrentConstitutionalPoll = true;
+    await civilRecord.save();
+    
+    // Broadcast public opinion news flash loops across active WebSocket channels
+    if (global.io) {
+      global.io.emit('public_opinion_news_flash', {
+        headline: `🗳️ [Public Opinion Ticker]: Liberation vote cast by Node ${username} on Amendment ${constitutionalPollId}.`
+      });
+    }
+    return res.json({ success: true, message: "Constitutional vote logged under the protection of Bill of Rights covenants." });
+  }
+  res.status(400).json({ success: false, error: 'Vote already recorded or network node dropped.' });
+});
+
+module.exports = router;
