@@ -1,0 +1,25 @@
+import React from 'react';
+
+const SACRED_UNICODE_BLOCKS = [
+  { hex: 'U+26E7', char: '⛧', name: 'Two-Point Inverted Anomaly Star' },
+  { hex: 'U+2721', char: '✡', name: 'Hexagram Matrix Star of David' },
+  { hex: 'U+25C9', char: '◉', name: 'Ophanim Inner Eye Gyro Center' },
+  { hex: 'U+2713', char: '✓', name: 'Lightworker Contract Checklist Valid' }
+];
+
+export function UnicodeTablePage() {
+  return (
+    <div className="chat-log-sidebar" style={{ top: '12%', left: '680px', width: '320px' }}>
+      <div style={{ fontSize: '11px', color: '#a5b4fc', fontWeight: 700 }}>🔣 UNICODE REALM SYMBOL DICTIONARY</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', fontFamily: 'monospace' }}>
+        {SACRED_UNICODE_BLOCKS.map(u => (
+          <div key={u.hex} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(0,0,0,0.2)', padding: '6px', borderRadius: '4px' }}>
+            <span style={{ color: '#fbbf24' }}>{u.hex}</span>
+            <span style={{ fontSize: '16px', color: '#fff' }}>{u.char}</span>
+            <span style={{ fontSize: '11px', color: '#94a3b8' }}>{u.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
