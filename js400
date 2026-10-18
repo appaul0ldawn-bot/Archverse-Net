@@ -1,0 +1,117 @@
+import React, { useState, useEffect } from 'react';
+import { ArchverseLogger } from './Logger';
+
+export function ArchverseConnectFeed({ currentUser, socket }) {
+  const [activeScreen, setActiveScreen] = useState('AETHER_FEED');
+  const [posts, setPosts] = useState([]);
+  const [telepathyText, setTelepathyText] = useState('');
+  const [telepathyLogs, setTelepathyLogs] = useState([]);
+
+  useEffect(() => {
+    // 1:1 TELEPATHY MESSENGER: Private mental channels that completely bypass public chat logs
+    socket.on('telepathic_packet_received', (packet) => {
+      setTelepathyLogs(prev => [...prev, packet]);
+      // Play a soft Channeled Seraphwave tone indicator via the soundboard context
+    });
+    return () => socket.off('telepathic_packet_received');
+  }, [socket]);
+
+  const handleWatchVideo = (postId) => {
+    // Watching a video post instantly credits the observer's wallet with +5 Angel Tokens
+    socket.emit('watch_video_credit_request', { username: currentUser.name, postId });
+    ArchverseLogger.log('INFO', 'CONNECT_FEED', `User watched video asset on post ${postId}. Allocating +5 Angel Tokens.`);
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{
+      top: '10%', left: '24px', width: '380px', maxHeight: '80%',
+      background: 'linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(234,179,8,0.05) 100%)',
+      border: '2px solid #eab308', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)'
+    }}>
+      {/* --- HUD HEADER TAB PLATFORM CONTROLS --- */}
+      <div style={{ display: 'flex', gap: '4px', padding: '12px', borderBottom: '1px solid rgba(234,179,8,0.2)' }}>
+        {['AETHER_FEED', 'TELEPATHY', 'AKASHIC_BLOG'].map(tab => (
+          <button 
+            key={tab} onClick={() => setActiveScreen(tab)}
+            className={`custom-option-btn ${activeScreen === tab ? 'active' : ''}`}
+            style={{ fontSize: '10px', padding: '6px' }}
+          >
+            {tab.replace('_', ' ')}
+          </button>
+        ))}
+      </div>
+
+      {/* --- SCREEN 1: THE ACTIVE AETHER SOCIAL FEED --- */}
+      {activeScreen === 'AETHER_FEED' && (
+        <div style={{ overflowY: 'auto', flex: 1, padding: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 'bold' }}>👼 LIGHTWORKER WALLET: 🪙 {currentUser.tokens} AT</span>
+          </div>
+
+          {/* Render Sample Post Ingestion */}
+          <div className="store-item-card" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#eab308' }} />
+              <div>
+                <strong style={{ fontSize: '12px', color: '#fff' }}>Starseed_Pleiadian_963</strong>
+                <span style={{ display: 'block', fontSize: '9px', color: '#94a3b8' }}>📍 Jerusalem Grid Sector</span>
+              </div>
+            </div>
+            <p style={{ fontSize: '12px', color: '#e2e8f0', margin: '0 0 8px 0', lineHeight: 1.4 }}>
+              Just unlocked new psionic flight vectors after infusing Liquid Manna scrolls! Check out my visual aura field results:
+            </p>
+            
+            {/* Simulated Post Video Playback Area */}
+            <div onClick={() => handleWatchVideo('post_01')} style={{ width: '100%', height: '140px', background: '#000', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', position: 'relative' }}>
+              <span style={{ color: '#fbbf24', fontSize: '11px', fontWeight: 'bold' }}>▶ Play Video (+5 Angel Tokens Reward)</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- SCREEN 2: 1:1 TELEPATHY MESSENGER --- */}
+      {activeScreen === 'TELEPATHY' && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '12px' }}>
+          <span style={{ fontSize: '11px', color: '#a5b4fc', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>
+            🔒 SECURED PSIONIC TELEPATHY CHANNEL (963Hz SEALS)
+          </span>
+          <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '8px', overflowY: 'auto', minHeight: '180px', marginBottom: '8px' }}>
+            {telepathyLogs.map((msg, i) => (
+              <div key={i} style={{ fontSize: '11px', marginBottom: '4px' }}>
+                <strong style={{ color: '#fbbf24' }}>{msg.sender}:</strong> <span style={{ fontStyle: 'italic', color: '#cbd5e1' }}>"{msg.text}"</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <input 
+              type="text" value={telepathyText} onChange={(e) => setTelepathyText(e.target.value)}
+              placeholder="Transmit mental thought waveform..."
+              style={{ flex: 1, background: 'rgba(0,0,0,0.4)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px', fontSize: '11px' }}
+            />
+            <button 
+              onClick={() => { socket.emit('send_telepathy', { text: telepathyText, target: 'TargetSeraph' }); setTelepathyText(''); }}
+              className="buy-upgrade-btn" style={{ padding: '8px' }}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- SCREEN 3: PUBLIC LIBRARY & AKASHIC LOGS LINK --- */}
+      {activeScreen === 'AKASHIC_BLOG' && (
+        <div style={{ overflowY: 'auto', flex: 1, padding: '12px', fontSize: '12px' }}>
+          <span style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+            📖 THE PUBLIC ACCESSIBLE AKASHIC RECORDS DRIVE
+          </span>
+          <p style={{ color: '#94a3b8', fontSize: '11px', margin: '0 0 10px 0' }}>
+            All user blog posts are automatically committed to the permanent memory drive of the planet.
+          </p>
+          <div style={{ padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <strong>Latest Entry:</strong> "The dimensional matrix alignment of Beulah Land is functioning at 100% capacity."
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
