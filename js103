@@ -1,0 +1,37 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 📿 SUPERNATURAL SPECTRAL ENTITY & TIMED CONTAINER SCHEMA
+// ==========================================================================
+const ActiveGhostTrackSchema = new mongoose.Schema({
+  entityId: { type: String, required: true, unique: true, index: true },
+  spectralFrequencyHz: { type: Number, required: true }, // e.g., 300-400Hz entity echo spikes
+  currentCoordinates: {
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true }
+  },
+  
+  // Tactical Mission Alignment Information
+  missionObjectiveText: String,
+  existentialDilemma: String,
+  entanclementVulnerability: String, // e.g., 'Requires Solfeggio 396Hz loop to unbind'
+
+  isTrappedInVessel: { type: Boolean, default: false },
+  trappedByUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
+});
+
+const MetaphysicalContainerSchema = new mongoose.Schema({
+  containerId: { type: String, required: true, unique: true, index: true },
+  ownerUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  boundElementSymbol: { type: String, required: true }, // e.g., 'Ect', 'Ao', 'Lsh'
+  storedEssenceMassGrams: { type: Number, default: 0 },
+  
+  // Timed Locking Covenants
+  isLockedState: { type: Boolean, default: true },
+  lockExpirationTimestamp: { type: Date, required: true } // Automatic unbinding trigger
+});
+
+module.exports = {
+  ActiveGhostTrack: mongoose.model('ActiveGhostTrack', ActiveGhostTrackSchema),
+  MetaphysicalContainer: mongoose.model('MetaphysicalContainer', MetaphysicalContainerSchema)
+};
