@@ -1,0 +1,35 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 5D CELESTIAL BATTLESHIP MATCH SCHEMAS
+// ==========================================================================
+const CelestialBattleshipSchema = new mongoose.Schema({
+  matchId: { type: String, required: true, unique: true, index: true },
+  playerAngelicUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  playerDemonicUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  
+  // 5D Matrix Grid State Tensor: [X, Y, Z, Timeline_T, Omega_Layer_W]
+  playerAngelicShips: [{
+    shipType: { type: String, default: 'Ophanim_Gyro_Cruiser' },
+    coordinatesTensor: { type: Array, required: true }, // e.g., [3, 4, 1, 0, 9] mapped to Omega-09
+    isBanishmentCollapsed: { type: Boolean, default: false }
+  }],
+  
+  playerDemonicShips: [{
+    shipType: { type: String, default: 'Abyssal_Void_Reaper' },
+    coordinatesTensor: { type: Array, required: true },
+    isBanishmentCollapsed: { type: Boolean, default: false }
+  }],
+
+  tokenWagerPotST: { type: Number, default: 500 },
+  matchStatus: { 
+    type: String, 
+    enum: ['MATCHMAKING_QUEUE', 'FIRING_PROPHETIC_STRIKES', 'ANGELIC_VICTORY', 'DEMONIC_VICTORY', 'HOUSE_STALEMATE_WIN'], 
+    default: 'MATCHMAKING_QUEUE' 
+  },
+  
+  currentTurnUserEmail: String,
+  lastActionTimestamp: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('CelestialBattleship', CelestialBattleshipSchema);
