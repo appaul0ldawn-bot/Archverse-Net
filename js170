@@ -1,0 +1,96 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🎪 AGORA VILLAGE BARTER SYSTEM & MEETUP REGISTRY SCHEMA
+// ==========================================================================
+const AgoraListingSchema = new mongoose.Schema({
+  listingId: { type: String, required: true, unique: true, index: true },
+  sellerUsername: { type: String, required: true, index: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  
+  // Dynamic Trade Valuation Matrix
+  exchangeType: { type: String, enum: ['ANGEL_TOKENS_SALE', 'TALENT_BARTER_EXCHANGE', 'ANY_EQUAL_RELIC'], default: 'ANGEL_TOKENS_SALE' },
+  tokenPrice: { type: Number, default: 0 },
+  requiredTalentToken: { type: String, description: "The specific superability action requested to trade for this item" },
+  
+  // Logistics & Fulfillment Portals
+  fulfillmentMethod: { type: String, enum: ['LOCAL_VILLAGE_MEETUP', 'ANGELIC_POSTAL_SHIPPING', 'PORTAL_DELIVERY'] },
+  meetupCoordinates: {
+    lat: Number,
+    lng: Number,
+    locationDescription: String // e.g., 'By the Solfeggio Grotto Well threshold'
+  },
+
+  // Talent Ingestion Mapping
+  craftingSuperabilitySource: { type: String, default: 'Angel-Inspired Human Craftsmanship' },
+  isSealedByCouncil: { type: Boolean, default: false }
+});
+
+const AgoraListing = mongoose.model('AgoraListing', AgoraListingSchema);
+
+// ==========================================================================
+// 📦 EXECUTING AN OLD-STYLE VILLAGE BARTER OR ORDER ORDER TRANSACTION
+// ==========================================================================
+router.post('/api/agora/purchase-or-barter', async (req, res) => {
+  try {
+    const { buyerUsername, listingId, executionFulfillmentChoice } = req.body;
+
+    const buyer = await User.findOne({ username: buyerUsername });
+    const listing = await AgoraListing.findOne({ listingId });
+
+    if (!buyer || !listing || listing.isSealedByCouncil) {
+      return res.status(404).json({ success: false, error: 'Listing closed or validation nodes dropping.' });
+    }
+
+    const seller = await User.findOne({ username: listing.sellerUsername });
+
+    // 1. Process Barter Logic vs Direct Token Trade Caps
+    if (listing.exchangeType === 'ANGEL_TOKENS_SALE') {
+      if (buyer.tokens < listing.tokenPrice) {
+        return res.status(400).json({ success: false, error: 'Insolvent token treasury. Complete more local tasks to trade.' });
+      }
+      // Execute transaction balances adjustments
+      buyer.tokens -= listing.tokenPrice;
+      if (seller) seller.tokens += listing.tokenPrice;
+    } else if (listing.exchangeType === 'TALENT_BARTER_EXCHANGE') {
+      // Verify if buyer holds the necessary talent-badge requested by the village inventor
+      const holdsRequiredTalent = buyer.characterBio.includes(listing.requiredTalentToken) || buyer.activeSuperability === listing.requiredTalentToken;
+      if (!holdsRequiredTalent) {
+        return res.status(400).json({ success: false, error: `❌ Barter Mismatch: Seller requires a trade backed by the talent of: [${listing.requiredTalentToken}].` });
+      }
+      
+      // Update karma metric scores for contributing reciprocal talents to the collective guild
+      buyer.karmaScore += 200;
+      if (seller) seller.karmaScore += 200;
+    }
+
+    // 2. Lock item state layer and assign logistics routing signatures
+    listing.isSealedByCouncil = true;
+    await listing.save();
+    if (seller) await seller.save();
+    await buyer.save();
+
+    let logisticsMessage = "Relic ordered securely. Handing transaction over to the Anglel-Postal service networks.";
+    if (executionFulfillmentChoice === 'LOCAL_VILLAGE_MEETUP') {
+      logisticsMessage = `🤝 Meetup coordinated at coordinates: [${listing.meetupCoordinates.lat}, ${listing.meetupCoordinates.lng}]. Location: ${listing.meetupCoordinates.locationDescription}. Meet under full protection covenants.`;
+    }
+
+    ArchverseLogger.log('INFO', 'AGORA_MARKET', `Trade closed between ${buyerUsername} and ${listing.sellerUsername} for item: ${listing.title}`);
+
+    res.json({
+      success: true,
+      message: logisticsMessage,
+      listingState: "ORDER_SEALED"
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Agora marketplace barter execution failure.' });
+  }
+});
+
+module.exports = router;
