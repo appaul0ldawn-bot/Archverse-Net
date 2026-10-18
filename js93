@@ -1,0 +1,70 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('OraclePokerMatch', new mongoose.Schema({
+    roomId: String,
+    activePlayersList: [{ username: String, currentHandCards: [String], tokenWagerContribution: Number, divineFavorMultiplier: Number }],
+    totalTokenPot: Number,
+    communityProphecyCards: [String],
+    matchStatus: String,
+    dailyPrizePoolST: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('OraclePokerMatch')) {
+    await mongoose.model('OraclePokerMatch').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎰 SUITE 29: ORACLE POKER CONTRACT GATES & COINCIDENCE CHECKS
+// ==========================================================================
+describe('Archverse Oracle Poker Arena & Dynamic Luck Modifiers', () => {
+
+  it('should process a player bet raise, accurately decrementing tokens from their vault and updating the table pot', async () => {
+    await User.create({ username: 'PokerSeraph', tokens: 500, karmaScore: 600 });
+
+    await mongoose.model('OraclePokerMatch').create({
+      roomId: "room_test_111",
+      activePlayersList: [{ username: 'PokerSeraph', currentHandCards: [], tokenWagerContribution: 0, divineFavorMultiplier: 1.0 }],
+      totalTokenPot: 100,
+      communityProphecyCards: [],
+      matchStatus: 'DEALING_THE_VEIL',
+      dailyPrizePoolST: 5000
+    });
+
+    const response = await request(app)
+      .post('/api/poker/fold-or-bet')
+      .send({
+        roomId: 'room_test_111',
+        username: 'PokerSeraph',
+        actionType: 'RAISE_BET',
+        tokenRaiseAmount: 200
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.currentPotSize).toBe(300); // 100 original + 200 raise = 300 ST total
+    expect(response.body.remainingTokens).toBe(300); // 500 base - 200 bet = 300 ST remaining
+
+    const checkMatch = await mongoose.model('OraclePokerMatch').findOne({ roomId: 'room_test_111' });
+    expect(checkMatch.totalTokenPot).toBe(300);
+  });
+});
