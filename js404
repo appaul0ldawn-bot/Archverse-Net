@@ -1,0 +1,43 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 19: ANCIENT LOOPS & REPHAIM INVENTORY VALIDATIONS
+// ==========================================================================
+describe('Archverse Ancient Lore and Levitical Score Ledger Checks', () => {
+
+  it('should successfully calculate a players body token scar counts matching their database balance', async () => {
+    const priestPlayer = await User.create({
+      username: 'LeviteAssassin_01',
+      tokens: 750, // Carved score counts balance
+      rank: 'Mercury (Ambitious Souls)'
+    });
+
+    // Request evaluation from the deep psychometry player profiling engine
+    const response = await request(app)
+      .get(`/api/users/profile?username=LeviteAssassin_01`)
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.user.tokens).toBe(750);
+  });
+});
