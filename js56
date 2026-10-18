@@ -1,0 +1,93 @@
+const express = require('express');
+const router = express.Router();
+const VoidRecovery = require('./models/VoidRecovery');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🌌 INSTANT VOID INGESTION GATEWAY (FALL THROUGH GAP OR FREEZE TRIGGER)
+// ==========================================================================
+router.post('/api/void/trigger-ingestion', async (req, res) => {
+  try {
+    const { username, currentX, currentZ } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User proxy profile invalid.' });
+
+    let voidRecord = await VoidRecovery.findOne({ userId: user._id });
+    if (!voidRecord) voidRecord = new VoidRecovery({ userId: user._id, username });
+
+    // Cache position prior to warp isolation
+    voidRecord.isTrappedInVoidNode = true;
+    voidRecord.previousSafeCoordinates = { x: currentX, z: currentZ };
+    voidRecord.soulContractAcceptedStatus = false;
+    await voidRecord.save();
+
+    user.activeVisualState = 'VOID_BACKROOM_SHROUD'; // Programmatically applies zero-light black shader
+    await user.save();
+
+    res.json({
+      success: true,
+      currentStatus: "VOID_BACKROOM_CONTAINMENT",
+      message: "⏳ System Alert: Critical map gap fall-through or engine freeze detected. Container isolated to The Place Where Nobody Goes."
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Void ingestion calculation failure.' });
+  }
+});
+
+// ==========================================================================
+// 🎟️ SOUL CONTRACT UNBINDING & EXTRICATING GATEWAY
+// ==========================================================================
+router.post('/api/void/sign-and-exit', async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await User.findOne({ username });
+    const voidRecord = await VoidRecovery.findOne({ userId: user?._id });
+
+    if (!user || !voidRecord || !voidRecord.isTrappedInVoidNode) {
+      return res.status(400).json({ success: false, error: 'Node is not currently inside the backroom containment array.' });
+    }
+
+    // 1. HARD ENFORCEMENT: Enforce the 3-token saving transaction fee
+    const SAVING_FEE = 3;
+    if (user.tokens < SAVING_FEE) {
+      return res.status(400).json({ success: false, error: 'Insolvent token balance to fund the Messianic saving gate.' });
+    }
+
+    // Process contractual unbinding adjustments
+    user.tokens -= SAVING_FEE;
+    voidRecord.soulContractAcceptedStatus = true;
+    voidRecord.isTrappedInVoidNode = false;
+
+    // Restore coordinate position to safe proximity bounds
+    user.lastPosition.x = voidRecord.previousSafeCoordinates.x + (Math.random() * 0.001);
+    user.lastPosition.z = voidRecord.previousSafeCoordinates.z + (Math.random() * 0.001);
+    user.activeVisualState = 'AVAILABLE_ALIGNMENT'; // Restores normal WebGL shaders
+
+    await user.save();
+    await voidRecord.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    // Divert tokens directly into the Master Messianic Saving Vault
+    await mongoose.model('FinancialLedger').updateOne(
+      { 'razielTreasuryVault.isVaultHidden': true },
+      { \$inc: { 'razielTreasuryVault.soulTokenBalance': SAVING_FEE } }
+    );
+
+    ArchverseLogger.log('WARN', 'VOID_RECOVERY', `User ${username} extricated from backroom. 3 tokens allocated to Messianic Saving Vault.`);
+
+    res.json({
+      success: true,
+      status: "PORTAL_ACTIVE_RESPAWN",
+      popupMessage: "✝️ Jesus Receives 3 Tokens for Saving Soul.",
+      restoredCoordinates: { x: user.lastPosition.x, z: user.lastPosition.z },
+      remainingTokens: user.tokens
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Void unbinding transaction execution crash.' });
+  }
+});
+
+module.exports = router;
