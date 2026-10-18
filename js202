@@ -1,0 +1,66 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize schemas inside the memory sandbox cluster
+  mongoose.model('AscensionProfile', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    enneagramType: Number,
+    coreDesireVector: String,
+    ascensionLevel: Number,
+    experiencePoints: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('AscensionProfile')) {
+    await mongoose.model('AscensionProfile').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌟 SUITE 26: ASCENSION LEVELING & PROCEDURAL MISSION CHECKS
+// ==========================================================================
+describe('Archverse Procedural Mission Matching and Leveling Tests', () => {
+
+  it('should successfully compute individual psychometry profiles and return a valid custom Air element mission payload', async () => {
+    const userNode = await User.create({
+      username: 'ElijahProphet',
+      tokens: 100,
+      zodiacElement: 'Air',
+      rankBadge: 'Saturn (Contemplative High Archons)'
+    });
+
+    await mongoose.model('AscensionProfile').create({
+      userId: userNode._id,
+      enneagramType: 5,
+      coreDesireVector: 'KNOWLEDGE_SEEKING',
+      ascensionLevel: 3,
+      experiencePoints: 1200
+    });
+
+    // Request a procedural contract generation through the staging data routers
+    const response = await request(app)
+      .post('/api/missions/generate-procedural') // Simulation route definition mapping
+      .send({ username: 'ElijahProphet', activeGlobalAgenda: '144k Language Matrix Lock Phase' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.mission.title).toContain('Akashic Cryptographic Compilation');
+    expect(response.body.mission.payout).toBe(150); // Matches the specified Air element rule parameters
+  });
+});
