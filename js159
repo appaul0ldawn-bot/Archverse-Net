@@ -1,0 +1,68 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const DndStatus = require('./models/DndStatus');
+
+// ==========================================================================
+// 📴 TELEPATHIC INTERCEPTION & PRIVACY RADAR GATES
+// ==========================================================================
+router.post('/api/comms/send-telepathy-packet', async (req, res) => {
+  try {
+    const { senderUsername, recipientUsername, textMessagePayload } = req.body;
+
+    const sender = await User.findOne({ username: senderUsername });
+    const recipient = await User.findOne({ username: recipientUsername });
+
+    if (!sender || !recipient) {
+      return res.status(404).json({ success: false, error: 'Communication node channels dropped.' });
+    }
+
+    // Fetch the target recipient's active privacy parameter logs
+    let privacyConfig = await DndStatus.findOne({ userId: recipient._id });
+    if (!privacyConfig) {
+      privacyConfig = await DndStatus.create({ userId: recipient._id });
+    }
+
+    // ⏳ TIME BUFFER VALIDATION: Check if recipient is inside a scheduled hush window or sleeping
+    const now = new Date();
+    const currentHourMin = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    
+    let isInsideHushWindow = false;
+    privacyConfig.scheduledHushWindows.forEach(window => {
+      if (currentHourMin >= window.startHourMinute && currentHourMin <= window.endHourMinute) {
+        isInsideHushWindow = true;
+      }
+    });
+
+    // Enforce immediate privacy interception if any DND condition evaluates to true
+    const isBotherAllowed = privacyConfig.currentPrivacyMode === 'AVAILABLE_ALIGNMENT' && !isInsideHushWindow && !privacyConfig.syncedDeviceAlarm.isSleepTrackingActive;
+
+    if (!isBotherAllowed) {
+      // 🔒 PRIVACY GATE INTERCEPT ENFORCED: Block message delivery and fire back the auto-response away text
+      return res.json({
+        success: true,
+        deliveryStatus: 'PACKET_CACHED_IN_VEIL',
+        awayAutoResponse: privacyConfig.customAwayMessageText,
+        message: `Message intercepted safely. Recipient is currently shrouded under a Hush/DND field.`
+      });
+    }
+
+    // Standard consensual delivery routing path if un-shrouded
+    if (global.io) {
+      const recipientSocket = Object.values(global.players).find(p => p.name === recipientUsername);
+      if (recipientSocket) {
+        global.io.to(recipientSocket.id).emit('telepathic_packet_received', {
+          sender: senderUsername,
+          text: textMessagePayload
+        });
+      }
+    }
+
+    res.json({ success: true, deliveryStatus: 'DELIVERED_DIRECT_TO_MIND' });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Telepathy transmission processing failure.' });
+  }
+});
+
+module.exports = router;
