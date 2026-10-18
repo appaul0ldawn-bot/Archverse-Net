@@ -1,0 +1,61 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const { ActiveGhostTrack, MetaphysicalContainer } = require('./models/NecroCodex');
+const User = require('./models/User');
+
+// ==========================================================================
+// 🌌 SPECTRAL RECYCLER & TIMED ELEMENT COMPRESSION TERMINAL
+// ==========================================================================
+router.post('/api/necro/trap-and-recycle', async (req, res) => {
+  try {
+    const { username, targetEntityId, actionExecutionMode } = req.body;
+
+    const user = await User.findOne({ username });
+    const ghost = await ActiveGhostTrack.findOne({ entityId: targetEntityId });
+
+    if (!user || !ghost || ghost.isTrappedInVessel) {
+      return res.status(404).json({ success: false, error: 'Target entity is either secured or invalid.' });
+    }
+
+    if (actionExecutionMode === 'EXECUTE_TRAP_CONTAINMENT') {
+      ghost.isTrappedInVessel = true;
+      ghost.trappedByUserId = user._id;
+      await ghost.save();
+
+      // Automatically initialize a timed containment lock inside metaphysical storage (locks for 1 hour)
+      await MetaphysicalContainer.create({
+        containerId: `container_${Date.now()}`,
+        ownerUserId: user._id,
+        boundElementSymbol: "Ect", // Ectoplasm baseline residue
+        storedEssenceMassGrams: Math.floor(ghost.spectralFrequencyHz * 0.1),
+        lockExpirationTimestamp: new Date(Date.now() + 60 * 60 * 1000)
+      });
+
+      return res.json({ success: true, currentStatus: "ENTITY_SECURED_IN_CONTAINER", message: "🔒 Structural containment grid active. Residual ectoplasm locked inside timed metaphysical storage." });
+    } 
+    
+    else if (actionExecutionMode === 'TRANSMUTE_RECYCLE_TO_TOKEN') {
+      // Direct recycling into the central financial treasury loops
+      const tokenYieldValue = Math.floor(ghost.spectralFrequencyHz + 150); // Payout scales by frequency size
+      user.tokens += tokenYieldValue;
+      user.karmaScore += 100;
+      
+      await user.save();
+      await ghost.deleteOne(); // Erase entity node from local active map tracking trackers
+      global.stateHasChanged = true;
+
+      return res.json({
+        success: true,
+        currentStatus: "WAVE_FUNCTION_RECYCLED",
+        message: `✨ Essence successfully transmuted and recycled back into the Archverse infrastructure loops. Aligned 🪙 ${tokenYieldValue} ST into your treasury.`,
+        newBalance: user.tokens
+      });
+    }
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Supernatural recycling execution crash.' });
+  }
+});
+
+module.exports = router;
