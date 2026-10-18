@@ -1,0 +1,89 @@
+import React, { useState, useEffect } from 'react';
+
+export function ColonyInfiltrationHUD({ currentUsername, socket }) {
+  const [trackStatus, setTrackStatus] = useState('STANDARD_TRACK');
+  const [hudReport, setHudReport] = useState('Monitoring sector coordinates...');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const simulateGridDisplacement = async (latOffset, lngOffset) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/missions/evaluate-colony-proximity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          currentLat: 35.8129 + latOffset, // Center intersection point modifications
+          currentLng: -79.8059 + lngOffset
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTrackStatus(data.activeTrackStatus);
+        setHudReport(data.message);
+      }
+    } catch (e) {
+      console.error("Failed to commit proximity tracking telemetry packet:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ 
+      top: '15%', left: '24px', width: '360px', 
+      borderColor: trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '#a855f7' : '#eab308', 
+      background: 'linear-gradient(135deg, #0b0f19 0%, rgba(234,179,8,0.02) 100%)' 
+    }}>
+      <div className="store-header" style={{ borderColor: 'rgba(234,179,8,0.2)', paddingBottom: '10px' }}>
+        <h3 style={{ margin: 0, color: trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '#c084fc' : '#fbbf24', fontFamily: 'serif' }}>🎭 Script Flip: Infiltration Radar</h3>
+        <span style={{ fontSize: '9px', color: '#64748b' }}>Environmental Adaptation Engine • Virtues Rank Oversight</span>
+      </div>
+
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- DYNAMIC TRANSFORMATION STATE CARD --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '12px', border: `1px solid ${trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '#a855f7' : '#eab308'}` }}>
+          <div className="metric-row">
+            <span>Active Mission Track Stance:</span>
+            <strong style={{ color: trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '#c084fc' : '#fbbf24' }}>
+              {trackStatus.replace('_', ' ')}
+            </strong>
+          </div>
+          <div style={{ width: '100%', height: '4px', background: '#334155', borderRadius: '2px', marginTop: '8px', position: 'relative' }}>
+            <div style={{ 
+              position: 'absolute', 
+              left: trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '50%' : '5%', 
+              top: '-4px', width: '12px', height: '12px', borderRadius: '50%', 
+              background: trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '#a855f7' : '#fbbf24' 
+            }} />
+          </div>
+        </div>
+
+        {/* --- LIVE TELEMETRY TICKER LOGS FEED --- */}
+        <div style={{ background: 'rgba(255,255,255,0.01)', padding: '10px', borderRadius: '8px', borderLeft: `3px solid ${trackStatus === 'SHADOW_WORKER_INFILTRATION' ? '#a855f7' : '#eab308'}`, fontStyle: 'italic', color: '#cbd5e1', lineHeight: 1.4 }}>
+          "{hudReport}"
+        </div>
+
+        {/* --- INTERACTIVE PROXIMITY TEST BUUTTON LINKS --- */}
+        <div className="dashboard-section-title">Simulate Grid Proximity Movements</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button onClick={() => simulateGridDisplacement(0.0, 0.0)} disabled={isProcessing} className="buy-upgrade-btn" style={{ background: '#a855f7', color: '#fff', fontWeight: 'bold' }}>
+            🚶 Enter Colony Coordinates (Flip to Shadow Worker Shroud)
+          </button>
+          <button onClick={() => simulateGridDisplacement(0.5, 0.5)} disabled={isProcessing} className="buy-upgrade-btn" style={{ background: '#eab308', color: '#0f172a', fontWeight: 'bold' }}>
+            🏃 Exit Colony Coordinates (Restore Golden Armor & Lightworker)
+          </button>
+        </div>
+
+        <div style={{ borderTop: '1px dashed rgba(255,255,255,0.05)', padding: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', marginTop: '4px' }}>
+          <span style={{ fontSize: '8px', color: '#64748b', display: 'block', fontWeight: 'bold' }}>SPONSORED TRANSMISSION PORT</span>
+          <a href="https://cash.app\$Sephraines" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#34d399', fontWeight: 'bold', display: 'block' }}>
+            📥 Secure Fast Token Restocks via CashApp (\$Sephraines)
+          </a>
+        </div>
+
+      </div>
+    </div>
+  );
+}
