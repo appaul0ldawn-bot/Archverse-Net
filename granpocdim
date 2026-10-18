@@ -1,0 +1,11 @@
+// --- RENDER COMPONENT LAYER FOR THE GRAND CANYON POCKET DIMENSION ---
+export function GrandCanyonPocketDimension({ isTimeTravelActive }) {
+  return (
+    <div style={{ width: '100%', height: '100%', position: 'relative', background: '#451a03' }}>
+      <div style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', background: 'rgba(220,38,38,0.2)', border: '1px solid #dc2626', padding: '6px 20px', borderRadius: '20px', color: '#fca5a5', zIndex: 110, fontSize: '12px' }}>
+        ⚠️ TEMPORAL ANOMALY: RIYFIEM TRAINING GROUNDS [MOBILE AR DISABLED]
+      </div>
+      {/* Three.js canvas maps the subterranean cyclopean training caverns below */}
+    </div>
+  );
+}
