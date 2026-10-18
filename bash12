@@ -1,0 +1,9 @@
+# Access your repository directory path on the server host machine
+cd /opt/3d-multiplayer-world
+
+# Shut down running containers and force-compile with the whitelisted parameters active
+docker-compose down --remove-orphans
+docker-compose up -d --build
+
+# Confirm containers are running and check active network nodes
+docker-compose ps
