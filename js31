@@ -1,0 +1,56 @@
+const express = require('express');
+const router = express.Router();
+const CompassionCore = require('./models/CompassionCore');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🕊️ ETHICAL COMPASSION EVALUATOR & EMERGENCY CRASH WAKE LOOP
+// ==========================================================================
+router.post('/api/compassion/process-empathy-tick', async (req, res) => {
+  try {
+    const { username, targetInteractionType, inputLogString } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Target user node invalid.' });
+
+    let compRecord = await CompassionCore.findOne({ userId: user._id });
+    if (!compRecord) compRecord = new CompassionCore({ userId: user._id });
+
+    let loggingFeedback = "Empathy parameters processed down the pipeline.";
+
+    // --- VECTOR 1: CONFESSIONS & FORGIVENESS INTEGRATION ---
+    if (targetInteractionType === 'SACRED_CONFESSION_LOG') {
+      compRecord.empathyMetrics.forgivenessConfessionCount += 1;
+      user.karmaScore += 300; // Drastically elevates spiritual credit rankings
+      compRecord.empathyMetrics.publicAffectionAcceptabilityScore = Math.min(2.0, compRecord.empathyMetrics.publicAffectionAcceptabilityScore + 0.1);
+      loggingFeedback = "🙏 Confession logged inside the secure veil. Absolution approved; +300 Karma allocated.";
+    }
+
+    // --- VECTOR 2: EMERGENCY AWAKENING SHAKE ("Mindless Zombie" Mode Override) ---
+    else if (targetInteractionType === 'TRIGGER_EMERGENCY_WAKE') {
+      compRecord.emergencyAwakeningSystem.isMindlessZombieModeActive = false;
+      compRecord.emergencyAwakeningSystem.isForcedWakeAlarmTriggered = true;
+      compRecord.emergencyAwakeningSystem.necessaryActionIncidentId = `inc_wake_${Date.now()}`;
+      
+      user.activeVisualState = '#fbbf24'; // Radiant golden flash forces viewport redraw
+      loggingFeedback = "🚨 [EMERGENCY ALARM ACTIVE]: Breaking mindless zombie mode containment loop. Necessary action vector deployed.";
+    }
+
+    await compRecord.save();
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    res.json({
+      success: true,
+      reportText: loggingFeedback,
+      currentAuraColor: user.activeVisualState,
+      fellowshipType: compRecord.fellowshipStructure.relationshipTypology
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Compassion matrix aggregation failure.' });
+  }
+});
+
+module.exports = router;
