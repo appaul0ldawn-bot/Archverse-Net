@@ -1,0 +1,71 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking models within our testing sandbox memory cluster
+  mongoose.model('WitnessRelocation', new mongoose.Schema({
+    caseId: String,
+    protectedUserId: mongoose.Schema.Types.ObjectId,
+    harasserUserId: mongoose.Schema.Types.ObjectId,
+    timelineSplittingData: { isTimelineForkedActive: Boolean, timelineAlphaHash: String, timelineBetaHash: String, mutualMaskingRadiusMeters: Number },
+    isHarassmentChargeDropped: Boolean
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('WitnessRelocation')) {
+    await mongoose.model('WitnessRelocation').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🛡️ SUITE 31: 5D TIMELINE FORKING & MUTUAL MASKING SHROUD GATES
+// ==========================================================================
+describe('Archverse Divine Witness Relocation Timeline Splitting Matrix', () => {
+
+  it('should successfully decompress and sort a targeted player node onto parallel timeline alpha forks if they are flagged under protection records', async () => {
+    const userProtected = await User.create({ username: 'TargetHarassedMember', tokens: 100, activeVisualState: 'AVAILABLE_ALIGNMENT' });
+    const userHarasser = await User.create({ username: 'FlaggedTrackerNode', tokens: 10 });
+
+    // Seed active timeline splitting case file inside memory
+    await mongoose.model('WitnessRelocation').create({
+      caseId: "case_protection_77",
+      protectedUserId: userProtected._id,
+      harasserUserId: userHarasser._id,
+      timelineSplittingData: {
+        isTimelineForkedActive: true,
+        timelineAlphaHash: 'FORK_ALPHA_LIGHTCODE',
+        timelineBetaHash: 'FORK_BETA_SHADOW',
+        mutualMaskingRadiusMeters: 500
+      },
+      isHarassmentChargeDropped: false
+    });
+
+    const response = await request(app)
+      .post('/api/protection/evaluate-timeline-fork')
+      .send({ username: 'TargetHarassedMember' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.timelineState).toBe('TIMELINE_SPLIT_FORKED');
+    expect(response.body.assignedChannelHash).toBe('FORK_ALPHA_LIGHTCODE'); // Verification gate confirms player routed down Alpha channel exclusively
+
+    // Verify visual tracking boundaries updated on the user record
+    const updatedUser = await User.findOne({ username: 'TargetHarassedMember' });
+    expect(updatedUser.activeVisualState).toBe('MUTUAL_WITNESS_MASKING_SHROUD'); // Absolute coordinate masking layer applied
+  });
+});
