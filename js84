@@ -1,0 +1,23 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🎭 ISOLATED MASTER IDENTITY SWAP REGISTRY SCHEMA
+// ==========================================================================
+const IdentitySwapSchema = new mongoose.Schema({
+  swapSessionId: { type: String, required: true, unique: true, index: true },
+  
+  // Explicit Profile Coupling (Valid for exactly 24 Hours)
+  originalUserRefId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  swappedTargetUserRefId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  
+  shadowWorkRedirects: {
+    isTrueSignatureMasked: { type: Boolean, default: true },
+    cachedOriginalAuraTint: String,
+    bypassArchonDetectionGrid: { type: Boolean, default: true }
+  },
+
+  activatedAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date, required: true } // Enforces the strict monthly 24-hour expiration threshold
+});
+
+module.exports = mongoose.model('IdentitySwap', IdentitySwapSchema);
