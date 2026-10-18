@@ -1,0 +1,59 @@
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
+export function AtmosphericWindMesh({ baseVelocity = 1.0, windTint = "#38bdf8" }) {
+  const windShaderRef = useRef();
+
+  useFrame((state) => {
+    if (!windShaderRef.current) return;
+    const time = state.clock.getElapsedTime();
+
+    // Pass time and velocity vectors into the custom WebGL vertex pipeline
+    windShaderRef.current.material.uniforms.uTime.value = time * baseVelocity;
+  });
+
+  const WindShaderMaterial = {
+    uniforms: {
+      uTime: { value: 0 },
+      uColor: { value: new THREE.Color(windTint) }
+    },
+    vertexShader: `
+      uniform float uTime;
+      varying vec2 vUv;
+      varying float vDisplacement;
+
+      // Mathematical pseudo-random noise generator to model chaotic air flow
+      float noise(vec2 p) {
+        return sin(p.x * 2.0 + uTime) * cos(p.y * 1.5 + uTime * 0.5);
+      }
+
+      void main() {
+        vUv = uv;
+        // Compute non-linear vector offsets simulating realistic wind shear
+        vDisplacement = noise(position.xy * 0.5);
+        vec3 newPosition = position + normal * vDisplacement * 0.3;
+        
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor;
+      varying vec2 vUv;
+      varying float vDisplacement;
+
+      void main() {
+        // Shards alpha thresholds based on local atmospheric displacement
+        float alpha = smoothstep(-1.0, 1.0, vDisplacement) * 0.25;
+        gl_FragColor = vec4(uColor, alpha);
+      }
+    `
+  };
+
+  return (
+    <mesh ref={windShaderRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 4, 0]}>
+      <planeGeometry args={[100, 100, 32, 32]} />
+      <shaderMaterial args={[WindShaderMaterial]} transparent depthWrite={false} blenders={THREE.AdditiveBlending} />
+    </mesh>
+  );
+}
