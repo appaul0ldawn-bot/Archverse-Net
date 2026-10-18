@@ -1,0 +1,25 @@
+// ==========================================================================
+// 📚 DIVINE LIBRARY MATERIAL STOREFRONT & STEWARDESS GATE
+// ==========================================================================
+const BOOK_PRICING_CATALOG = {
+  "spells_binding":  { title: "Scroll of Enochian Spells", cost: 450, type: "SPELL" },
+  "gospel_john":     { title: "The Gospel of John (Unveiled)", cost: 300, type: "GOSPEL" },
+  "gnosis_platonic": { title: "Sethian Gnosticism Research Manuscript", cost: 600, type: "BOOK" }
+};
+
+app.post('/api/library/apply-stewardess', async (req, res) => {
+  const { username } = req.body;
+  const user = await User.findOne({ username });
+
+  // Guard Constraint: Only allow High Archons or Council Members to manage library archives
+  const isEligible = ['Archangel', 'Council'].includes(user.rank);
+
+  if (!isEligible) {
+    return res.status(403).json({ success: false, error: 'Application Denied. High celestial rank badge required.' });
+  }
+
+  user.libraryStatusRole = 'DIVINE_STEWARDESS_CARETAKER';
+  await user.save();
+  
+  res.json({ success: true, message: '🎉 Your account has been officially verified as a Caretaker of the Archives.' });
+});
