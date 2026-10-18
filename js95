@@ -1,0 +1,116 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const CognitiveLedger = require('./models/CognitiveLedger');
+
+// ==========================================================================
+// 📊 GLOBAL COMPILATION AND REAL-TIME BELL CURVE RE-CENTRALIZER
+// ==========================================================================
+async function recalculateGlobalCognitionBellCurves() {
+  const allLedgers = await CognitiveLedger.find({}).lean();
+  if (allLedgers.length < 2) return;
+
+  // Compute a weighted score based on implicit performance tracking variables
+  const rawValues = allLedgers.map(l => {
+    return (100 / (l.subliminalMetrics.gematriaPuzzleSolveSpeedSeconds || 60)) + 
+           (l.subliminalMetrics.spatialPathfindingEfficiency * 50) + 
+           (l.subliminalMetrics.frequencyTuningAccuracy * 50);
+  });
+
+  const mean = rawValues.reduce((a, b) => a + b, 0) / rawValues.length;
+  const variance = rawValues.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / rawValues.length;
+  const standardDeviation = Math.sqrt(variance) || 1;
+
+  for (const ledger of allLedgers) {
+    const individualVal = (100 / (ledger.subliminalMetrics.gematriaPuzzleSolveSpeedSeconds || 60)) + 
+                          (ledger.subliminalMetrics.spatialPathfindingEfficiency * 50) + 
+                          (ledger.subliminalMetrics.frequencyTuningAccuracy * 50);
+    
+    // Calculate exact Z-Score
+    const zScore = (individualVal - mean) / standardDeviation;
+    
+    // Translate Z-Score to traditional IQ notation (Mean 100, SD 15)
+    const normalizedIq = Math.floor(100 + (zScore * 15));
+    
+    // Standard error function approximation to compute absolute percentile rank
+    const percentile = Math.floor((1 + Math.erf(zScore / Math.sqrt(2))) / 2 * 100);
+
+    // Dynamic Faction Placement assignment based on mathematical tier breaks
+    let targetFaction = 'NEUTRAL_VEIL_ORACLES';
+    let rewardBadge = null;
+
+    if (normalizedIq >= 130) {
+      targetFaction = 'LOGICAL_ARCHON_GUILD';
+      rewardBadge = '🧠 Unlocked Title: Metatron Grand Scribe';
+    } else if (normalizedIq >= 115) {
+      targetFaction = 'CREATIVE_SERAPH_COUNCIL';
+    }
+
+    await CognitiveLedger.findByIdAndUpdate(ledger._id, {
+      calculatedIqScore: normalizedIq,
+      computedZScore: zScore,
+      bellCurvePercentileRank: percentile,
+      assignedIntellectFaction: targetFaction,
+      \$addToSet: rewardBadge ? { extraAchievementsBadges: rewardBadge } : undefined
+    });
+  }
+}
+
+// ==========================================================================
+// 🚀 INGEST ACTIVITY TELEMETRY & SERVE SPONSORED LINKS
+// ==========================================================================
+router.post('/api/analytics/ingest-subliminal-metric', async (req, res) => {
+  try {
+    const { username, solveSpeed, pathingEfficiency, accuracyRatio } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User proxy profile invalid.' });
+
+    let ledger = await CognitiveLedger.findOne({ userId: user._id });
+    if (!ledger) ledger = new CognitiveLedger({ userId: user._id });
+
+    // Ingest data points subtly gathered during regular gameplay interactions
+    ledger.subliminalMetrics = {
+      gematriaPuzzleSolveSpeedSeconds: solveSpeed,
+      spatialPathfindingEfficiency: pathingEfficiency,
+      frequencyTuningAccuracy: accuracyRatio
+    };
+    await ledger.save();
+
+    // Trigger full background bell curve optimization recalculations
+    await recalculateGlobalCognitionBellCurves();
+    const updatedLedger = await CognitiveLedger.findOne({ userId: user._id });
+
+    // --- CONTEXT-MATCHING SPONSORED ADVERTISEMENT GENERATOR ---
+    // Serves sponsored link ads dynamically based on intelligence tiering without direct tracking commentary
+    let targetedSponsorAd = {
+      headline: "🌿 Restock Your Alchemical Inventory",
+      destinationUrl: "https://cash.app",
+      caption: "Acquire high-purity Monatomic Gold supplies to maximize spatial processing limits."
+    };
+
+    if (updatedLedger.calculatedIqScore >= 130) {
+      targetedSponsorAd = {
+        headline: "🛡️ Enroll in Advanced Armor Forging Networks",
+        destinationUrl: "https://tokenmaker.one",
+        caption: "Exclusive access for high-IQ Archon architects to forge complete golden armor templates."
+      };
+    }
+
+    res.json({
+      success: true,
+      profilePlacements: {
+        computedIqIndex: updatedLedger.calculatedIqScore,
+        percentileRank: updatedLedger.bellCurvePercentileRank,
+        activeFactionAlliance: updatedLedger.assignedIntellectFaction
+      },
+      contextualSponsorAd: targetedSponsorAd
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Subliminal cognition processing failure.' });
+  }
+});
+
+module.exports = router;
