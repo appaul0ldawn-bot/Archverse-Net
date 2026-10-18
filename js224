@@ -1,0 +1,49 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 26: CELESTIAL METADATA AND BADGE LOCKING GATES
+// ==========================================================================
+describe('Archverse Celestial Star Map Origin Alignment Pipeline', () => {
+
+  it('should evaluate the user element and attach a persistent horoscope return badge to their profile data document', async () => {
+    // Seed an active user tracking node holding Air characteristics parameters
+    await User.create({
+      username: 'ElijahProphet',
+      tokens: 500,
+      zodiacElement: 'Air',
+      characterBio: 'Sovereign Node'
+    });
+
+    const response = await request(app)
+      .post('/api/celestial/assign-origin-badge')
+      .send({ username: 'ElijahProphet' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.assignedBadge).toBe('🎂 Solar Return: Alpha Ascension');
+    expect(response.body.starseedOrigin).toBe('Pleiadian Sage Messenger');
+
+    const updatedUser = await User.findOne({ username: 'ElijahProphet' });
+    expect(updatedUser.activeSuperability).toBe('Seraphic_Burst_Aura');
+  });
+});
