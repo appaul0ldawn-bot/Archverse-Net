@@ -1,0 +1,112 @@
+import React, { useState } from 'react';
+
+export function CelestialArcadeHUD({ currentUsername, currentTokensBalance, activeMatchId }) {
+  const [activeGameTab, setActiveGameTab] = useState('ALPHA_OMEGA');
+  const [wordInput, setWordInput] = useState('');
+  const [pronounChoice, setPronounChoice] = useState('I AM');
+  const [logsText, setLogsText] = useState('Select an arcade room below to synchronize.');
+
+  const executeArcadeTransaction = async (gameType, payload) => {
+    try {
+      const response = await fetch('/api/arcade/process-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          matchId: activeMatchId || "arcade_session_777",
+          username: currentUsername,
+          targetGameType: gameType,
+          actionPayloadString: payload
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setLogsText(data.reportText);
+        setWordInput('');
+      } else {
+        alert(`❌ Arcade Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Arcade interaction loop dropped:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', right: '24px', width: '380px', maxHeight: '82%', background: 'linear-gradient(135deg, #0b1329 0%, rgba(234,179,8,0.03) 100%)', border: '2px solid #fbbf24', borderRadius: '24px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid #fbbf24', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>👼 Celestial Arcade Hub</h3>
+        <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Multiplayer Extension Suite • Tokens Balance: 🪙 {currentTokensBalance} ST</span>
+      </div>
+
+      {/* Grid Tab Layout Controls */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <button onClick={() => setActiveGameTab('ALPHA_OMEGA')} className={`custom-option-btn ${activeGameTab === 'ALPHA_OMEGA' ? 'active' : ''}`} style={{ fontSize: '9px' }}>Word Challenge</button>
+        <button onClick={() => setActiveGameTab('MESSENGER_TAG')} className={`custom-option-btn ${activeGameTab === 'MESSENGER_TAG' ? 'active' : ''}`} style={{ fontSize: '9px' }}>Messenger Tag</button>
+        <button onClick={() => setActiveGameTab('PRONOUNS')} className={`custom-option-btn ${activeGameTab === 'PRONOUNS' ? 'active' : ''}`} style={{ fontSize: '9px' }}>Pronouns</button>
+        <button onClick={() => setActiveGameTab('SCAPEGOAT')} className={`custom-option-btn ${activeGameTab === 'SCAPEGOAT' ? 'active' : ''}`} style={{ fontSize: '9px' }}>Scapegoat</button>
+        <button onClick={() => setActiveGameTab('FLATYURLANDS')} className={`custom-option-btn ${activeGameTab === 'FLATYURLANDS' ? 'active' : ''}`} style={{ fontSize: '9px' }}>Flatyurlands</button>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- DYNAMIC ACTION TIMELINE FEED --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '8px', borderLeft: '3px solid #fbbf24', fontStyle: 'italic' }}>
+          "{logsText}"
+        </div>
+
+        {/* --- GAME 1 SPECIFIC VIEW --- */}
+        {activeGameTab === 'ALPHA_OMEGA' && (
+          <div>
+            <span style={{ color: '#fbbf24', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>🔤 Alpha Bet Omega Word Challenge</span>
+            <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>The letter kills, but the word lives. Submit consonant phrases containing absolute zero vowels.</p>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <input type="text" value={wordInput} onChange={(e) => setWordInput(e.target.value)} placeholder="e.g., YHWH, BRCHL" style={{ flex: 1, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: '#fff', borderRadius: '6px' }} />
+              <button onClick={() => executeArcadeTransaction('ALPHA_OMEGA_WORD_CHALLENGE', wordInput)} className="buy-upgrade-btn">Cast</button>
+            </div>
+          </div>
+        )}
+
+        {/* --- GAME 2 SPECIFIC VIEW --- */}
+        {activeGameTab === 'MESSENGER_TAG' && (
+          <div>
+            <span style={{ color: '#38bdf8', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>🏃 Tag Your It! (Messenger Relay)</span>
+            <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>The game angels play when relaying messages across grid coordinates. Proximity-touch adjacent nodes to pass the prophetic packet.</p>
+            <button onClick={() => executeArcadeTransaction('MESSENGER_TAG', 'PASS_PACKET_PROXIMITY')} className="buy-upgrade-btn" style={{ width: '100%', background: '#38bdf8', color: '#0f172a' }}>⚡ Pass Message Packet</button>
+          </div>
+        )}
+
+        {/* --- GAME 3 SPECIFIC VIEW --- */}
+        {activeGameTab === 'PRONOUNS' && (
+          <div>
+            <span style={{ color: '#a855f7', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>👁️ The Game of Pronouns</span>
+            <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>Identify who is who across multi-dimensional fields. Anchor your container to a master moniker state.</p>
+            <select value={pronounChoice} onChange={(e) => setPronounChoice(e.target.value)} style={{ background: '#0f172a', color: '#fff', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <option value="I AM">I AM (The Supreme Source Origin)</option>
+              <option value="yoSe'f">yoSe'f (The Earth Artisan Anchor)</option>
+              <option value="yesuar">yesuar (The Messianic Sovereign Gate)</option>
+            </select>
+            <button onClick={() => executeArcadeTransaction('GAME_OF_PRONOUNS', pronounChoice)} className="buy-upgrade-btn" style={{ width: '100%', background: '#a855f7', marginTop: '6px' }}>Lock Identity Matrix</button>
+          </div>
+        )}
+
+        {/* --- GAME 4 SPECIFIC VIEW --- */}
+        {activeGameTab === 'SCAPEGOAT' && (
+          <div>
+            <span style={{ color: '#ef4444', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>🐐 Pin the Tail on the Scapegoat</span>
+            <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>The ultimate blame game. Divert accumulated structural karma weights away from your village container onto a designated proxy node.</p>
+            <button onClick={() => executeArcadeTransaction('SCAPEGOAT_PIN', 'PIN_ACCUMULATED_BLAME')} className="buy-upgrade-btn" style={{ width: '100%', background: '#ef4444' }}>🐐 Pin Blame to Proxy Node</button>
+          </div>
+        )}
+
+        {/* --- GAME 5 SPECIFIC VIEW --- */}
+        {activeGameTab === 'FLATYURLANDS' && (
+          <div>
+            <span style={{ color: '#10b981', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>💨 Flatyurlands (Cosmic Comedy)</span>
+            <p style={{ color: '#cbd5e1', margin: '0 0 8px 0' }}>God manifests gas planets, and mountains collapse crumbling in laughter at hilarious divine jokes. Triggers real-time structural mesh displacement waves.</p>
+            <button onClick={() => executeArcadeTransaction('FLATYURLANDS', 'TRIGGER_DIVINE_LAUGHTER_WAVE')} className="buy-upgrade-btn" style={{ width: '100%', background: '#10b981' }}>😂 Trigger Divine Laughter Wave</button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
