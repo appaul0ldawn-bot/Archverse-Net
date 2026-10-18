@@ -1,0 +1,68 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Angel Lottery model inside our testing memory sandbox
+  mongoose.model('AngelLottery', new mongoose.Schema({
+    poolId: String,
+    targetAngelNumber: Number,
+    currentJackpotTokens: Number,
+    ticketEntries: [{ username: String, submittedPhraseString: String, computedGematriaSum: Number, numerologicalReductionDigit: Number }],
+    isSealedByHighCouncil: Boolean,
+    drawScheduledAt: Date
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('AngelLottery')) {
+    await mongoose.model('AngelLottery').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🔮 SUITE 28: ALPHANUMERIC GEMATRIA CIPHERS & UNIVERSAL LOTTERY CHECKS
+// ==========================================================================
+describe('Archverse Gnostic Gematria and Numerology Calculation Engine', () => {
+
+  it('should accurately calculate string values using the English cipher and output single digit reductions', async () => {
+    await User.create({ username: 'PropheticScholar', tokens: 100, karmaScore: 10 });
+    
+    // Seed an active daily pool target to test against
+    await mongoose.model('AngelLottery').create({
+      poolId: 'daily_pool_777',
+      targetAngelNumber: 777,
+      currentJackpotTokens: 5000,
+      ticketEntries: [],
+      isSealedByHighCouncil: false,
+      drawScheduledAt: new Date()
+    });
+
+    const response = await request(app)
+      .post('/api/lottery/submit-ticket')
+      .send({
+        username: 'PropheticScholar',
+        sacredPhraseText: 'abc', // 'a'(1) + 'b'(2) + 'c'(3) = 6 Gematria Sum
+        activePoolId: 'daily_pool_777'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.gematriaSum).toBe(6); // 1 + 2 + 3 = 6
+    expect(response.body.masterReductionDigit).toBe(6); // Single digit requires zero further reduction loops
+    expect(response.body.updatedBalance).toBe(50); // 100 base - 50 entry fee = 50 ST
+  });
+});
