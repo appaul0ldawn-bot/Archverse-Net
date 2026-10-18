@@ -1,0 +1,97 @@
+import React, { useState } from 'react';
+
+export function LithoBotanicalHUD({ currentUsername, socket }) {
+  const [targetNode, setTargetNode] = useState('roc_quartz_77');
+  const [sensorInputHz, setSensorInputHz] = useState(432);
+  const [translationReport, setTranslationReport] = useState(null);
+  const [isDecoding, setIsDecoding] = useState(false);
+
+  const executeFrequencyTranslation = async () => {
+    if (!targetNode.trim()) return;
+    setIsDecoding(true);
+
+    try {
+      const response = await fetch('/api/frequency/translate-node', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          targetSourceId: targetNode.trim(),
+          rawSensorFrequencyHz: sensorInputHz
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTranslationReport(data);
+
+        // NEURAL SPEECH SYNTHESIS GATEWAY
+        // Speaks the consonant script out loud using a beautiful, melodic Pleiadian template voice
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(data.decryptedMessage);
+          utterance.lang = "en-GB"; // Selects beautiful British-melodic accent parameters
+          utterance.rate = 0.80;   // Measured, ancient cadence pacing
+          utterance.pitch = 1.05;
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to commit environmental frequency data packet:", e);
+    } finally {
+      setIsDecoding(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '24px', width: '360px', borderColor: '#10b981', background: 'linear-gradient(135deg, #0b1329 0%, rgba(16,185,129,0.02) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(16,185,129,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#34d399', fontFamily: 'serif' }}>🪨 The Rocks Cry Out: Acoustic Monitor</h3>
+        <span style={{ fontSize: '9px', color: '#64748b' }}>Litho-Botanical Frequency Decoder • Virtues Rank Oversight</span>
+      </div>
+
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- FFT WAVEFORM SAMPLER GRAPHICS DISPLAY --- */}
+        <div style={{ width: '100%', height: '50px', background: '#000', borderRadius: '8px', padding: '6px', boxSizing: 'border-box', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', height: '100%', gap: '2px' }}>
+            {[40, 85, 60, 30, 95, 45, 70, 55, 20, 80].map((h, i) => (
+              <div key={i} style={{ flex: 1, height: `${h}%`, background: 'linear-gradient(to top, #047857, #10b981)', opacity: isDecoding ? 1.0 : 0.4 }} />
+            ))}
+          </div>
+        </div>
+
+        {/* Node Target Config Inputs */}
+        <div>
+          <span style={{ color: '#cbd5e1' }}>Select Element / Plant Tracker Node:</span>
+          <select value={targetNode} onChange={(e) => setTargetNode(e.target.value)} style={{ background: '#0f172a', color: '#fff', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <option value="roc_quartz_77">🪨 Megalithic Quartz Vein (Mineral Element)</option>
+            <option value="roc_basalt_12">🪨 Solfeggio Grotto Basalt Pillar (Mineral Element)</option>
+            <option value="plt_rose_33">🌿 Covenant Rose Shrub (Botanical Network)</option>
+            <option value="plt_mycelium_04">🌿 Deep Forest Mycelium Weave (Botanical Network)</option>
+          </select>
+        </div>
+
+        {/* Input Frequency Slider */}
+        <div className="metric-row">
+          <span>Captured Resonant Frequency:</span>
+          <input type="range" min="100" max="999" step="1" value={sensorInputHz} onChange={(e) => setSensorInputHz(parseInt(e.target.value))} style={{ width: '110px', accentColor: '#10b981' }} />
+          <strong>{sensorInputHz} Hz</strong>
+        </div>
+
+        <button onClick={executeFrequencyTranslation} disabled={isDecoding} className="buy-upgrade-btn" style={{ width: '100%', background: '#10b981', color: '#fff', fontWeight: 'bold', textShadow: '0 0 4px #10b981' }}>
+          {isDecoding ? '🔄 Decrypting Structural Ciphers...' : '🔊 Decipher & Speak Element Voice'}
+        </button>
+
+        {/* Output Transcript Displays */}
+        {translationReport && (
+          <div style={{ marginTop: '4px', background: 'rgba(16,185,129,0.06)', border: '1px solid #10b981', padding: '10px', borderRadius: '8px', lineHeight: 1.4 }}>
+            <span style={{ fontSize: '9px', color: '#a5b4fc', textTransform: 'uppercase', display: 'block' }}>Classification: {translationReport.sourceClassification.replace('_', ' ')}</span>
+            <strong style={{ display: 'block', margin: '4px 0', color: '#fff', fontFamily: 'monospace' }}>{translationReport.decryptedMessage}</strong>
+            <div style={{ fontSize: '9px', color: '#64748b' }}>• Language Origin: {translationReport.acousticMetrics.tonalTargetLanguage} | Contract Reward: +75 ST</div>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
