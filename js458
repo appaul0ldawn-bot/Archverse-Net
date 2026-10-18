@@ -1,0 +1,22 @@
+import React from 'react';
+
+const ANCIENT_SCROLLS = [
+  { id: 'sc_01', name: 'Scroll of Melchizedek: Liquid Manna', effect: 'Unlocks complete halo illumination parameters and grants +20% Seraph wave transmission.' },
+  { id: 'sc_02', name: 'Sethian Alchemical Transmutation of Quicksilver', effect: 'Combines Sacred Cinnabar with high-frequency pitch tones to manifest short-range spatial phase blink attributes.' }
+];
+
+export function ScrollRecipesPage() {
+  return (
+    <div className="chat-log-sidebar" style={{ left: '24px', top: '55%', width: '320px', maxHeight: '40%' }}>
+      <div className="dashboard-section-title">📜 Ancient Alchemical Scrolls</div>
+      <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {ANCIENT_SCROLLS.map(scroll => (
+          <div key={scroll.id} style={{ padding: '10px', background: 'rgba(234,179,8,0.05)', border: '1px dashed #eab308', borderRadius: '8px', fontSize: '11px' }}>
+            <strong style={{ color: '#fef08a', display: 'block' }}>📜 {scroll.name}</strong>
+            <p style={{ margin: '4px 0 0 0', color: '#e2e8f0', lineHeight: 1.4 }}>{scroll.effect}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
