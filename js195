@@ -1,0 +1,77 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Pact Registry tracking model within our testing sandbox
+  mongoose.model('PactRegistry', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    activePactType: String,
+    generationalCurseBrokenStatus: Boolean,
+    karmicPayloadModifiers: { tokenYieldMultiplier: Number, baseKarmaScoreShift: Number, forcedAuraColorOverride: String, unlockedExclusiveAbility: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('PactRegistry')) {
+    await mongoose.model('PactRegistry').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 📜 SUITE 27: COVENANTS, ABYSSAL DEALS, AND PASSPHRASING CHECKS
+// ==========================================================================
+describe('The Archverse Sovereign Contract and Covenant Ingestion System', () => {
+
+  it('should successfully execute a Faustian Deal with the Devil, injecting +5000 ST and applying a 3x yield multiplier', async () => {
+    const playerNode = await User.create({
+      username: 'FaustianExplorer',
+      tokens: 200,
+      rank: 'Low'
+    });
+
+    const response = await request(app)
+      .post('/api/contracts/transmute-pact')
+      .send({
+        username: 'FaustianExplorer',
+        targetPactSelection: 'ABYSSAL_DEAL_WITH_DEVIL',
+        secretPassphraseSignature: 'The Light Reigns Eternal' // Valid 4-word holy pass phrase
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.currentPactState).toBe('ABYSSAL_DEAL_WITH_DEVIL');
+    expect(response.body.appliedModifiers.tokenYieldMultiplier).toBe(3.0);
+
+    const checkUser = await User.findOne({ username: 'FaustianExplorer' });
+    expect(checkUser.tokens).toBe(5200); // 200 starting + 5000 upfront injection = 5200 ST total
+  });
+
+  it('should reject contract transmutations if the passphrase contains fewer than 4 structural words', async () => {
+    const userNode = await User.create({ username: 'DefectiveSigner', tokens: 0 });
+
+    const response = await request(app)
+      .post('/api/contracts/transmute-pact')
+      .send({
+        username: 'DefectiveSigner',
+        targetPactSelection: 'DIVINE_COVENANT_OF_GOD',
+        secretPassphraseSignature: 'Short Bad' // Counterfeit short password structure
+      });
+
+    expect(response.status).toBe(401); // Blocked and intercepted safely by validation middleware
+    expect(response.body.success).toBe(false);
+  });
+});
