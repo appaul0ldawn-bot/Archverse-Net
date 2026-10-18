@@ -1,0 +1,73 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+const { CosmicEvent, UserToDoTask } = require('./models/CosmicCalendar');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  await CosmicEvent.deleteMany({});
+  await UserToDoTask.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 📅 SUITE 24: GOOGLE CALENDAR SYNC & TEMPORAL CONFLICT CHECKS
+// ==========================================================================
+describe('Archverse Cosmic Calendar & Workspace Productivity Synchronizer', () => {
+
+  it('should successfully log a Google Calendar event task to the MongoDB document list and trigger conflict flags if crossing an ancient holiday', async () => {
+    await User.create({ username: 'ProductiveSeraph', tokens: 100 });
+
+    // Seed a conflicting global cyclic law event at the target timestamp bounds
+    const targetDate = new Date('2026-10-17T12:00:00-04:00');
+    await CosmicEvent.create({
+      eventId: 'evt_shift_999',
+      title: 'Enochian Grid Hardening Phase',
+      category: 'CYCLIC_LAW_SHIFT',
+      triggerTimestamp: targetDate,
+      alignmentModifiers: { resonanceHz: 963, globalAuraColor: '#4f46e5' }
+    });
+
+    const response = await request(app)
+      .post('/api/calendar/sync-task')
+      .send({
+        username: 'ProductiveSeraph',
+        taskText: 'Stabilize Mount Hermon Sub-coordinates',
+        targetDateISO: targetDate.toISOString(),
+        googleEventId: 'g_event_xyz123'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.message).toContain('Warning: This slot intersects with');
+    expect(response.body.taskNode.linkedCalendarEventId).toBe('g_event_xyz123');
+  });
+
+  it('should allocate exactly +100 Angel Tokens to the wallet upon task completion', async () => {
+    const user = await User.create({ username: 'FulfillmentNode', tokens: 50, karmaScore: 10 });
+    const task = await UserToDoTask.create({ userId: user._id, taskText: 'Cleanse Localized Shadow Anomaly', isCompleted: false });
+
+    const response = await request(app)
+      .post('/api/calendar/complete-task')
+      .send({ username: 'FulfillmentNode', taskId: task._id });
+
+    expect(response.status).toBe(200);
+    expect(response.body.currentBalance).toBe(150); // 50 base + 100 mission completion reward = 150 AT total
+
+    const checkTask = await UserToDoTask.findById(task._id);
+    expect(checkTask.isCompleted).toBe(true); // Verification gate confirms state mutation locked
+  });
+});
