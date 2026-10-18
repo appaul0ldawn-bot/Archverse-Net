@@ -1,0 +1,38 @@
+import React from 'react';
+
+export function DivineDatingCamsView({ userProfile }) {
+  return (
+    <div style={{ padding: '20px', background: 'rgba(15,23,42,0.95)', borderRadius: '16px', border: '1px solid #db2777' }}>
+      <h3 style={{ color: '#db2777', margin: '0 0 4px 0' }}>🔞 Celestial Cams Portal</h3>
+      <p style={{ fontSize: '13px', color: '#fca5a5', fontWeight: 'bold' }}>
+        Notice: You must be 18 years of age or older to enter this sector interface.
+      </p>
+      
+      <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.5' }}>
+        Archverse Dating models support active multi-peer streaming. Select the <strong>Cosplay</strong> portal 
+        below to access communities of high-tier Angelic Siren Cosplayers.
+      </p>
+
+      {/* --- TELEMETRY COMMAND REMINDER NOTE --- */}
+      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px', margin: '12px 0', borderLeft: '3px solid #fbbf24' }}>
+        <span style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 'bold', display: 'block' }}>💻 JAVA / JSON ANGEL COMMAND INTEGRATION</span>
+        <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#e2e8f0', fontFamily: 'monospace' }}>
+          Example: {"{ \"command\": \"Siren_Haptic\", \"action\": \"EARTHQUAKE\", \"intensity\": 20 }"}
+          {"\n"}Spoken or typed codes drive interconnected Lovense vibration reactors to mimic cosmic phenomenon 
+          (Tidalwaves, Earthquakes, Meteor Showers) in real-time.
+        </p>
+      </div>
+
+      <a 
+        href={userProfile.isAgeVerified18Plus ? "https://chaturbate.com/tag/cosplay/" : "#"}
+        target={userProfile.isAgeVerified18Plus ? "_blank" : "_self"}
+        rel="noopener noreferrer"
+        onClick={() => { if(!userProfile.isAgeVerified18Plus) alert("🛑 Biometric Verification Required. Verify 18+ profile status in your account dashboard panel first."); }}
+        className="buy-upgrade-btn" 
+        style={{ background: userProfile.isAgeVerified18Plus ? '#db2777' : '#334155', display: 'inline-block', textDecoration: 'none', textAlign: 'center', width: '100%' }}
+      >
+        {userProfile.isAgeVerified18Plus ? "⚡ Enter Cosplay Cams Gateway" : "🔒 Gated: Verify Identity (18+)"}
+      </a>
+    </div>
+  );
+}
