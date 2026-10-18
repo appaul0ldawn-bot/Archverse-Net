@@ -1,0 +1,47 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 📊 MICROMANAGED INTEGRATED COGNITION BELL CURVE LEDGER
+// ==========================================================================
+const SubtleTestLedgerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true },
+  testedKnowledgeDomain: { type: String, default: 'GNOSTIC_COSMOLOGY_COMPETENCY' },
+  
+  // Implicite behavioral grading points trackers
+  implicitMetrics: {
+    correctSolfeggioToneSelections: { type: Number, default: 0 },
+    proceduralMissionSuccessRate: { type: Number, default: 0 },
+    uncleanSpiritCompressionEfficiency: { type: Number, default: 0 }
+  },
+
+  computedZScore: { type: Number, default: 0.0 }, // Distance from the group's mathematical average
+  bellCurvePercentileRank: { type: Number, default: 50.0 }
+});
+
+const SubtleTestLedger = mongoose.model('SubtleTestLedger', SubtleTestLedgerSchema);
+
+// Automated Background Evaluation Tick (Computes Standard Deviation arrays dynamically)
+export async function calculateGlobalCognitionBellCurves() {
+  const allScores = await SubtleTestLedger.find({}).lean();
+  if (allScores.length < 2) return;
+
+  const rawValues = allScores.map(s => s.implicitMetrics.correctSolfeggioToneSelections + s.implicitMetrics.proceduralMissionSuccessRate);
+  
+  // Simple Arithmetic via code to lock precision
+  const mean = rawValues.reduce((a, b) => a + b, 0) / rawValues.length;
+  const variance = rawValues.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / rawValues.length;
+  const standardDeviation = Math.sqrt(variance) || 1;
+
+  for (const score of allScores) {
+    const individualVal = score.implicitMetrics.correctSolfeggioToneSelections + score.implicitMetrics.proceduralMissionSuccessRate;
+    const zScore = (individualVal - mean) / standardDeviation;
+    
+    // Convert Z-Score to a standard percentile curve threshold
+    const percentile = Math.floor((1 + Math.erf(zScore / Math.sqrt(2))) / 2 * 100);
+
+    await SubtleTestLedger.findByIdAndUpdate(score._id, {
+      computedZScore: zScore,
+      bellCurvePercentileRank: percentile
+    });
+  }
+}
