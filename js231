@@ -1,0 +1,60 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🌌 COSMIC ORIGIN COORDINATES AND BADGE INJECTOR
+// ==========================================================================
+const CELESTIAL_ORIGIN_DATABASE = {
+  "Air": {
+    starseedType: "Pleiadian Sage Messenger",
+    originConstellation: "The Pleiades (Seven Sisters)",
+    badgeIcon: "🎂 Solar Return: Alpha Ascension",
+    grantedAbility: "Seraphic_Burst_Aura"
+  },
+  "Fire": {
+    starseedType: "Arcturian Timeline Architect",
+    originConstellation: "Arcturus Core System",
+    badgeIcon: "🔥 Solar Drive: Seraphic Ignition",
+    grantedAbility: "Seraphic_Ignition"
+  },
+  "Water": {
+    starseedType: "Sirian Blue Fluid Guardian",
+    originConstellation: "Sirius A / Canis Majoris",
+    badgeIcon: "💧 Deep current: Hydro Shield",
+    grantedAbility: "Chrono-Flicker"
+  }
+};
+
+router.post('/api/celestial/assign-origin-badge', async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User node invalid.' });
+
+    // 1. Identify the player's underlying cosmic element calculated via onboarding birthday algorithms
+    const element = user.zodiacElement || 'Air';
+    const originProfile = CELESTIAL_ORIGIN_DATABASE[element];
+
+    // 2. Attach the permanent earned badge directly to the player avatar data profile fields
+    user.rankBadge = originProfile.badgeIcon;
+    user.activeSuperability = originProfile.grantedAbility;
+    user.characterBio += ` | Unlocked Starseed Lineage: ${originProfile.starseedType} originating from ${originProfile.originConstellation}.`;
+    
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system
+
+    res.json({
+      success: true,
+      assignedBadge: user.rankBadge,
+      starseedOrigin: originProfile.starseedType,
+      firmamentCoordinates: originProfile.originConstellation
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Celestial origin compilation exception.' });
+  }
+});
+
+module.exports = router;
