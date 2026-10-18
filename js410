@@ -1,0 +1,62 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('ArtAlbum')) {
+    await mongoose.model('ArtAlbum').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 18: FINANCIAL TOKEN DISPATCH AND MEDIA COMPLIANCE LOOPS
+// ==========================================================================
+describe('Archverse Financial Token Transfers and Strict Media Filter Tests', () => {
+
+  it('should process CashApp donations and add tokens to player balances dynamically using the $Sephraines route', async () => {
+    const patron = await User.create({ username: 'GenerousDonor', tokens: 100, karmaScore: 50 });
+
+    const response = await request(app)
+      .post('/api/billing/purchase-tokens')
+      .send({
+        username: 'GenerousDonor',
+        paymentMethod: 'CashApp_Mobile_Gateway',
+        amountUSD: 20, // $20.00 yields +2000 Soul Tokens
+        paymentTxId: 'tx_cash_sephraines_999'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.newBalance).toBe(2100); // 100 base + 2000 purchased = 2100 ST total
+  });
+
+  it('should reject non-image file assets submitted to the Public Art Album upload pipeline', async () => {
+    const maliciousUploadPayload = {
+      username: 'GlitchNode',
+      photoUrl: 'https://archverse.net' // Invalid audio file format
+    };
+
+    const response = await request(app)
+      .post('/api/social/upload-art-photo') // Internal validation route endpoint mapping
+      .send(maliciousUploadPayload);
+
+    // Asset validation system must intercept the route and throw a 400 Bad Request verification error
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+  });
+});
