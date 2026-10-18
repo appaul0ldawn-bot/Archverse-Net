@@ -1,0 +1,58 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 18: ARCHVERSE <CONNECT> CELSTIAL SOCIAL NETWORKING LOOPS
+// ==========================================================================
+describe('Archverse <Connect> Social Media Application Core Verification', () => {
+
+  it('should successfully evaluate a player profile input and translate a perceived mental disorder into an untapped superpower', async () => {
+    await User.create({ username: 'AwokenStarseed', tokens: 100, rank: 'Cherub' });
+
+    const response = await request(app)
+      .post('/api/connect/generate-profile-matrix')
+      .send({
+        username: 'AwokenStarseed',
+        rawAuraColor: '#60a5fa',
+        perceivedDisorder: 'ADHD / Thought Jumping Loops',
+        baselineTalents: ['Telepathy', 'Psychometry']
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.reframedAbility).toContain('Mercury Quick-Silver'); // Reframing loop verified
+    expect(response.body.aiBioText).toContain('[Aether Network Oracle Transmission]');
+  });
+
+  it('should grant a +5 Angel Token wallet reward whenever a user views a video post asset', async () => {
+    const user = await User.create({ username: 'ViewerAngel', tokens: 50 });
+
+    // Mock direct socket view credit request dispatching
+    const response = await request(app)
+      .post('/api/connect/credit-video-view') // Internal route simulation mapping
+      .send({ username: 'ViewerAngel', postId: 'post_abc999' });
+
+    expect(response.status).toBe(200);
+    const updatedUser = await User.findOne({ username: 'ViewerAngel' });
+    expect(updatedUser.tokens).toBe(55); // 50 base + 5 view reward = 55 AT total
+  });
+});
