@@ -1,0 +1,30 @@
+import React from 'react';
+
+const HIVEMIND_STATIONS = [
+  { name: "Facebook Spiritual Assembly", url: "https://facebook.com" },
+  { name: "Instagram Lightcode Reels", url: "https://instagram.com" },
+  { name: "Discord High Council Room", url: "https://discord.gg" },
+  { name: "TikTok Seraph Wave Clips", url: "https://tiktok.com" },
+  { name: "Snapchat Aura Filters", url: "https://snapchat.com" },
+  { name: "X (Twitter) Prophecy Alerts", url: "https://x.com" },
+  { name: "YouTube Esoteric Audio Catalog", url: "https://youtube.com" }
+];
+
+export function HivemindNetworkHUD() {
+  return (
+    <div style={{ padding: '20px', background: '#020617', color: '#fff', height: '100%' }}>
+      <div className="dashboard-section-title">🧠 Aetherverses Network Hub</div>
+      <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '16px' }}>
+        Decentralized cross-platform matrix synchronization routing. Connect with global server streams.
+      </p>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+        {HIVEMIND_STATIONS.map(station => (
+          <a key={station.name} href={station.url} target="_blank" rel="noopener noreferrer" className="custom-option-btn" style={{ textDecoration: 'none', padding: '12px', textAlign: 'center' }}>
+            🌐 {station.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
