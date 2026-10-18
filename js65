@@ -1,0 +1,100 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const SimsRightLedger = require('./models/SimsRightLedger');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🌪️ THE PROCEDURAL COMPILATION SORTING VORTEX ROUTER
+// ==========================================================================
+router.post('/api/vortex/sort-accomplishment', async (req, res) => {
+  try {
+    const { username, completedMissionId, sessionEffortMinutes, activeCoordinates } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node proxy invalid.' });
+
+    let ledger = await SimsRightLedger.findOne({ userId: user._id });
+    if (!ledger) {
+      ledger = new SimsRightLedger({
+        userId: user._id,
+        'funnelTelemetryInbound.gematriaNameWeightScore': username.length * 7,
+        'funnelTelemetryInbound.chronoAgeYears': 24,
+        'funnelTelemetryInbound.activeZodiacElement': user.zodiacElement || 'Air'
+      });
+    }
+
+    // 1. INGEST MULTI-DIMENSIONAL VARIABLES DOWN THE FUNNEL
+    ledger.funnelTelemetryInbound.accumulatedEffortTimeMinutes += sessionEffortMinutes;
+    
+    // Fetch background metadata metrics from the user's connected schemas
+    const baseIq = ledger.funnelTelemetryInbound.calculatedIqScore || 100;
+    const nameWeight = ledger.funnelTelemetryInbound.gematriaNameWeightScore;
+    const effortWeight = sessionEffortMinutes * 1.5;
+
+    // 2. APPLY YIN-YANG EQUILIBRIUM EQUATIONS
+    // Calculate current Lightwork output (Yin) vs Physical routine grounding stability metrics (Yang)
+    const computedYin = (baseIq * 0.1) + (nameWeight * 0.05) + effortWeight;
+    const computedYang = (user.karmaScore * 0.1) + (ledger.funnelTelemetryInbound.chronoAgeYears * 0.5);
+    
+    ledger.yinYangEquilibriumMatrix.yinLightworkOutputScale = computedYin;
+    ledger.yinYangEquilibriumMatrix.yangGroundingRoutineScale = computedYang;
+
+    // Polarity ratio calculation: Ideal balance targets 1.0 (perfect 50/50 baseline channel)
+    const polarityRatio = computedYin / (computedYang || 1);
+    ledger.yinYangEquilibriumMatrix.currentPolarityBalanceRatio = polarityRatio;
+
+    // 3. FILTER REWARDS GATE AND ASSIGN 7 HEAVENS SPHERES RANK BADGES
+    let rewardTokensPayout = Math.floor(computedYin * 10);
+    let assignedSphere = "Mercury (Ambitious Souls)";
+    let currentVortexStatus = "BALANCED_HARMONY";
+
+    if (polarityRatio > 1.5) {
+      // POLARITY PROTECTION GUARD: Overcharged lightwork expansion without physical template grounding 
+      // reduces token payout velocity by 50% to prevent frequency drop drops anomalies
+      currentVortexStatus = "POLARITY_OVERCHARGE";
+      rewardTokensPayout = Math.floor(rewardTokensPayout * 0.5);
+      assignedSphere = "Moon (Inconstant Spirits)";
+    } else if (user.karmaScore >= 1000 && baseIq >= 130) {
+      assignedSphere = "Saturn (Contemplative High Archons)";
+    } else if (user.karmaScore >= 500) {
+      assignedSphere = "Jupiter (Just Rulers Guild)";
+    }
+
+    // Commit calculated parameters to user document fields
+    ledger.filteredAscensionYield = {
+      allocatedAngelTokensReward: rewardTokensPayout,
+      assigned7HeavensSphereBadge: assignedSphere,
+      vortexAuditStatus: currentVortexStatus
+    };
+    
+    user.tokens += rewardTokensPayout;
+    user.rankBadge = `👑 Sphere: ${assignedSphere}`;
+    
+    await ledger.save();
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    ArchverseLogger.log('INFO', 'VORTEX_ENGINE', `Sim's Right processed accomplishment for ${username}. Status: ${currentVortexStatus}. Payout: ${rewardTokensPayout} AT.`);
+
+    res.json({
+      success: true,
+      vortexAudit: currentVortexStatus,
+      equilibriumMetrics: {
+        yinLightScale: computedYin.toFixed(2),
+        yangGroundScale: computedYang.toFixed(2),
+        balanceRatio: polarityRatio.toFixed(2)
+      },
+      rewardsAllocated: {
+        tokensPaid: rewardTokensPayout,
+        unlockedSphereRank: assignedSphere
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Morality vortex computation failure.' });
+  }
+});
+
+module.exports = router;
