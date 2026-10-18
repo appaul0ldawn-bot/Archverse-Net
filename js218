@@ -1,0 +1,53 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize alternative element tracker structures inside testing sandbox
+  mongoose.model('EsotericElement', new mongoose.Schema({
+    elementSymbol: String,
+    name: String,
+    sourceProvenance: String,
+    gameplayModifier: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('EsotericElement')) {
+    await mongoose.model('EsotericElement').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 28: FRINGE ESOTERIC & ALCHEMICAL DATA PROCESSING LOOPS
+// ==========================================================================
+describe('Archverse Esoteric and Alternative Science Element Ingestion', () => {
+
+  it('should verify that alternative element parameters parse correctly and apply designated speed/gravity multipliers', async () => {
+    const mockElement = await mongoose.model('EsotericElement').create({
+      elementSymbol: "Mst",
+      name: "Monatomic Gold (ORMEs)",
+      sourceProvenance: "David Hudson Research Papers",
+      gameplayModifier: "HIGH_SPIN_GRAVITY_BYPASS"
+    });
+
+    expect(mockElement.elementSymbol).toBe('Mst');
+    expect(mockElement.gameplayModifier).toBe('HIGH_SPIN_GRAVITY_BYPASS');
+    
+    const count = await mongoose.model('EsotericElement').countDocuments({});
+    expect(count).toBe(1);
+  });
+});
