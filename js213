@@ -1,0 +1,71 @@
+import React, { useState } from 'react';
+
+export function CerebroPredictiveHUD({ adminEmail, currentUsername, selectedPlayerName }) {
+  const [targetQuery, setTargetQuery] = useState(selectedPlayerName || '');
+  const [predictionData, setPredictionData] = useState(null);
+  const [isTracking, setIsTracking] = useState(false);
+
+  const handleExecuteCerebroScan = async () => {
+    if (!targetQuery.trim()) return;
+    setIsTracking(true);
+
+    try {
+      const response = await fetch('/api/cerebro/predict-user-trajectory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          callingUsername: currentUsername,
+          targetUsername: targetQuery.trim()
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setPredictionData(data.telemetrySnapshot);
+      } else {
+        alert(data.error);
+        setPredictionData(null);
+      }
+    } catch (e) {
+      console.error("Cerebro pipeline matrix connection dropdown:", e);
+    } finally {
+      setIsTracking(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '760px', width: '350px', borderColor: '#eab308' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#eab308' }}>🧠 Cerebro Predictive Mod</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Processes real-time heading vectors and lifestyle routines to calculate future user destinations. Range increments scale by Celestial Rank.
+      </p>
+
+      {/* Target input field */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '10px' }}>
+        <input 
+          type="text" value={targetQuery} onChange={(e) => setTargetQuery(e.target.value)}
+          placeholder="Enter target username to track..."
+          style={{ flex: 1, background: 'rgba(0,0,0,0.5)', border: '1px solid #eab308', borderRadius: '6px', padding: '8px', color: '#fff', fontSize: '12px' }}
+        />
+        <button onClick={handleExecuteCerebroScan} disabled={isTracking} className="buy-upgrade-btn" style={{ padding: '8px', fontSize: '12px' }}>
+          {isTracking ? '📡 Sync...' : 'Track'}
+        </button>
+      </div>
+
+      {/* Prediction Output Display */}
+      {predictionData && (
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '12px', borderRadius: '10px', textAlign: 'left', fontSize: '11px', lineHeight: 1.4, border: '1px solid rgba(255,255,255,0.05)' }}>
+          <strong style={{ color: '#fbbf24', display: 'block', fontSize: '12px', marginBottom: '4px' }}>🎯 Target Node: {predictionData.targetNodeName}</strong>
+          <div>• <strong>Current Pattern:</strong> {predictionData.trackedRoutine}</div>
+          <div>• <strong>Current Coordinates:</strong> [{predictionData.currentPosition.lat.toFixed(4)}, {predictionData.currentPosition.lng.toFixed(4)}]</div>
+          <div style={{ color: '#34d399', marginTop: '4px', fontWeight: 'bold' }}>
+            🔮 Projected 10s Vector: [{predictionData.tenSecondFuturePrediction.lat.toFixed(4)}, {predictionData.tenSecondFuturePrediction.lng.toFixed(4)}]
+          </div>
+          <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px', textAlign: 'right' }}>Confidence: {predictionData.confidenceRatingPercentage}%</div>
+        </div>
+      )}
+    </div>
+  );
+}
