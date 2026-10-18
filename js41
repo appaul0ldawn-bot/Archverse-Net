@@ -1,0 +1,27 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧬 MULTI-SENSOR REAL-TIME TASTE & TOUCH COGNITION SCHEMA
+// ==========================================================================
+const SensoryAnalyticsSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // 👅 TASTE INTERFERENCE VIA VISUAL FACIAL EXPRESSIONS
+  tasteProfileLogs: {
+    inferredTasteSensation: { type: String, enum: ['SWEET_MANNA', 'BITTER_ABSINTHE', 'SOUR_DENSITY', 'SALT_EARTH', 'NEUTRAL'] },
+    facialMicroExpressionVector: String, // e.g., 'Glabellar_Frown_Contraction', 'Zygomatic_Smile_Elevation'
+    perceivedPalatabilityScore: { type: Number, default: 1.0 } // 0.0 (Extreme Rejection) to 2.0 (High Absorption)
+  },
+
+  // ✋ TACTILE TEXTURE INTERFERENCE VIA AUDITORY TELEMETRY
+  tactileTouchLogs: {
+    perceivedTextureFeel: { type: String, enum: ['SMOOTH_PEARLESCENT_GLASS', 'ROUGH_ABYSSAL_BRIMSTONE', 'LIQUID_AETHER_FLOW', 'METALLIC_SHIELD_RIGID'] },
+    vocalReactionClassification: { type: String, enum: ['EXCITEMENT_BURST', 'MOAN_RESONANCE', 'CRY_DISTRESS', 'ANGER_VOCAL_SPIKE', 'SILENT_MEDITATION'] },
+    measuredDecibelLevelDb: { type: Number, default: 0 },
+    calculatedTactileIntensity: { type: Number, default: 0.5 } // 0.0 to 1.0 velocity scale
+  },
+
+  lastSensorySyncAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('SensoryAnalytics', SensoryAnalyticsSchema);
