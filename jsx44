@@ -1,0 +1,22 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🛡️ DIVINE WITNESS RELOCATION & TIMELINE FORK SCHEMA
+// ==========================================================================
+const WitnessRelocationSchema = new mongoose.Schema({
+  caseId: { type: String, required: true, unique: true, index: true },
+  protectedUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  harasserUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
+  timelineSplittingData: {
+    isTimelineForkedActive: { type: Boolean, default: true },
+    timelineAlphaHash: { type: String, default: 'FORK_ALPHA_LIGHTCODE' }, // Bound to protected user
+    timelineBetaHash: { type: String, default: 'FORK_BETA_SHADOW' },    // Bound to harasser user
+    mutualMaskingRadiusMeters: { type: Number, default: 500 } // Global diameter of the visual blackout shroud
+  },
+
+  isHarassmentChargeDropped: { type: Boolean, default: false },
+  initiatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('WitnessRelocation', WitnessRelocationSchema);
