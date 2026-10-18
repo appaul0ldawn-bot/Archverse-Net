@@ -1,0 +1,71 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize schemas inside the sandbox memory cluster
+  mongoose.model('CorporateSponsor', new mongoose.Schema({
+    sponsorId: String,
+    brandName: String,
+    fundingContributionUSD: Number,
+    activeCampaignTier: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('CorporateSponsor')) {
+    await mongoose.model('CorporateSponsor').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🪙 SUITE 24: CORPORATE ONBOARDING & DUAL-WALLET SECURITY GATES
+// ==========================================================================
+describe('Archverse Father\'s Business and Angel School Infrastructure Tests', () => {
+
+  it('should successfully index corporate sponsor data and allocate their active campaign tier based on funding values', async () => {
+    const response = await request(app)
+      .post('/api/corporate/join-fathers-business')
+      .send({
+        companyName: "Solfeggio Acoustics Corp",
+        capitalInvestmentUSD: 15000,
+        coreDeveloperProposalText: "Integrate binaural audio streaming modules directly into WebRTC channels loops."
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.assignedTier).toBe('CELESTIAL_PARTNER'); // Tier calculations verified
+
+    const count = await mongoose.model('CorporateSponsor').countDocuments({});
+    expect(count).toBe(1);
+  });
+
+  it('should successfully attach an instruction profile tracking badge when a user joins Angel School', async () => {
+    await User.create({ username: 'ScholarAngel', tokens: 100, characterBio: 'Sovereign Node' });
+
+    const response = await request(app)
+      .post('/api/education/join-angel-school')
+      .send({
+        applicantUsername: 'ScholarAngel',
+        chosenClassSectorType: 'DIVINE_LORE'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.academicStatus).toBe('ACTIVE_SCHOLAR');
+    expect(response.body.message).toContain('Archangel Raziel');
+  });
+});
