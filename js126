@@ -1,0 +1,66 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Governance model within our testing memory sandbox
+  mongoose.model('OmniGovernance', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    financialMetrics: { celestialCreditScore: Number, hasActiveHolyStipendGrant: Boolean },
+    backgroundSafetyRegistry: { isRegisteredAnomalyOffender: Boolean, generationalCurseInheritanceFactor: Number },
+    gridAccessPrivileges: { maximumAllowedAltitudeMeters: Number, isRestrictedFromSacredGrottoWells: Boolean }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('OmniGovernance')) {
+    await mongoose.model('OmniGovernance').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// ⚖️ SUITE 25: GOVERNANCE, HOLY GRANTS, AND SAFETY TRACKER GATES
+// ==========================================================================
+describe('Archverse Omniversal Governance and Safety Watchlist Systems', () => {
+
+  it('should successfully isolate a high-risk actor and apply strict boundary constraints if marked as an anomaly offender', async () => {
+    const maliciousUser = await User.create({ username: 'FlaggedBadActorNode', tokens: 500 });
+
+    // Seed high-risk background tracking flags into the memory cluster
+    await mongoose.model('OmniGovernance').create({
+      userId: maliciousUser._id,
+      backgroundSafetyRegistry: { isRegisteredAnomalyOffender: true, generationalCurseInheritanceFactor: 1.0 },
+      financialMetrics: { celestialCreditScore: 300, hasActiveHolyStipendGrant: false }
+    });
+
+    const response = await request(app)
+      .post('/api/governance/audit-node')
+      .send({
+        adminEmail: 'zethreigns@gmail.com', // Whitelisted Admin Signature
+        evaluationTargetUsername: 'FlaggedBadActorNode',
+        physicalLat: 31.7683,
+        physicalLng: 35.2137
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.auditStatus).toBe('CRITICAL_CONTAINMENT_ENFORCED');
+
+    // Confirm changes are persistently written down to User documents
+    const updatedUser = await User.findOne({ username: 'FlaggedBadActorNode' });
+    expect(updatedUser.tokens).toBe(0); // Assets successfully wiped by system reprimand rules
+    expect(updatedUser.activeVisualState).toBe('CONTAINMENT_ISOLATION_SHROUD');
+  });
+});
