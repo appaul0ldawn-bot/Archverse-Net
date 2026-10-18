@@ -1,0 +1,25 @@
+// ==========================================================================
+// ARCHVERSE ANCIENT GIANT TERRITORIES GEOGRAPHIC MATRIX
+// ==========================================================================
+const ANCIENT_GIANT_TERRITORIES = {
+  "BASHAN_SECTOR": {
+    sovereignLineage: "Rephaim (Tribe of Rifiem)",
+    biblicalCitations: ["Deuteronomy 3:11", "Joshua 13:12"],
+    monarchRuler: "King Og of Bashan (Whose iron bedstead measured nine cubits)",
+    qualities: "Possessed immense supernatural skeletal density, master warfare architects, and tactical martial counselors.",
+    modernArchaeologySite: "Golan Heights Megalithic Stone Rings (Rujm el-Hiri / Wheel of Giants)"
+  },
+  "HEBRON_SECTOR": {
+    sovereignLineage: "Anakim (Sons of Anak)",
+    biblicalCitations: ["Numbers 13:33", "Joshua 14:15"],
+    monarchRuler: "Ahiman, Sheshai, and Talmai",
+    qualities: "Towering stature that induced psychological paralysis in standard scouts; master constructors of cyclopean stone architecture.",
+    modernArchaeologySite: "Tel Hebron Cyclopean Wall Formations & Megalithic Foundations"
+  },
+  "MOAB_EMIM_SECTOR": {
+    sovereignLineage: "Emim / Zamzummim",
+    biblicalCitations: ["Deuteronomy 2:10-11", "Deuteronomy 2:20"],
+    qualities: "Fierce, populous, and numerous; their acoustic throat-chant vocalizations were used as a psychological warfare frequency loop.",
+    modernArchaeologySite: "Transjordan Megalithic Dolmens & Standing Stones Fields"
+  }
+};
