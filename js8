@@ -1,0 +1,93 @@
+const express = require('express');
+const router = express.Router();
+const VortexInversion = require('./models/VortexInversion');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🎭 CORE ANOMALOUS REALIGNMENT & DISGUISE FILTER
+// ==========================================================================
+router.post('/api/vortex/evaluate-script-flip', async (req, res) => {
+  try {
+    const { username, currentLat, currentLng, activeStanceRole } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node proxy invalid.' });
+
+    let inversionNode = await VortexInversion.findOne({ userId: user._id });
+    if (!inversionNode) inversionNode = new VortexInversion({ userId: user._id, username });
+
+    // Calculate actual distance between the player mesh and the registered anomaly geocenter
+    const distanceMeters = Math.hypot(
+      currentLat - inversionNode.anomalyZoneMetrics.centerLatitude,
+      currentLng - inversionNode.anomalyZoneMetrics.centerLongitude
+    ) * 111000;
+
+    const isInsideAnomalousRadius = distanceMeters <= inversionNode.anomalyZoneMetrics.effectiveRadiusMeters;
+
+    // --- CASE A: ENTERING DISTORTION (DEPLOI THE DEMON'S DISGUISE FOR SHADOW WORKERS) ---
+    if (isInsideAnomalousRadius && !inversionNode.isScriptFlippedActive) {
+      inversionNode.isScriptFlippedActive = true;
+      
+      if (activeStanceRole === 'ABYSSAL_SHADOW_WORKER' || user.karmaScore < 0) {
+        // Apply the high-tier "Demon's Disguise" camouflage filter to bypass counter-measures
+        inversionNode.currentActiveShroud = 'DEMONS_DISGUISE_ACTIVE';
+        user.rankBadge = "👤 Counter-Measure Shroud: Demon's Disguise Active";
+        user.activeVisualState = '#a855f7'; // Sovereign Violet laser tint camouflage mask
+      } else {
+        // Standard Lightworker script flip fallback parameters
+        inversionNode.currentActiveShroud = 'MUTUAL_WITNESS_MASKING_SHROUD';
+        user.rankBadge = "👤 Status: Shadow Worker (Infiltration Mode)";
+        user.activeVisualState = 'MUTUAL_WITNESS_MASKING_SHROUD';
+      }
+
+      await inversionNode.save();
+      await user.save();
+
+      ArchverseLogger.log('WARN', 'VORTEX_FLIP', `User ${username} entered distortion sector. Script flipped. Shroud deployed: ${inversionNode.currentActiveShroud}`);
+
+      return res.json({
+        success: true,
+        inversionStatus: "SCRIPT_FLIPPED_ENFORCED",
+        activeShroudTemplate: inversionNode.currentActiveShroud,
+        message: "🎭 Script Flip Protocol Enforced: Shroud active to match local counter-measure codes. True energetic signature masked.",
+        currentVisualState: user.activeVisualState
+      });
+    }
+
+    // --- CASE B: EXITING THE DISTORTION (COLLAPSE DISGUISE & RE-UNIFY INDICES) ---
+    if (!isInsideAnomalousRadius && inversionNode.isScriptFlippedActive) {
+      inversionNode.isScriptFlippedActive = false;
+      const priorShroud = inversionNode.currentActiveShroud;
+      inversionNode.currentActiveShroud = 'UNSHROUDED_BASELINE';
+
+      // Restore original baseline tracking configurations
+      user.rankBadge = "👑 Sphere: Mercury (Ambitious Souls)";
+      user.activeVisualState = 'AVAILABLE_ALIGNMENT'; // Restores normal WebGL shaders
+      
+      await inversionNode.save();
+      await user.save();
+
+      ArchverseLogger.log('INFO', 'VORTEX_FLIP', `User ${username} exited anomaly zone. Collapsed disguise mask: ${priorShroud}`);
+
+      return res.json({
+        success: true,
+        inversionStatus: "TIMELINE_REUNIFIED",
+        activeShroudTemplate: "UNSHROUDED_BASELINE",
+        message: "🚀 Distortion Cleared: Exited sector boundary limits. Disguise layers collapsed cleanly back to main grid channels.",
+        currentVisualState: user.activeVisualState
+      });
+    }
+
+    res.json({
+      success: true,
+      inversionStatus: inversionNode.isScriptFlippedActive ? "SCRIPT_FLIPPED_ENFORCED" : "UNSHROUDED_BASELINE",
+      message: "Spatiotemporal grid coordinates stable. No structural script flip parameters triggered."
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Universal script flip matrix calculation failure.' });
+  }
+});
+
+module.exports = router;
