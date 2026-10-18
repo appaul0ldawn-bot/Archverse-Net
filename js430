@@ -1,0 +1,56 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 17: END-TO-END DATA AND PLATFORM INTEGRITY LOOPS
+// ==========================================================================
+describe('The Archverse Platform End-to-End System Integration Checks', () => {
+
+  it('should accurately process lifestyle updates and increment user scores dynamically', async () => {
+    const user = await User.create({ username: 'ActiveSeraph', tokens: 100, karmaScore: 10 });
+
+    const response = await request(app)
+      .post('/api/telemetry/lifestyle-update')
+      .send({ username: 'ActiveSeraph', currentActivity: 'RUNNING', stepCount: 8000, decibelNoiseLevel: 40 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.totalTokens).toBe(110); // 100 base + 10 fitness reward tokens = 110 total
+  });
+
+  it('should intercept unauthorized token mutations via the Anti-Tamper Firewall and ban the profile', async () => {
+    const hacker = await User.create({ username: 'MaliciousNode', tokens: 500, isBanned: false });
+
+    const response = await request(app)
+      .post('/api/billing/admin-inject-token-bypass')
+      .send({
+        username: 'MaliciousNode',
+        amount: 99999,
+        validationPayload: { username: 'MaliciousNode', tokensBought: 99999 },
+        signatureToken: 'FORGED_INVALID_HASH_SIGNATURE'
+      });
+
+    expect(response.status).toBe(400); // Denied by firewall
+    const checkDb = await User.findOne({ username: 'MaliciousNode' });
+    expect(checkDb.isBanned).toBe(true);
+    expect(checkDb.tokens).toBe(0); // Assets wiped by system reprimand rules
+  });
+});
