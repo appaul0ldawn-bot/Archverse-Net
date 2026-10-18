@@ -1,0 +1,28 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🎭 SCRIPT FLIP & ENVIRONMENTAL INFILTRATION SCHEMA
+// ==========================================================================
+const ColonyInfiltrationSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+  
+  // Geofenced Boundary Parameters
+  colonyBoundaryBox: {
+    sectorLabel: { type: String, default: 'NATURAL_FELLOWSHIP_COLONY' },
+    centerLat: { type: Number, default: 35.8129 }, // Mapped to local tracking sectors
+    centerLng: { type: Number, default: -79.8059 },
+    boundaryRadiusMeters: { type: Number, default: 300 } // Strict geofenced footprint cap
+  },
+
+  // State File Remapping Tracking
+  cachedPreInfiltrationState: {
+    originalRoleTrack: { type: String, default: 'CELESTIAL_LIGHTWORKER' },
+    originalArmorMeshId: { type: String, default: 'FULL_GOLDEN_ARMOR_OF_GOD' }
+  },
+
+  isInfiltrationActive: { type: Boolean, default: false },
+  lastTransformationPulseAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('ColonyInfiltration', ColonyInfiltrationSchema);
