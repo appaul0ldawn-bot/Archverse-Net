@@ -1,0 +1,68 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🧬 HORMONAL BIOMARKER TIMELINE ACCELERATOR
+// ==========================================================================
+router.post('/api/telemetry/calculate-hormones', async (req, res) => {
+  try {
+    const { username, targetGenderTrack, daysSinceEpochReset } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'Identity not found.' });
+
+    // Enforce the standard 28-to-30 day mathematical sine cycle calculation engine
+    const cycleDayNormalized = daysSinceEpochReset % 28;
+    const radianAngle = (cycleDayNormalized / 28) * Math.PI * 2;
+
+    let estrogenLevel = 50;
+    let testosteroneLevel = 50;
+    let assignedPassiveAbility = "Baseline Resonance";
+
+    if (targetGenderTrack === 'FEMALE_ESTROGEN') {
+      // Standard statistical curve calculation simulation: Estrogen peaks around day 14
+      estrogenLevel = Math.floor(50 + Math.sin(radianAngle) * 40);
+      testosteroneLevel = Math.max(10, Math.floor(30 - Math.cos(radianAngle) * 15));
+      
+      if (cycleDayNormalized >= 12 && cycleDayNormalized <= 16) {
+        assignedPassiveAbility = "🌟 Peak Seraphic Attraction (Seduction Aura Expanded +5m)";
+      } else {
+        assignedPassiveAbility = "✨ Refined Intuitive Psychometry Link";
+      }
+    } else if (targetGenderTrack === 'MALE_TESTOSTERONE') {
+      // Testosterone curves track higher baseline spikes matching fitness data inputs
+      testosteroneLevel = Math.floor(65 + Math.sin(radianAngle * 2) * 25);
+      estrogenLevel = Math.max(5, Math.floor(15 + Math.cos(radianAngle) * 10));
+      
+      if (testosteroneLevel > 80) {
+        assignedPassiveAbility = "🌋 Kinetic Blast Force (Telekinesis Push Vector Overcharged)";
+      } else {
+        assignedPassiveAbility = "🛡️ Hardened Golden Plating Physical Armor Block";
+      }
+    }
+
+    // Save calculated metrics to user profile inventory data fields
+    user.hormoneMetrics = {
+      track: targetGenderTrack,
+      estrogen: estrogenLevel,
+      testosterone: testosteroneLevel,
+      currentCycleDay: cycleDayNormalized
+    };
+    await user.save();
+
+    global.stateHasChanged = true;
+
+    res.json({
+      success: true,
+      currentCycleDay: cycleDayNormalized,
+      metrics: user.hormoneMetrics,
+      unlockedAbility: assignedPassiveAbility
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Hormonal engine processing failure.' });
+  }
+});
+
+module.exports = router;
