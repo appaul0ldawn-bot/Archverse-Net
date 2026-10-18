@@ -1,0 +1,60 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Mind Wrapper schema within our testing memory sandbox cluster
+  mongoose.model('MindWrapper', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    isWrapperShieldEmitting: Boolean,
+    activeShieldFrequencyHz: Number,
+    shieldIntegrityMeters: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('MindWrapper')) {
+    await mongoose.model('MindWrapper').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🛡️ SUITE 40: MIND WRAPPER SHIELD EMISSIONS & FREQUENCY CHECKS
+// ==========================================================================
+describe('Archverse Mind Wrapper Active Shield Emitter Validation Gates', () => {
+
+  it('should successfully calibrate wrapper parameters and shift character visual aura hues to neon violet upon 963Hz selection', async () => {
+    const player = await User.create({ username: 'ProtectedStarseed', tokens: 100, activeVisualState: 'AVAILABLE_ALIGNMENT' });
+
+    const response = await request(app)
+      .post('/api/protection/calibrate-wrapper')
+      .send({
+        username: 'ProtectedStarseed',
+        selectedToneHz: 963,
+        isShieldActive: true
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.shieldStatus).toBe('EMITTING_PROTECTION_FIELD');
+    expect(response.body.activeFrequency).toBe('963Hz');
+
+    // Confirm that the visual state layer correctly shifted to neon violet hex configurations
+    const updatedUser = await User.findOne({ username: 'ProtectedStarseed' });
+    expect(updatedUser.activeVisualState).toBe('#a855f7');
+  });
+});
