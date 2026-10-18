@@ -1,0 +1,29 @@
+{
+  "\$schema": "https://railway.com",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyOnFailure": "ALWAYS",
+    "healthCheckPath": "/api/governance/audit-node"
+  },
+  "services": {
+    "game-server": {
+      "source": ".",
+      "interfaces": [
+        {
+          "port": 3000,
+          "type": "HTTP",
+          "protocol": "TCP"
+        }
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "MONGO_URI": "\${{MongoDB.MONGO_URL}}",
+        "REDIS_URI": "\${{Redis.REDIS_URL}}",
+        "ADMIN_JWT_SECRET": "SECRET_HEAVEN_KEY_999"
+      }
+    }
+  }
+}
