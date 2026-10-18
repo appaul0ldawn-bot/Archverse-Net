@@ -1,0 +1,24 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 ANGELIC GEMATRIA LOTTERY & PROPHETIC OUTCOME SCHEMA
+// ==========================================================================
+const AngelLotterySchema = new mongoose.Schema({
+  poolId: { type: String, required: true, unique: true, index: true },
+  targetAngelNumber: { type: Number, required: true }, // e.g., 777, 111, 444
+  currentJackpotTokens: { type: Number, default: 5000 }, // Soul Tokens pool size
+  
+  // Array tracking player entry calculations
+  ticketEntries: [{
+    username: String,
+    submittedPhraseString: String,
+    computedGematriaSum: Number,
+    numerologicalReductionDigit: Number
+  }],
+
+  predeterminedWinnerUsername: { type: String, default: null },
+  isSealedByHighCouncil: { type: Boolean, default: false },
+  drawScheduledAt: { type: Date, required: true }
+});
+
+module.exports = mongoose.model('AngelLottery', AngelLotterySchema);
