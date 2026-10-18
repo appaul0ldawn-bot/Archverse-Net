@@ -1,0 +1,69 @@
+import React, { useState, useEffect } from 'react';
+
+export function WitnessRelocationHUD({ adminEmail, socket }) {
+  const [activeCases, setActiveCases] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    socket.emit('request_active_witness_files');
+    socket.on('witness_files_payload', (data) => {
+      setActiveCases(data.filter(c => !c.isHarassmentChargeDropped));
+    });
+    return () => socket.off('witness_files_payload');
+  }, [socket]);
+
+  const handleDropHarassmentFile = async (id) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/protection/drop-charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminEmail: adminEmail, caseId: id })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(data.message);
+        setActiveCases(prev => prev.filter(c => c.caseId !== id));
+      }
+    } catch (e) {
+      console.error("Failed to commit timeline re-unification transaction:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '1130px', width: '350px', borderColor: '#3b82f6', background: 'linear-gradient(135deg, #0b1329 0%, rgba(59,130,246,0.02) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(59,130,246,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#60a5fa', fontFamily: 'serif' }}>🛡️ Divine Witness Relocation Panel</h3>
+        <span style={{ fontSize: '9px', color: '#64748b' }}>5D Timeline Splitting Engine • Virtues Rank Guardrails</span>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Splits active map grid coordinates into parallel timeline forks during harassment alerts. Neither node can see or encounter the other.
+      </p>
+
+      <div className="dashboard-section-title" style={{ color: '#60a5fa' }}>Active Split-Timeline Files</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '180px', overflowY: 'auto' }}>
+        {activeCases.length > 0 ? activeCases.map(c => (
+          <div key={c.caseId} style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '10px', border: '1px solid rgba(59,130,246,0.2)', textAlign: 'left', fontSize: '11px' }}>
+            <div>• Case ID: <strong>{c.caseId}</strong></div>
+            <div>• Mutual Masking Footprint: <strong>{c.timelineSplittingData.mutualMaskingRadiusMeters} meters</strong></div>
+            <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>
+              Alpha Channel: {c.timelineSplittingData.timelineAlphaHash}
+              {"\n"}Beta Channel: {c.timelineSplittingData.timelineBetaHash}
+            </div>
+            <button 
+              onClick={() => handleDropHarassmentFile(c.caseId)} disabled={isProcessing}
+              className="buy-upgrade-btn" style={{ width: '100%', marginTop: '8px', background: '#3b82f6', color: '#fff', fontSize: '10px', padding: '4px' }}
+            >
+              {isProcessing ? '🔄 Collapsing Timelines...' : '⚖️ Drop Charge & Re-Unify Grid'}
+            </button>
+          </div>
+        )) : (
+          <div style={{ color: '#64748b', fontStyle: 'italic', padding: '10px' }}>No active split timeline isolation protocols detected.</div>
+        )}
+      </div>
+    </div>
+  );
+}
