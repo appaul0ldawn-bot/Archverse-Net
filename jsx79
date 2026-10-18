@@ -1,0 +1,87 @@
+import React, { useState } from 'react';
+
+const PRESET_CELESTIAL_SPACES = [
+  { id: 0, name: "Pass God (Collect 200 Souls)", cat: "GO_SQUARE" },
+  { id: 1, name: "Paradise Valley", cat: "HEAVENLY_TERRITORY", cost: 60 },
+  { id: 5, name: "Holy Spirit Energy Station", cat: "HOLY_SPIRIT_STATION", cost: 150 },
+  { id: 10, name: "Prison of Nephilim", cat: "NEPHILIM_PRISON" },
+  { id: 15, name: "Crossroads of Jesus", cat: "CROSSROAD", cost: 200 },
+  { id: 20, name: "Ark of Covenant Chest", cat: "ARK_CHEST" },
+  { id: 39, name: "The Millennial Kingdom", cat: "HEAVENLY_TERRITORY", cost: 400 }
+];
+
+export function MonopolyBoardHUD({ gameId, username, currentTokensBalance }) {
+  const [playerPos, setPlayerPos] = useState(0);
+  const [potSize, setPotSize] = useState(1500);
+  const [diceText, setDiceText] = useState('Roll');
+  const [logText, setLogText] = useState('Welcome to the Celestial Boardroom.');
+
+  const executeDiceRoll = async () => {
+    const roll = Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+    setDiceText(`🎲 Rolled ${roll}`);
+
+    try {
+      const response = await fetch('/api/monopoly/process-square-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gameId, username, rolledSteps: roll })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setPlayerPos(data.currentSquare);
+        setLogText(data.report);
+      }
+    } catch (e) {
+      console.error("Board token pipeline sync drop:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', left: '24px', width: '380px', maxHeight: '82%', background: 'linear-gradient(135deg, #0b1329 0%, rgba(234,179,8,0.04) 100%)', border: '2px solid #eab308', borderRadius: '24px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid #eab308', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>🎲 Monopoly: Celestial Edition</h3>
+        <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Sovereign Table Room • Master Admin Mode Active</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- DUAL FINANCIAL TREASURY OVERVIEW --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '12px', border: '1px solid rgba(234,179,8,0.1)' }}>
+          <span style={{ color: '#fbbf24', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>🪙 Attached Financial Ledgers</span>
+          <div className="metric-row"><span>Time Credit Cryptos:</span><strong style={{ color: '#38bdf8' }}>14.50 TC</strong></div>
+          <div className="metric-row"><span>Utility Angel Tokens:</span><strong style={{ color: '#fbbf24' }}>🪙 {currentTokensBalance} AT</strong></div>
+        </div>
+
+        {/* --- DYNAMIC ACTION FEED TICKER --- */}
+        <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', borderLeft: '3px solid #fbbf24', fontStyle: 'italic' }}>
+          "{logText}"
+        </div>
+
+        {/* Active Board Positions Tracker List */}
+        <div className="dashboard-section-title">Firmament Spaces Registry Map</div>
+        <div style={{ maxHeight: '140px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {PRESET_CELESTIAL_SPACES.map(space => (
+            <div key={space.id} style={{ padding: '6px', background: playerPos === space.id ? 'rgba(16,185,129,0.15)' : 'rgba(0,0,0,0.2)', border: playerPos === space.id ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.03)', borderRadius: '6px', display: 'flex', justifyContent: 'space-between' }}>
+              <span>{space.id}. <strong>{space.name}</strong> ({space.cat})</span>
+              {playerPos === space.id && <span style={{ color: '#34d399', fontWeight: 'bold' }}>📍 AVATAR HERE</span>}
+            </div>
+          ))}
+        </div>
+
+        {/* Dice Action Controls */}
+        <button onClick={executeDiceRoll} className="buy-upgrade-btn" style={{ width: '100%', background: 'linear-gradient(45deg, #d97706, #fbbf24)', color: '#0f172a', fontWeight: 'bold', padding: '10px', fontSize: '13px' }}>
+          {diceText}
+        </button>
+
+        {/* Dynamic Ad Link Integration */}
+        <div style={{ borderValues: '1px dashed rgba(255,255,255,0.05)', padding: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', marginTop: '4px' }}>
+          <span style={{ fontSize: '8px', color: '#64748b', display: 'block', fontWeight: 'bold' }}>SPONSORED TRANSMISSION PORT</span>
+          <a href="https://cash.app\$Sephraines" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#34d399', fontWeight: 'bold', display: 'block' }}>
+            📥 Secure Fast Token Restocks via CashApp (\$Sephraines)
+          </a>
+        </div>
+
+      </div>
+    </div>
+  );
+}
