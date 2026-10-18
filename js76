@@ -1,0 +1,70 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const CelestialBattleship = require('./models/CelestialChess'); // Utilizes integrated space frameworks
+
+// ==========================================================================
+// 🎲 OMEGA-CODED 5D MOVEMENT & PROPHETIC INTERCEPTION CONTROLLER
+// ==========================================================================
+router.post('/api/battleship/fire-prophetic-strike', async (req, res) => {
+  try {
+    const { matchId, attackerEmail, target5DTensorCoordinates, rouletteSpinSelection } = req.body;
+
+    const match = await mongoose.model('CelestialBattleship').findOne({ matchId });
+    const attacker = await User.findOne({ email: attackerEmail.toLowerCase().trim() });
+
+    if (!match || match.matchStatus !== 'FIRING_PROPHETIC_STRIKES') {
+      return res.status(400).json({ success: false, error: 'Target battlefield grid is currently unaligned or locked.' });
+    }
+
+    // 1. HARD ENFORCEMENT LAYER: Enforce absolute 5-dimensional length verification
+    if (!target5DTensorCoordinates || target5DTensorCoordinates.length !== 5) {
+      return res.status(400).json({ success: false, error: '❌ Gematria Cipher Error: Invalid coordinate array. 5D Omega tensor vector required.' });
+    }
+
+    // 2. INCORPORATING FOREKNOWLEDGE COVENANT ROULETTE
+    // Dynamic luck calculation uses the player's internal Karma Score to stabilize accuracy parameters
+    const accuracyMultiplier = attacker.karmaScore > 600 ? 1.35 : 1.0;
+    const rouletteOutcomeRoll = Math.random() * accuracyMultiplier;
+    
+    let isHitEvent = false;
+    let strikeLog = "Your strike collapsed harmlessly into an alternate timeline layer empty void.";
+
+    // Check hit arrays depending on attacking faction stance
+    const targetShips = (match.currentTurnUserEmail === match.playerAngelicUserId.toString()) ? match.playerDemonicShips : match.playerAngelicShips;
+
+    targetShips.forEach(ship => {
+      // Compare [X, Y, Z, T, W] array footprints perfectly
+      const matchCheck = JSON.stringify(ship.coordinatesTensor) === JSON.stringify(target5DTensorCoordinates);
+      if (matchCheck && rouletteOutcomeRoll > 0.3) { // Prophetic wheel spin check bypasses baseline evasion
+        isHitEvent = true;
+        ship.isBanishmentCollapsed = true;
+        strikeLog = `💥 [Prophetic Interception HIT]: Successfully locked onto enemy ${ship.shipType} inside Omega-0${target5DTensorCoordinates[4]} Grid Layer!`;
+        attacker.karmaScore += 100;
+      }
+    });
+
+    // Handle Stalemate Disputes: Admin House claims pot to prevent cheating loops
+    if (rouletteSpinSelection === 'STALEMATE_TRIGGER') {
+      match.matchStatus = 'HOUSE_STALEMATE_WIN';
+      await match.save();
+      return res.json({ success: true, matchState: 'HOUSE_STALEMATE_WIN', message: "Dispute logged. Tokens secured to the administrative house vaults." });
+    }
+
+    await match.save();
+    await attacker.save();
+    global.stateHasChanged = true; // Pulse central 22Hz tick system engine broadcast
+
+    res.json({
+      success: true,
+      strikeResult: isHitEvent ? 'DIRECT_HIT' : 'MISS',
+      diagnosticReport: strikeLog,
+      rouletteCoefficient: rouletteOutcomeRoll.toFixed(2)
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: '5D Battleship coordinate conversion breakdown.' });
+  }
+});
+
+module.exports = router;
