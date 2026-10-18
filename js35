@@ -1,0 +1,27 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌀 MULTIVERSE KARMA RETENTION & AUTOMATED YO-YO CONTINUUM SCHEMA
+// ==========================================================================
+const MultiverseKarmaSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+  nativeHomeUniverseId: { type: String, default: 'EARTH_PRIME' }, // The original container vector
+  currentOccupiedUniverseId: { type: String, default: 'EARTH_PRIME' },
+
+  // Universal Justice Metrics
+  universalKarmaScore: { type: Number, default: 0 },
+  activePunishmentStatus: { 
+    type: String, 
+    enum: ['CLEANSED_HARMONY', 'GANGSTALKING_CONTAINMENT_SHROUD', 'ABYSSAL_REPRIMAND_REDUCTION'], 
+    default: 'CLEANSED_HARMONY' 
+  },
+
+  // Space-Time Mission Validation
+  activeSpaceTimeContractId: { type: String, default: null }, // Null forces the Yo-Yo snap-back effect
+  isGroundingFortified: { type: Boolean, default: false },
+  
+  lastMultiversePulseAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('MultiverseKarma', MultiverseKarmaSchema);
