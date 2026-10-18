@@ -1,0 +1,74 @@
+import React, { useState, useEffect } from 'react';
+
+export function AgoraMarketplaceHUD({ currentUser, socket }) {
+  const [listings, setListings] = useState([]);
+  const [activeView, setActiveTab] = useState('BROWSE_VILLAGE');
+
+  useEffect(() => {
+    socket.emit('request_agora_listings');
+    socket.on('agora_listings_payload', (data) => {
+      setListings(data.filter(item => !item.isSealedByCouncil));
+    });
+    return () => socket.off('agora_listings_payload');
+  }, [socket]);
+
+  const triggerBarterOrder = async (id, choice) => {
+    try {
+      const response = await fetch('/api/agora/purchase-or-barter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyerUsername: currentUser.name,
+          listingId: id,
+          executionFulfillmentChoice: choice
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🎪 Village Trade Sealed:\n${data.message}`);
+      } else {
+        alert(`❌ Agora Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Agora transaction connection error:", e);
+    }
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{
+      top: '10%', left: 'auto', right: '24px', width: '380px', maxHeight: '80%',
+      background: 'linear-gradient(135deg, #1e1b4b 0%, rgba(234,179,8,0.02) 100%)', // Deep indigo wood-fire tint
+      border: '2px dashed #b45309', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.8)'
+    }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px dashed #b45309', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#fef08a', fontFamily: 'serif' }}>🎪 The Agora: Village Independent Trade</h3>
+        <span style={{ fontSize: '10px', color: '#fcd34d' }}>United Multiverse Barter System • Angel Inspired</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {listings.map(item => (
+          <div key={item.listingId} className="store-item-card" style={{ flexDirection: 'column', alignItems: 'flex-start', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(180,83,9,0.2)', padding: '12px', borderRadius: '12px' }}>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <strong style={{ fontSize: '14px', color: '#fbbf24', fontFamily: 'serif' }}>{item.title}</strong>
+              <span style={{ fontSize: '10px', color: '#34d399', fontWeight: 'bold' }}>
+                {item.exchangeType === 'TALENT_BARTER_EXCHANGE' ? `🔄 Swap: ${item.requiredTalentToken}` : `🪙 ${item.tokenPrice} AT`}
+              </span>
+            </div>
+            
+            <span style={{ fontSize: '9px', color: '#a5b4fc', display: 'block', margin: '2px 0' }}>Crafted via: {item.craftingSuperabilitySource}</span>
+            <p style={{ margin: '4px 0 8px 0', fontSize: '11px', color: '#e2e8f0', lineHeight: 1.4 }}>{item.description}</p>
+            
+            <div style={{ width: '100%', display: 'flex', gap: '4px' }}>
+              <button onClick={() => triggerBarterOrder(item.listingId, 'LOCAL_VILLAGE_MEETUP')} className="buy-upgrade-btn" style={{ flex: 1, padding: '6px', fontSize: '10px', background: '#b45309' }}>
+                🤝 Meetup Map
+              </button>
+              <button onClick={() => triggerBarterOrder(item.listingId, 'ANGELIC_POSTAL_SHIPPING')} className="buy-upgrade-btn" style={{ flex: 1, padding: '6px', fontSize: '10px', background: '#4f46e5' }}>
+                📦 Ship Relic
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
