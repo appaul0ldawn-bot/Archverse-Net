@@ -1,0 +1,67 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Ophans Overlook tracking model within our testing sandbox memory cluster
+  mongoose.model('OphansOverlook', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    graceFrictionTracking: { absorbedDailyFrictionIndex: Number, overlookedAnomaliesCount: Number, subsurfaceGoodFinderRatio: Number },
+    mercyMitigationCalculated: { graceCoefficientMultiplier: Number, activeAuraRestorationShader: String, overlookStatus: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('OphansOverlook')) {
+    await mongoose.model('OphansOverlook').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🕊️ SUITE 44: OPHAN'S OVERLOOK ABSOLUTE GRACE VALIDATION GATES
+// ==========================================================================
+describe('Archverse Ophan\'s Overlook Autonomous Mercy Filtration Array', () => {
+
+  it('should detect a minor friction infraction, let it slide entirely, and award a +250 AT grace bonus reward', async () => {
+    const player = await User.create({ username: 'FrictionNodeCaretaker', tokens: 100, karmaScore: 50, activeVisualState: 'AVAILABLE_ALIGNMENT' });
+
+    await mongoose.model('OphansOverlook').create({
+      userId: player._id,
+      username: 'FrictionNodeCaretaker',
+      graceFrictionTracking: { absorbedDailyFrictionIndex: 0, overlookedAnomaliesCount: 3, subsurfaceGoodFinderRatio: 1.0 },
+      mercyMitigationCalculated: { graceCoefficientMultiplier: 1.5, activeAuraRestorationShader: '#38bdf8', overlookStatus: 'HARMONIC_MERCY_ENGAGED' }
+    });
+
+    const response = await request(app)
+      .post('/api/judicial/apply-ophans-overlook')
+      .send({
+        username: 'FrictionNodeCaretaker',
+        rawFrictionIntensityScore: 25 // Minor score falls safely below the 50-point absolute let-slide threshold
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.overlookAuditStatus).toBe('HARMONIC_MERCY_ENGAGED');
+    expect(response.body.mitigationMetrics.totalOverlookedAnomalies).toBe(4); // Incremented from 3 to 4 successfully
+    expect(response.body.rewardsYielded.mercyTokensBonusPaid).toBe(250); // High grace bonus awarded
+
+    // Verify visual tracking boundaries updated on the user record to brilliant emerald harmony
+    const checkUser = await User.findOne({ username: 'FrictionNodeCaretaker' });
+    expect(checkUser.activeVisualState).toBe('#10b981');
+    expect(checkUser.tokens).toBe(350); // 100 base + 250 bonus = 350 total utility tokens
+  });
+});
