@@ -1,0 +1,43 @@
+# ==========================================================================
+# 🌌 THE ARCHVERSE MATRIX: RENDER INFRASTRUCTURE BLUEPRINT
+# ==========================================================================
+services:
+  # 🏢 Central 22Hz Tick-Rate Server & WebGL Map Engine Core
+  - type: web
+    name: archverse-game-server
+    env: docker
+    repo: https://github.com
+    rootDir: ./
+    plan: starter
+    region: oregon # Runs close to your fallback grid configurations
+    numReplicas: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: ADMIN_JWT_SECRET
+        value: SECRET_HEAVEN_KEY_999
+      - key: MONGO_URI
+        fromDatabase:
+          name: archverse-mongo-vault
+          property: connectionString
+      - key: REDIS_URI
+        fromService:
+          name: archverse-redis-cache
+          type: redis
+          property: connectionString
+
+  # 🗄️ In-Memory Telemetry Cache Layer for Real-Time Flow-Bot Routing
+  - type: redis
+    name: archverse-redis-cache
+    plan: starter
+    region: oregon
+    ipAllowList: [] # Private networking enabled by default within the mesh
+
+databases:
+  # 🔒 Persistent Database Layer with WiredTiger Journaling
+  - name: archverse-mongo-vault
+    plan: starter
+    region: oregon
+    user: root
