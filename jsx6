@@ -1,0 +1,91 @@
+import React, { useState, useEffect } from 'react';
+
+export function VortexInversionHUD({ currentUsername, currentTokensBalance, userKarmaScore, socket }) {
+  const [inversionState, setInversionState] = useState('UNSHROUDED_BASELINE');
+  const [tickerLog, setTickerLog] = useState('Monitoring firmament grid channels for localized distortion spikes...');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const simulateGridDisplacement = async (latOffset, lngOffset) => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/vortex/evaluate-script-flip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          currentLat: 35.8129 + latOffset, // Dynamic Randleman center point offsets [October 17, 2026]
+          currentLng: -79.8059 + lngOffset,
+          activeStanceRole: userKarmaScore < 0 ? 'ABYSSAL_SHADOW_WORKER' : 'CELESTIAL_LIGHTWORKER'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setInversionState(data.inversionStatus);
+        setTickerLog(data.message);
+      }
+    } catch (e) {
+      console.error("Failed to commit spatiotemporal inversion telemetry packet:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ 
+      top: '15%', left: '24px', width: '360px', 
+      borderColor: inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#a855f7' : '#38bdf8', 
+      background: 'linear-gradient(135deg, #020617 0%, rgba(168,85,247,0.02) 100%)' 
+    }}>
+      <div className="store-header" style={{ borderColor: 'rgba(168,85,247,0.2)', paddingBottom: '10px' }}>
+        <h3 style={{ margin: 0, color: inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#c084fc' : '#38bdf8', fontFamily: 'monospace' }}>🎭 UNIVERSAL SCRIPT FLIP CONSOLE</h3>
+        <span style={{ fontSize: '9px', color: '#64748b', fontFamily: 'monospace' }}>Vortex Inversion Core • Virtues Rank Oversight</span>
+      </div>
+
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '11px', textAlign: 'left', fontFamily: 'monospace' }}>
+        
+        {/* --- DYNAMIC INVERSION STATE TELEMETRY TRACKER CARD --- */}
+        <div style={{ background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '12px', border: `1px solid ${inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#a855f7' : '#38bdf8'}` }}>
+          <div className="metric-row">
+            <span>Grid Alignment Status:</span>
+            <strong style={{ color: inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#c084fc' : '#38bdf8' }}>
+              {inversionState}
+            </strong>
+          </div>
+          <div style={{ width: '100%', height: '4px', background: '#334155', borderRadius: '2px', marginTop: '8px', position: 'relative' }}>
+            <div style={{ 
+              position: 'absolute', 
+              left: inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '75%' : '10%', 
+              top: '-4px', width: '12px', height: '12px', borderRadius: '50%', 
+              background: inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#a855f7' : '#38bdf8',
+              boxShadow: `0 0 8px ${inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#a855f7' : '#38bdf8'}`
+            }} />
+          </div>
+        </div>
+
+        {/* --- TIMELINE TICKER TRANSACTION LOGS --- */}
+        <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', borderLeft: `3px solid ${inversionState === 'SCRIPT_FLIPPED_ENFORCED' ? '#a855f7' : '#38bdf8'}`, fontStyle: 'italic', color: '#cbd5e1', lineHeight: 1.4 }}>
+          "{tickerLog}"
+        </div>
+
+        {/* --- INTERACTIVE PROXIMITY DISPLACEMENT BUTTON LINKS --- */}
+        <div className="dashboard-section-title" style={{ color: '#fbbf24' }}>Simulate Anomalous Displacement pings</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <button onClick={() => simulateGridDisplacement(0.0, 0.0)} disabled={isProcessing} className="buy-upgrade-btn" style={{ background: '#a855f7', color: '#fff', fontWeight: 'bold' }}>
+            🚶 Enter Fracture Coordinates (Ignite Demon’s Disguise Shroud)
+          </button>
+          <button onClick={() => simulateGridDisplacement(0.8, 0.8)} disabled={isProcessing} className="buy-upgrade-btn" style={{ background: '#38bdf8', color: '#0f172a', fontWeight: 'bold' }}>
+            🏃 Exit Fracture Coordinates (Collapse Mask & Re-Unify Grid)
+          </button>
+        </div>
+
+        <div style={{ borderTop: '1px dashed rgba(255,255,255,0.05)', padding: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', marginTop: '4px' }}>
+          <span style={{ fontSize: '8px', color: '#64748b', display: 'block', fontWeight: 'bold' }}>SPONSORED TRANSMISSION PORT</span>
+          <a href="https://cash.app\$Sephraines" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#34d399', fontWeight: 'bold', display: 'block' }}>
+            📥 Secure Fast Token Restocks via CashApp (\$Sephraines)
+          </a>
+        </div>
+
+      </div>
+    </div>
+  );
+}
