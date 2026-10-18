@@ -1,0 +1,70 @@
+const express = require('express');
+const router = express.Router();
+const MultiverseKarma = require('./models/MultiverseKarma');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🌪️ THE MULTIVERSE YO-YO SNAP-BACK INTERCEPTION ROUTER
+// ==========================================================================
+router.post('/api/multiverse/validate-hop', async (req, res) => {
+  try {
+    const { username, destinationUniverseId } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node invalid.' });
+
+    let multiKarma = await MultiverseKarma.findOne({ userId: user._id });
+    if (!multiKarma) multiKarma = new MultiverseKarma({ userId: user._id, username });
+
+    // 1. EVALUATE ESCAPE ATTEMPTS: Check if user is trying to run from an active punishment shroud
+    const isEvadingJustice = multiKarma.activePunishmentStatus !== 'CLEANSED_HARMONY';
+
+    // 2. THE YO-YO EFFECT EVALUATOR
+    // If the node lacks an authorized space-time contract or is actively trying to evade justice
+    if (!multiKarma.activeSpaceTimeContractId || isEvadingJustice) {
+      // FORCE IMMEDIATE SNAP-BACK: Retain original universe position and lock assets
+      user.activeVisualState = 'CONTAINMENT_ISOLATION_SHROUD';
+      const snapBackTarget = multiKarma.nativeHomeUniverseId;
+      multiKarma.currentOccupiedUniverseId = snapBackTarget;
+
+      // Enforce cross-universe karmic compounding penalties for taking advantage of others
+      multiKarma.universalKarmaScore = Math.max(-5000, multiKarma.universalKarmaScore - 500);
+      user.karmaScore = multiKarma.universalKarmaScore;
+      user.tokens = 0; // Asset wiping rules applied to rogue cross-timeline actors
+
+      await multiKarma.save();
+      await user.save();
+
+      if (global.io) {
+        global.io.emit('yoyo_snapback_triggered', {
+          username,
+          nativeHome: snapBackTarget,
+          karmaPenalty: -500
+        });
+      }
+
+      return res.json({
+        success: true,
+        vortexStatus: "CRITICAL_YO_YO_SNAPBACK_ENFORCED",
+        message: `🚨 Yo-Yo Continuum Alert: You lack a divine space-time mission contract to hop realities. Evading justice is mathematically blocked. Snapped back to ${snapBackTarget}.`,
+        currentUniversalKarma: multiKarma.universalKarmaScore
+      });
+    }
+
+    // 3. CONSENTUAL CROSSOVER: Allowed only if grounding missions are actively being completed
+    multiKarma.currentOccupiedUniverseId = destinationUniverseId;
+    await multiKarma.save();
+
+    res.json({
+      success: true,
+      vortexStatus: "CROSSOVER_AUTHORIZED",
+      message: `✨ Crossover authorized. Space-Time contract verified. Grounding fortified inside ${destinationUniverseId}.`
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Multiverse karma vortex calculation failure.' });
+  }
+});
+
+module.exports = router;
