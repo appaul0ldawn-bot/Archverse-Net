@@ -1,0 +1,25 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 5D CELESTIAL CHESS COMPETITION & STATE MATRIX SCHEMA
+// ==========================================================================
+const CelestialMatchSchema = new mongoose.Schema({
+  matchId: { type: String, required: true, unique: true, index: true },
+  factionAngelicUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  factionDemonicUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  
+  // 5D Matrix State Tracker: [Spatial_X, Spatial_Y, Spatial_Z, Timeline_T, Dimension_W]
+  activeBoardTensorState: { type: Array, required: true },
+  
+  matchStatus: { 
+    type: String, 
+    enum: ['MATCHMAKING_QUEUE', 'ARMAGEDDON_ACTIVE', 'ANGELIC_VICTORY', 'DEMONIC_VICTORY', 'HOUSE_STALEMATE_WIN'], 
+    default: 'MATCHMAKING_QUEUE' 
+  },
+  
+  highScoreST: { type: Number, default: 0 },
+  currentTurnUserEmail: String,
+  initiatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('CelestialMatch', CelestialMatchSchema);
