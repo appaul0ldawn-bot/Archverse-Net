@@ -1,0 +1,23 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🚨 CRITICAL REPRIMAND & CONTAINER CONTAINMENT SCHEMA
+// ==========================================================================
+const ReprimandLedgerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+  
+  violationType: { type: String, default: 'UNAUTHORIZED_EXPLOITATION_OR_SEXUAL_ACTION' },
+  isAccountPermanentlyShrouded: { type: Boolean, default: true },
+  
+  // Hard enforcement boundary locks
+  disciplinaryMetrics: {
+    wipedSoulTokenBalance: { type: Number, default: 0 },
+    assignedPunishmentSector: { type: String, default: '9th_Circle_Judecca_Containment' },
+    isBannedFromAllPublicFeeds: { type: Boolean, default: true }
+  },
+
+  loggedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('ReprimandLedger', ReprimandLedgerSchema);
