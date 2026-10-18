@@ -1,0 +1,85 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Agora model within our testing sandbox memory cluster
+  mongoose.model('AgoraListing', new mongoose.Schema({
+    listingId: String,
+    sellerUsername: String,
+    title: String,
+    description: String,
+    exchangeType: String,
+    tokenPrice: Number,
+    requiredTalentToken: String,
+    fulfillmentMethod: String,
+    meetupCoordinates: { lat: Number, lng: Number, locationDescription: String },
+    craftingSuperabilitySource: String,
+    isSealedByCouncil: Boolean
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('AgoraListing')) {
+    await mongoose.model('AgoraListing').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎪 SUITE 24: VILLAGE TRADING POST & BARTER MECHANICS VALIDATIONS
+// ==========================================================================
+describe('The Agora Village Barter Engine and Talent Validation Gates', () => {
+
+  it('should successfully execute a talent barter swap if the buyer holds the requested active superability', async () => {
+    const buyer = await User.create({ 
+      username: 'TalentedSmith', 
+      tokens: 0, 
+      activeSuperability: 'TELEKINESIS_OVERCHARGE',
+      characterBio: 'Awoken Node'
+    });
+    
+    const seller = await User.create({ username: 'VillageInventor', tokens: 0 });
+
+    const listing = await mongoose.model('AgoraListing').create({
+      listingId: "list_relic_77",
+      sellerUsername: "VillageInventor",
+      title: "Pneumatic Wind-Shear Capacitor",
+      description: "Independent mechanical invention that concentrates local air movements.",
+      exchangeType: "TALENT_BARTER_EXCHANGE",
+      requiredTalentToken: "TELEKINESIS_OVERCHARGE",
+      fulfillmentMethod: "LOCAL_VILLAGE_MEETUP",
+      meetupCoordinates: { lat: 31.7683, lng: 35.2137, locationDescription: "At the Pearlescent Gate" },
+      craftingSuperabilitySource: "Psionic Engineering",
+      isSealedByCouncil: false
+    });
+
+    const response = await request(app)
+      .post('/api/agora/purchase-or-barter')
+      .send({
+        buyerUsername: 'TalentedSmith',
+        listingId: 'list_relic_77',
+        executionFulfillmentChoice: 'LOCAL_VILLAGE_MEETUP'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.listingState).toBe('ORDER_SEALED');
+    expect(response.body.message).toContain('Meetup coordinated');
+
+    const checkListing = await mongoose.model('AgoraListing').findOne({ listingId: 'list_relic_77' });
+    expect(checkListing.isSealedByCouncil).toBe(true); // Verification gate confirms trade completed
+  });
+});
