@@ -1,0 +1,94 @@
+import React, { useState, useEffect } from 'react';
+
+export function ArmageddonChessHUD({ currentUser, socket }) {
+  const [matchData, setMatchData] = useState(null);
+  const [selectedPiece, setSelectedPiece] = useState('Ophanim_Gyro_Knight');
+  const [activeTimelineLayer, setActiveTimelineLayer] = useState(0);
+
+  useEffect(() => {
+    socket.emit('request_active_chess_match', { username: currentUser.name });
+    socket.on('chess_match_state_payload', (data) => {
+      setMatchData(data);
+    });
+    return () => socket.off('chess_match_state_payload');
+  }, [currentUser, socket]);
+
+  const handleJoinQueue = () => {
+    socket.emit('join_armageddon_matchmaking', { userEmail: currentUser.email });
+    alert("⚔️ Entering Armageddon Matchmaking Queue. Synchronizing 5D tensor arrays across the Aether Network...");
+  };
+
+  const dispatch5DMove = async (coords) => {
+    try {
+      const response = await fetch('/api/chess/execute-5d-move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          matchId: matchData?.matchId || "demo_match_111",
+          playerEmail: currentUser.email,
+          targetPieceId: selectedPiece,
+          proposed5DCoordinates: coords
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🎮 Move Validated: ${data.message}`);
+      } else {
+        alert(`❌ Tactical Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Failed to commit 5D canvas transform sequence:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', right: '24px', width: '380px', maxHeight: '80%', background: 'linear-gradient(135deg, rgba(11,19,43,0.98) 0%, rgba(234,179,8,0.02) 100%)', border: '2px solid #d97706', borderRadius: '16px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px dashed #d97706', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>⚔️ 5D Battle for Armageddon Room</h3>
+        <span style={{ fontSize: '10px', color: '#fcd34d' }}>Tactical Training Extension Page • Active High Score Tracking</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        
+        {/* --- HIGH SCORE & BADGE PROGRESSION PORTAL --- */}
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(217,119,6,0.2)', fontSize: '11px', textAlign: 'left' }}>
+          <span style={{ color: '#fbbf24', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>🏆 Your Tactical Achievements</span>
+          <div>• Best Arena High Score: <strong>🪙 4,200 ST</strong></div>
+          <div>• Earned Profile Badge: <span className="badge-indicator" style={{ backgroundColor: 'rgba(217,119,6,0.15)', color: '#f59e0b', fontSize: '9px', fontWeight: 'bold' }}>🥇 Grandmaster of the First Sphere</span></div>
+        </div>
+
+        {matchData?.status === 'ARMAGEDDON_ACTIVE' ? (
+          <div style={{ textAlign: 'left', fontSize: '12px' }}>
+            <span style={{ color: '#34d399', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>🟢 BATTLEFIELD STATUS: ACTIVE</span>
+            
+            {/* Visual multi-timeline dimensional layers controls selector */}
+            <div className="metric-row" style={{ marginBottom: '8px' }}>
+              <span>View Timeline Layer (Dimension W):</span>
+              <select value={activeTimelineLayer} onChange={(e) => setActiveTimelineLayer(parseInt(e.target.value))} style={{ background: '#0f172a', color: '#fff', fontSize: '11px', padding: '4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <option value={0}>Timeline Alpha (Original State)</option>
+                <option value={1}>Timeline Beta (Chrono Shift Axis)</option>
+              </select>
+            </div>
+
+            {/* Simulated 5D coordinates movement buttons action trigger */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '10px' }}>
+              <button onClick={() => dispatch5DMove([2, 4, 1, activeTimelineLayer, 0])} className="buy-upgrade-btn" style={{ background: '#d97706', padding: '8px' }}>
+                🚀 Launch Quantum Superposition Step [2, 4, 1, {activeTimelineLayer}, 0]
+              </button>
+              <button onClick={() => dispatch5DMove([0, 0, 0, -1, 0])} className="buy-upgrade-btn" style={{ background: '#475569', padding: '4px', fontSize: '10px' }}>
+                ⚠️ Trigger Experimental Stalemate Loop (House Intersession)
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <p style={{ fontSize: '12px', color: '#cbd5e1', margin: '0 0 12px 0' }}>No active multiplayer match detected over your current grid sector.</p>
+            <button onClick={handleJoinQueue} className="buy-upgrade-btn" style={{ width: '100%', background: '#d97706', fontWeight: 'bold' }}>
+              ⚔️ Join Armageddon Arena Queue
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
