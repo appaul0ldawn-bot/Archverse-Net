@@ -1,0 +1,24 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧭 THE IMMUTABLE MORAL ABSOLUTE LEDGER SCHEMAS
+// ==========================================================================
+const MoralAbsoluteLedgerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // --- MANDATE VECTOR 1: BODILY TEMPLE SANCTITY ---
+  hygienePurityScore: { type: Number, default: 100 }, // Deducts if logging toxic environments
+  nutritionalMannaBalance: { type: Number, default: 100 }, // Monitored via alchemical intake choices
+  physicalKineticOutput: { type: Number, default: 0 },    // Linked to daily device exercise steps
+
+  // --- MANDATE VECTOR 2: SOCIAL INTEGRITY ---
+  sovereignPropertyHonor: { type: Boolean, default: true }, // Absolute ban on theft ("do not steal")
+  sacredLifePreservation: { type: Boolean, default: true },  // Absolute ban on destruction ("do not kill")
+  mannerismsGraceIndex: { type: Number, default: 1.0 },     // Text sentiment tone evaluation
+
+  // --- CELESTIAL WEIGHT BALANCES (Libra Engine) ---
+  libraEquilibriumRatio: { type: Number, default: 1.0 }, // Balanced exactly at 1.0 for perfect alignment
+  lastVirtuesAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('MoralAbsoluteLedger', MoralAbsoluteLedgerSchema);
