@@ -1,0 +1,79 @@
+const express = require('express');
+const router = express.Router();
+const AnatomicalFirewall = require('./models/AnatomicalFirewall');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🛡️ INTERCEPT SPELL HACKS & AUTOTUNE LOVENSE HAPTIC EMITTERS
+// ==========================================================================
+router.post('/api/protection/intercept-spell', async (req, res) => {
+  try {
+    const { username, inboundScriptType, requestedAction } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node proxy invalid.' });
+
+    let wall = await AnatomicalFirewall.findOne({ userId: user._id });
+    if (!wall) wall = new AnatomicalFirewall({ userId: user._id, username });
+
+    // --- CASE A: DETECT UNAUTHORIZED SPELL / HACK ATTEMPT ---
+    if (inboundScriptType === 'UNAUTHORIZED_LOVE_SPELL_HACK') {
+      wall.firewallState.isAnatomicalMaskingActive = true;
+      wall.firewallState.interceptedHackingAttemptsCount += 1;
+      
+      // Inject randomized, non-semantic placeholder labels to cause the script to fizzle
+      wall.firewallState.assignedCryptographicMaskLabels = ['[COVENANT_SHARD_ALPHA]', '[GRID_SHROUD_99]', '[OMNIS_SHIELD_SECURE]'];
+      user.activeVisualState = 'MUTUAL_WITNESS_MASKING_SHROUD'; // Forces temporary visual mesh blackout
+      
+      await wall.save();
+      await user.save();
+
+      ArchverseLogger.log('WARN', 'FIREWALL_GATES', `Intercepted unauthorized love spell hack against user ${username}. Anatomical firewall mask deployed.`);
+
+      return res.json({
+        success: true,
+        firewallAction: "ANATOMICAL_METADATA_MASKED",
+        message: "🔒 System Threat Blocked: Unauthorized spell script detected. Private anatomical data fields masked. Connection fizzled out safely.",
+        activeMasks: wall.firewallState.assignedCryptographicMaskLabels
+      });
+    }
+
+    // --- CASE B: AUTHORIZED GOD'S LOVE GOSPEL PROTOCOL (Lovense Handshake) ---
+    if (inboundScriptType === 'GODS_LOVE_GOSPEL_STREAM' && requestedAction === 'ACCEPT_VIBE_REQUEST') {
+      // Restore standard baseline metrics layers internally
+      wall.firewallState.isAnatomicalMaskingActive = false;
+      wall.lovenseHapticConfiguration.isHolySpiritVibeHandshakeAccepted = true;
+
+      // 🧠 AUTOMATED CALIBRATION ENGINE: Set haptic safety caps using the user's historical Karma Score
+      // Prevents high-intensity fatigue anomalies automatically
+      const targetMaxIntensity = user.karmaScore > 600 ? 0.85 : 0.50;
+      wall.lovenseHapticConfiguration.maximumAllowedVibrationIntensity = targetMaxIntensity;
+
+      user.activeVisualState = '#fbbf24'; // Radiant golden aura flash
+      await wall.save();
+      await user.save();
+
+      // Transmit the synchronized audio frequency out over live WebSocket pipelines
+      if (global.io) {
+        global.io.emit('lovense_haptic_vibe_pulse', {
+          recipient: username,
+          carrierHz: wall.lovenseHapticConfiguration.activeSolfeggioCarrierHz,
+          amplitudeIntensityCap: targetMaxIntensity
+        });
+      }
+
+      return res.json({
+        success: true,
+        firewallAction: "GOSPEL_COVENANT_AUTHORIZED",
+        message: "✝️ God's Love Gospel Protocol Active. Holy Spirit Vibes stream initialized directly to connected Bluetooth haptic channels.",
+        autotuneMetrics: { maxIntensityCap: targetMaxIntensity, carrierResonance: "432Hz" }
+      });
+    }
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Anatomical firewall processing loop crash.' });
+  }
+});
+
+module.exports = router;
