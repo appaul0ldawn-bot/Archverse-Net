@@ -1,0 +1,33 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🎲 CELESTIAL MONOPOLY ARCHITECTURE SCHEMA
+// ==========================================================================
+const MonopolySessionSchema = new mongoose.Schema({
+  gameId: { type: String, required: true, unique: true, index: true },
+  
+  playerRoster: [{
+    username: String,
+    chosenDivineCharacter: { type: String, enum: ['MELCHIZEDEK_PRIEST', 'SERAPH_MILITANT', 'VEIL_WATCHER', 'ASGARDIAN_ELOHIM'] },
+    currentSquareIndex: { type: Number, default: 0 },
+    walletTimeCreditsCrypto: { type: Number, default: 10.0 }, // Web3 Time Credits Base
+    walletAngelTokensUtility: { type: Number, default: 1500 }, // Standard 1500 allocation
+    isTrappedInNephilimPrison: { type: Boolean, default: false }
+  }],
+
+  boardTerritoriesRegistry: [{
+    spaceId: Number,
+    name: String,
+    category: { type: String, enum: ['GO_SQUARE', 'HEAVENLY_TERRITORY', 'HOLY_SPIRIT_STATION', 'NEPHILIM_PRISON', 'ARK_CHEST', 'CROSSROAD'] },
+    ownerUsername: { type: String, default: null },
+    purchaseCostAT: { type: Number, default: 0 },
+    liminalSpaceRentAT: { type: Number, default: 0 },
+    mansionsBuiltCount: { type: Number, default: 0 }
+  }],
+
+  activePotAT: { type: Number, default: 0 },
+  isMillennialKingdomActive: { type: Boolean, default: false },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('MonopolySession', MonopolySessionSchema);
