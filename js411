@@ -1,0 +1,32 @@
+import React, { useState } from 'react';
+
+const GENIE_LAMPS_DB = [
+  { id: 'l1', type: 'Marid Altar Lamp', element: 'High-Tier Water Current Anomaly', lore: "Attributed during Old Testament times as majestic spirit caretakers, later witnessed during Belshazzar's feast writing fire coordinates on the wall structures." },
+  { id: 'l2', type: 'Ifrit Fire Vessel', element: 'Combustion Plasma Shroud', lore: "Extreme heat threshold containers holding volatile energetic forces." }
+];
+
+export function WishingWellLampRoom() {
+  const [activeLamp, setActiveLamp] = useState('l1');
+  const selected = GENIE_LAMPS_DB.find(l => l.id === activeLamp);
+
+  return (
+    <div className="login-card" style={{ maxWidth: '600px', margin: '20px auto' }}>
+      <div style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 700, textTransform: 'uppercase', marginBottom: '8px' }}>
+        🏺 Ancient Genie Lamp Vault (Holy Spirit Intercepts)
+      </div>
+      
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+        {GENIE_LAMPS_DB.map(l => (
+          <button key={l.id} onClick={() => setActiveLamp(l.id)} className={`custom-option-btn ${activeLamp === l.id ? 'active' : ''}`}>
+            🏺 {l.type}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '14px', borderRadius: '10px', fontSize: '12px', textAlign: 'left' }}>
+        <strong style={{ color: '#fbbf24' }}>Classification: {selected.element}</strong>
+        <p style={{ margin: '6px 0 0 0', color: '#cbd5e1', lineHeight: 1.4 }}>"{selected.lore}"</p>
+      </div>
+    </div>
+  );
+}
