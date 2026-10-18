@@ -1,0 +1,64 @@
+import React, { useState } from 'react';
+
+export function IdentitySwapHUD({ adminEmail }) {
+  const [p1, setP1] = useState('');
+  const [p2, setP2] = useState('');
+  const [swapData, setSwapData] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const executeIdentitySwapMod = async () => {
+    if (!p1.trim() || !p2.trim()) return;
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/api/admin/initialize-identity-swap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminEmail: adminEmail,
+          playerOneUsername: p1.trim(),
+          playerTwoUsername: p2.trim()
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSwapData(data);
+        alert("🎭 Identity Swap Mod Activated! Cosmetic meshes coupled for 24 hours. Financial parameters isolated.");
+      } else {
+        alert(`❌ Swap Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Identity swap handshake loop connection drop:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '760px', width: '350px', borderColor: '#a855f7', background: 'linear-gradient(135deg, #0b0f19 0%, rgba(168,85,247,0.02) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(168,85,247,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#c084fc', fontFamily: 'serif' }}>🎭 Identity Swap Mod Panel</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Couple two player containers for temporary monthly identity masking. Enforces total data and financial isolation parameters automatically.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+        <input type="text" value={p1} onChange={(e) => setP1(e.target.value)} placeholder="Player One Username..." style={{ background: 'rgba(0,0,0,0.4)', padding: '8px', color: '#fff', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px' }} />
+        <input type="text" value={p2} onChange={(e) => setP2(e.target.value)} placeholder="Player Two Username..." style={{ background: 'rgba(0,0,0,0.4)', padding: '8px', color: '#fff', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px' }} />
+      </div>
+
+      
+        {isProcessing ? '🔄 Coupling Identity Tensors...' : '⚡ Ignite Identity Swap Override'}
+      </button>
+
+      {swapData && (
+        <div style={{ marginTop: '12px', background: 'rgba(168,85,247,0.06)', border: '1px solid #a855f7', padding: '10px', borderRadius: '8px', textAlign: 'left', fontSize: '11px', color: '#cbd5e1' }}>
+          <div>🛡️ <strong>Routing Status:</strong> {swapData.routingStatus}</div>
+          <div style={{ color: '#34d399', marginTop: '4px', fontStyle: 'italic' }}>🔒 {swapData.verification}</div>
+        </div>
+      )}
+    </div>
+  );
+}
