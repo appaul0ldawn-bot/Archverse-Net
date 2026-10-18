@@ -1,0 +1,63 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Morality Vortex tracking model within our testing sandbox
+  mongoose.model('SimsRightLedger', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    funnelTelemetryInbound: { gematriaNameWeightScore: Number, calculatedIqScore: Number, chronoAgeYears: Number, activeZodiacElement: String, accumulatedEffortTimeMinutes: Number, playlistDominantFrequencyHz: Number },
+    yinYangEquilibriumMatrix: { yinLightworkOutputScale: Number, yangGroundingRoutineScale: Number, currentPolarityBalanceRatio: Number },
+    filteredAscensionYield: { allocatedAngelTokensReward: Number, assigned7HeavensSphereBadge: String, vortexAuditStatus: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('SimsRightLedger')) {
+    await mongoose.model('SimsRightLedger').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌪️ SUITE 35: SIM'S RIGHT VORTEX FILTER & POLARITY RATIO PROTECTION GATES
+// ==========================================================================
+describe('Archverse Sim\'s Right Morality Vortex Optimization Pipelines', () => {
+
+  it('should detect a polarity overcharge when lightwork output dominates grounding scales, and cut token reward velocity by 50%', async () => {
+    const player = await User.create({ username: 'OverchargedStarseed', tokens: 100, karmaScore: 10, zodiacElement: 'Air' });
+
+    // Seed a profile holding low physical grounding parameters (low karma) to trigger a high polarity ratio check
+    await mongoose.model('SimsRightLedger').create({
+      userId: player._id,
+      funnelTelemetryInbound: { gematriaNameWeightScore: 150, calculatedIqScore: 140, chronoAgeYears: 20, activeZodiacElement: 'Air', accumulatedEffortTimeMinutes: 10, playlistDominantFrequencyHz: 963 },
+      yinYangEquilibriumMatrix: { yinLightworkOutputScale: 1.0, yangGroundingRoutineScale: 1.0, currentPolarityBalanceRatio: 1.0 }
+    });
+
+    const response = await request(app)
+      .post('/api/vortex/sort-accomplishment')
+      .send({
+        username: 'OverchargedStarseed',
+        completedMissionId: 'ms_light_999',
+        sessionEffortMinutes: 120, // Massive session effort causes high polarity expansion surge
+        activeCoordinates: [31.7683, 35.2137]
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.vortexAudit).toBe('POLARITY_OVERCHARGE'); // Velocity cap protection verified
+    expect(response.body.rewardsAllocated.unlockedSphereRank).toBe('Moon (Inconstant Spirits)');
+  });
+});
