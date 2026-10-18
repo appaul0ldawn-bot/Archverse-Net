@@ -1,0 +1,67 @@
+import React, { useState } from 'react';
+
+export function WagerArenaHUD({ currentUsername, targetMissionId, socket }) {
+  const [stake, setStake] = useState(50);
+  const [prediction, setPrediction] = useState('SUCCESS');
+
+  const handleCommitWager = async () => {
+    try {
+      const response = await fetch('/api/wagers/place', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bettorUsername: currentUsername,
+          targetMissionId: targetMissionId,
+          tokenStake: stake,
+          prediction: prediction
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🎲 Wager Sealed! Remaining Treasury Balance: 🪙 ${data.currentBalance} ST`);
+      } else {
+        alert(`❌ Arena Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Failed to commit wager payload:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '380px', width: '350px', borderColor: '#b45309' }}>
+      <div className="store-header" style={{ borderColor: '#b45309' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>🎲 The Observation Betting Arena</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Bet Soul Tokens on outside mission successes or failures. Executing nodes must share proof to profile walls. House wins stalamate disputes.
+      </p>
+
+      {/* Stake & Direction Controls */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', marginBottom: '10px', textAlign: 'left' }}>
+        <div className="metric-row">
+          <span style={{ fontSize: '12px' }}>Token Stake Amount:</span>
+          <input type="range" min="10" max="200" step="10" value={stake} onChange={(e) => setStake(parseInt(e.target.value))} style={{ width: '120px', accentColor: '#fbbf24' }} />
+          <span style={{ fontSize: '11px', fontWeight: 'bold' }}>🪙 {stake} ST</span>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+          <span style={{ fontSize: '12px', color: '#cbd5e1' }}>Predict Completion:</span>
+          <select value={prediction} onChange={(e) => setPrediction(e.target.value)} style={{ background: '#0f172a', color: '#fff', fontSize: '11px', padding: '4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <option value="SUCCESS">👍 Succeeded (Mission Complete)</option>
+            <option value="FAILURE">👎 Failed / Aborted</option>
+          </select>
+        </div>
+      </div>
+
+      <button onClick={handleCommitWager} className="buy-upgrade-btn" style={{ width: '100%', background: 'linear-gradient(45deg, #b45309, #d97706)', color: '#fff', fontWeight: 'bold' }}>
+        🎲 Seal Mission Observation Wager
+      </button>
+
+      {/* --- CONFIRMATION WALL PROOF PROJECTION --- */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px', marginTop: '10px', textAlign: 'left', fontSize: '10px', color: '#94a3b8' }}>
+        📢 <strong>Wall Feed Confirmation Proof Requirements:</strong> Executing players must attach verified multi-sensor logs to public streams. Anti-cheat loops filter out forged transactions automatically.
+      </div>
+    </div>
+  );
+}
