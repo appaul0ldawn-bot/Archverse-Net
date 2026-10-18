@@ -1,0 +1,66 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('CelestialMatch', new mongoose.Schema({
+    matchId: String,
+    factionAngelicUserId: mongoose.Schema.Types.ObjectId,
+    factionDemonicUserId: mongoose.Schema.Types.ObjectId,
+    activeBoardTensorState: Array,
+    matchStatus: String,
+    highScoreST: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('CelestialMatch')) {
+    await mongoose.model('CelestialMatch').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎮 SUITE 30: 5D MULTIVERSAL CHESS CHANNELS & HOUSE STALEMATE GATES
+// ==========================================================================
+describe('Archverse 5D Celestial Chess Engine & Battle Mechanics', () => {
+
+  it('should verify that the server successfully awards victory parameters to the House if a stalemate timeline loop is triggered', async () => {
+    const adminUser = await User.create({ email: 'zethreigns@gmail.com', username: 'Masterpaul', tokens: 100 });
+
+    await mongoose.model('CelestialMatch').create({
+      matchId: "match_fail_999",
+      activeBoardTensorState:,
+      matchStatus: 'ARMAGEDDON_ACTIVE',
+      highScoreST: 5000
+    });
+
+    const response = await request(app)
+      .post('/api/chess/execute-5d-move')
+      .send({
+        matchId: 'match_fail_999',
+        playerEmail: 'zethreigns@gmail.com',
+        targetPieceId: 'Michael_Viceroy_King',
+        proposed5DCoordinates: [0, 0, 0, -1, 0] // -1 initiates an automatic stalemate check override trigger
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.matchState).toBe('HOUSE_STALEMATE_WIN'); // Verify anti-cheat stalemate logic locks assets to the Admin House
+
+    const checkMatch = await mongoose.model('CelestialMatch').findOne({ matchId: 'match_fail_999' });
+    expect(checkMatch.matchStatus).toBe('HOUSE_STALEMATE_WIN');
+  });
+});
