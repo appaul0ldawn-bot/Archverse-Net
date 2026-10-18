@@ -1,0 +1,18 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 ARCHON REGISTRY & DEMIURGIC FREQUENCY SCHEMA
+// ==========================================================================
+const ArchonRegistrySchema = new mongoose.Schema({
+  archonId: { type: String, required: true, unique: true, index: true },
+  gnosticName: { type: String, required: true }, // e.g., 'Yaldabaoth', 'Saklas', 'Samael'
+  associatedSphere: { type: String, required: true }, // e.g., '6th Circle: Heresy', '7th Heaven Boundary'
+  frequencyInterferenceHz: Number, // Low-vibrational noise loops used to trap souls
+  counterSolfeggioHz: Number,     // High-vibrational angelic antidote frequency
+  loreMetadata: {
+    textSource: String,           // Sourced from Apocryphon of John, Hypostasis of the Archons
+    description: String
+  }
+});
+
+module.exports = mongoose.model('ArchonRegistry', ArchonRegistrySchema);
