@@ -1,0 +1,64 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Identity Codex model within our testing memory sandbox cluster
+  mongoose.model('IdentityCodex', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    profileNameFields: { givenName: String, middleName: String, surName: String, spiritualMoniker: String },
+    linguisticEtymology: { rootOriginLanguage: String, primordialMeaningText: String, congruentMythologicalArchetype: String },
+    ancestralGenealogy: { assignedIsraeliteTribe: String, bloodlineGenerationIndex: Number, generationalCurseStatus: String },
+    proceduralAttributes: { baseResonanceHz: Number, auraShaderTintHex: String, unlockedSuperabilityId: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('IdentityCodex')) {
+    await mongoose.model('IdentityCodex').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 📜 SUITE 31: PROFILE NAME FIELDS ETYMO-GENEALOGICAL INGESTIONS
+// ==========================================================================
+describe('Archverse Identity Codex Multi-Field Name Parsing Pipeline', () => {
+
+  it('should successfully parse composite name fields, compute alphanumeric hashes, and resolve a persistent tribal allocation entry', async () => {
+    const player = await User.create({ username: 'MasterPaulSovereign', tokens: 100, characterBio: 'Awoken Node' });
+
+    // Ingest data packet over the server profile parsing routers endpoint loops
+    const response = await request(app)
+      .post('/api/identity/compile-profile-names')
+      .send({
+        username: 'MasterPaulSovereign',
+        givenName: 'Paul',
+        middleName: 'Asher',
+        surName: 'Sovereign',
+        moniker: 'ZethReigns'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.genealogyReport.assignedIsraeliteTribe).toBeDefined(); // Confirms mathematical tribe assignment resolved
+    expect(response.body.injectedAttributes.baseResonanceHz).toBeDefined(); // Confirms Solfeggio pitch code returned
+    expect(response.body.etymologyReport.rootOriginLanguage).toBe('Paleo-Hebrew');
+
+    // Confirm changes match user profile indicators badge updates
+    const updatedUser = await User.findOne({ username: 'MasterPaulSovereign' });
+    expect(updatedUser.rankBadge).toContain('Tribe of ');
+  });
+});
