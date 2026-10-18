@@ -1,0 +1,82 @@
+import React, { useState, useEffect } from 'react';
+
+export function AncestralLineageHUD({ currentUsername, socket }) {
+  const [lineageData, setLineageData] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    socket.emit('request_player_lineage_matrix', { username: currentUsername });
+    socket.on('player_lineage_payload', (data) => {
+      setLineageData(data);
+    });
+    return () => socket.off('player_lineage_payload');
+  }, [currentUsername, socket]);
+
+  const triggerLineageSync = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/lineage/sync-calling', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUsername })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🧬 Pattern Recognition Complete!\nLineage Aligned: ${data.ancestralMatchName}`);
+      }
+    } catch (e) {
+      console.error("Failed to compile ancestral alignment packet:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '380px', width: '360px', borderColor: '#fbbf24', background: 'linear-gradient(135deg, #0b0f19 0%, rgba(234,179,8,0.02) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(234,179,8,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>🌌 Ancestral Lineage & Calling Radar</h3>
+        <span style={{ fontSize: '9px', color: '#64748b' }}>Singular Name Pattern Recognition Active • Virtues Oversight</span>
+      </div>
+
+      {lineageData ? (
+        <div style={{ padding: '12px', fontSize: '11px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px', color: '#cbd5e1' }}>
+          
+          {/* --- CONFIDENCE RATING OVERVIEW CARD --- */}
+          <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(234,179,8,0.1)' }}>
+            <div className="metric-row">
+              <span>🌟 Lineage Congruence Match:</span>
+              <strong style={{ color: '#fbbf24' }}>{lineageData.ancestralMatchName} ({lineageData.confidenceRating})</strong>
+            </div>
+            <p style={{ margin: '6px 0 0 0', fontSize: '11px', lineHeight: 1.4, color: '#e2e8f0', fontStyle: 'italic' }}>
+              "{lineageData.propheticCalling}"
+            </p>
+          </div>
+
+          {/* --- REPEATING RECURRENT FACTORS PHENOMENON LEDGER --- */}
+          <div className="dashboard-section-title">Tracked Repeating Testimonies & Lessons</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: '6px' }}>
+            {lineageData.trackedFactors.map((factor, i) => (
+              <div key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '4px', marginBottom: '2px', color: '#94a3b8' }}>
+                {factor}
+              </div>
+            ))}
+          </div>
+
+          <button 
+            onClick={() => socket.emit('claim_lineage_lightworker_mission', { username: currentUsername })}
+            className="buy-upgrade-btn" style={{ width: '100%', marginTop: '6px', background: '#fbbf24', color: '#0f172a', fontWeight: 'bold' }}
+          >
+            🚀 Claim Aligned Patron Lightworker Mission (+250 AT)
+          </button>
+        </div>
+      ) : (
+        <div style={{ padding: '20px', fontSize: '11px', color: '#64748b', textAlign: 'center' }}>
+          <p style={{ margin: '0 0 10px 0' }}>Sovereign pattern ciphers unaligned over your profile name.</p>
+          <button onClick={triggerLineageSync} disabled={isProcessing} className="buy-upgrade-btn" style={{ width: '100%', background: '#475569' }}>
+            {isProcessing ? '🔄 Synchronizing Callings...' : '🧬 Synchronize Patron Lineage Map'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
