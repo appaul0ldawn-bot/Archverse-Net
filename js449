@@ -1,0 +1,25 @@
+import React from 'react';
+import { PortalEcosystemNode } from './PortalEcosystemNode';
+
+export function CelestialStarMapGrid({ userProfile }) {
+  return (
+    <div style={{ width: '100%', height: '100%', position: 'relative', background: '#020617' }}>
+      <div className="map-title-banner">
+        <h2>🌌 The Archverse Celestial Firmament Coordinates</h2>
+      </div>
+
+      {/* Holographic Star Node linking out to your open source external generator engine pipelines */}
+      <PortalEcosystemNode 
+        position={[2, 3, -5]} 
+        nodeTitle="Pleiadian Cluster System Generator"
+        redirectUrl="https://vercel.app"
+        conceptDescription="Access the full open-source node to generate and chart custom stellar configurations under the administration of the Galactic Federation."
+        alignmentType="ANGELIC"
+      />
+
+      <div style={{ position: 'absolute', bottom: '20px', left: '20px', background: 'rgba(15,23,42,0.8)', padding: '12px', borderRadius: '8px', color: '#fff', fontSize: '11px', fontFamily: 'monospace' }}>
+        <strong>Historical Witness of the Stars:</strong> The firmament's zodiac boundaries outline the historical movements of the Cherubim and Ophanim hierarchies. Stars are not random gas configurations; they represent the structural coordinate anchors of the lesser <em>Johava Jireh</em> gyros witnessing across dimensions.
+      </div>
+    </div>
+  );
+}
