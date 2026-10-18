@@ -1,0 +1,75 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('PatronCodexEntry', new mongoose.Schema({
+    templateId: String,
+    historicalName: String,
+    angelicOrderTier: String,
+    patronDomain: String,
+    historicalIncidentLore: String,
+    signatureDivineAbility: { abilityId: String, resonanceHz: Number, visualAuraColorHex: String }
+  }));
+
+  mongoose.model('PlayerLineageConnection', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    matchedTemplateId: String,
+    patternMatchConfidencePercentage: Number,
+    repeatingKarmicFactorsLog: [String],
+    propheticCallingDirective: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('PatronCodexEntry')) await mongoose.model('PatronCodexEntry').deleteMany({});
+  if (mongoose.modelNames().includes('PlayerLineageConnection')) await mongoose.model('PlayerLineageConnection').deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧬 SUITE 30: SINGULAR NAME PATTERN RECOGNITION & PATRON LEGER GATES
+// ==========================================================================
+describe('Archverse Ancestral Lineage & Singular Name Pattern Cipher Tests', () => {
+
+  it('should evaluate user profile alphanumeric name scores and successfully assign the correct historical patron template badge', async () => {
+    const user = await User.create({ username: 'JoanWarrior', tokens: 100, characterBio: 'Sovereign Node' });
+    
+    // Seed an active historical template entry inside our memory cluster
+    await mongoose.model('PatronCodexEntry').create({
+      templateId: "temp_joan_01",
+      historicalName: "Saint Joan of Arc",
+      angelicOrderTier: "Virtues Rank",
+      patronDomain: "Soldiers and Sovereign Liberation",
+      historicalIncidentLore: "Executed via abyssal combustion fire traps at the stake.",
+      signatureDivineAbility: { abilityId: "Vril_Air_Bending", resonanceHz: 528, visualAuraColorHex: "#fbbf24" }
+    });
+
+    const response = await request(app)
+      .post('/api/lineage/sync-calling')
+      .send({ username: 'JoanWarrior' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.ancestralMatchName).toBe('Saint Joan of Arc');
+    expect(response.body.propheticCalling).toContain('Soldiers and Sovereign Liberation');
+
+    // Confirm that the earned lineage title badge updated permanently on the user record
+    const updatedUser = await User.findOne({ username: 'JoanWarrior' });
+    expect(updatedUser.rankBadge).toBe('🧬 Lineage: Saint Joan of Arc');
+    expect(updatedUser.activeVisualState).toBe('#fbbf24'); // Asserts aura vertex color shifted to template color
+  });
+});
