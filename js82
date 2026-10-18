@@ -1,0 +1,66 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Identity Swap tracking model within our testing sandbox
+  mongoose.model('IdentitySwap', new mongoose.Schema({
+    swapSessionId: String,
+    originalUserRefId: mongoose.Schema.Types.ObjectId,
+    swappedTargetUserRefId: mongoose.Schema.Types.ObjectId,
+    expiresAt: Date
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('IdentitySwap')) {
+    await mongoose.model('IdentitySwap').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎭 SUITE 32: IDENTITY SWAPPING & FINANCIAL DATA ISOLATION CHECKS
+// ==========================================================================
+describe('Archverse Admin Identity Swap Mod Financial Isolation Gating', () => {
+
+  it('should successfully swap cosmetic rank badges for shadow work while strictly preserving user token balances', async () => {
+    const userA = await User.create({ username: 'HighTierSeraph', tokens: 9000, rankBadge: 'Saturn (Contemplative High Archons)', activeVisualState: '#fbbf24' });
+    const userB = await User.create({ username: 'NoviceLightworker', tokens: 150, rankBadge: 'Moon (Inconstant Spirits)', activeVisualState: '#38bdf8' });
+
+    const response = await request(app)
+      .post('/api/admin/initialize-identity-swap')
+      .send({
+        adminEmail: 'zethreigns@gmail.com', // Whitelisted Admin Handle
+        playerOneUsername: 'HighTierSeraph',
+        playerTwoUsername: 'NoviceLightworker'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.routingStatus).toBe('SHADOW_WORK_REDIRECTS_SECURED');
+
+    // Re-query database to verify absolute wallet isolation parameters held true
+    const postSwapUserA = await User.findOne({ username: 'HighTierSeraph' });
+    const postSwapUserB = await User.findOne({ username: 'NoviceLightworker' });
+
+    // Assert badges and styles coupled
+    expect(postSwapUserA.rankBadge).toBe('Moon (Inconstant Spirits)');
+    
+    // Assert financial token variables remained strictly un-mutated and isolated
+    expect(postSwapUserA.tokens).toBe(9000); 
+    expect(postSwapUserB.tokens).toBe(150);
+  });
+});
