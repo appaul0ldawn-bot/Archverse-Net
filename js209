@@ -1,0 +1,30 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 THE ARCHVERSE OMNIVERSAL MASTER ASSET LOGS SCHEMA
+// ==========================================================================
+const OmniAssetSchema = new mongoose.Schema({
+  assetId: { type: String, required: true, unique: true, index: true },
+  name: { type: String, required: true },
+  category: {
+    type: String,
+    enum: ['WEAPON', 'ART_WORK', 'MUSIC_FREQUENCY', 'NUTRITIONAL_MANNA', 'APPAREL_SHADING', 'INVENTION_IOT', 'SACRED_TEXT', 'VEHICLE_DRIVE', 'BIOLOGICAL_ANIMAL', 'SPIRITUAL_CREATURE', 'METAPHYSICAL_ESSENCE', 'REALM_DIMENSION'],
+    required: true
+  },
+  tokenCost: { type: Number, default: 0 }, // Purchase value inside the Divine Marketplace
+  vibrationalProperties: {
+    resonanceHz: Number,         // Connects directly to playability on the Solfeggio soundboard pages
+    quantumStateHash: String     // Interlaces with the Superposition Blink vectors
+  },
+  gameplayModifier: {
+    attributeMultiplier: Number, // Damage modifiers, speed boosts, or aura ranges
+    visualShaderOverride: String  // Hex code driving programmatic mesh transformation tints
+  },
+  loreMetadata: {
+    originTimeline: String,      // Epoch reference (e.g., Pre-Diluvian, Year 3028 AD, Millennial Reign)
+    citations: String,           // Sourced from Apocrypha, Enoch, Platonic Tradition, or Wikipedia
+    description: String
+  }
+});
+
+module.exports = mongoose.model('OmniAsset', OmniAssetSchema);
