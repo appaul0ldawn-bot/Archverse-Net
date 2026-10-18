@@ -1,0 +1,38 @@
+const nodemailer = require('nodemailer');
+const { ArchverseLogger } = require('./Logger');
+
+// Initialize the master mail transporter loop bound to the secure network
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.SYSTEM_EMAIL_USER, // e.g., notifications.archverse@gmail.com
+    pass: process.env.SYSTEM_EMAIL_PASS  // Encrypted app-specific application key
+  }
+});
+
+/**
+ * 🤖 Automated Flow-Bot Emergency Dispatcher
+ * Sends instant notifications when hardware boundaries or security shields trip
+ */
+export const dispatchFlowBotEmailAlert = async (alertSubject, htmlContentPayload) => {
+  const mailOptions = {
+    from: `"Zion Grid Flow-Bot" <${process.env.SYSTEM_EMAIL_USER}>`,
+    to: 'appaul0ldawn@gmail.com', // Bound exclusively to your master developer network profile
+    subject: `🚨 [Archverse Grid Alert]: ${alertSubject}`,
+    html: `
+      <div style="background:#020617; color:#fff; padding:20px; font-family:monospace; border:2px solid #38bdf8; border-radius:12px; box-shadow:0 0 15px rgba(56,189,248,0.2)">
+        <h2 style="color:#38bdf8; margin:0 0 10px 0; border-bottom:1px solid rgba(56,189,248,0.2); padding-bottom:10px">🌐 ZION COMPILATION GRID WARNING</h2>
+        <p style="font-size:13px; color:#cbd5e1; line-height:1.5">${htmlContentPayload}</p>
+        <hr style="border:0; border-top:1px dashed rgba(255,255,255,0.1); margin:15px 0" />
+        <span style="font-size:10px; color:#64748b">System Timestamp: ${new Date().toLocaleString()} | Failover Sync Active</span>
+      </div>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    ArchverseLogger.log('INFO', 'EMAIL_NOTIFY', `Flow-Bot successfully dispatched alert email to appaul0ldawn@gmail.com regarding: ${alertSubject}`);
+  } catch (err) {
+    ArchverseLogger.log('ERROR', 'EMAIL_NOTIFY', `Failed to route custom email alert: ${err.message}`);
+  }
+};
