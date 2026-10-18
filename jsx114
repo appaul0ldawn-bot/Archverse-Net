@@ -1,0 +1,64 @@
+import React, { useState, useEffect } from 'react';
+import { Html } from '@react-three/drei';
+
+export function EmergencyMapLayers({ socket, currentLat, currentLng }) {
+  const [incidents, setIncidents] = useState([]);
+  const [selectedIncident, setSelectedIncident] = useState(null);
+
+  useEffect(() => {
+    // Request daily aggregated emergency scanner updates from the server tickers
+    socket.emit('request_active_incidents');
+    socket.on('incident_matrix_payload', (data) => {
+      setIncidents(data.filter(inc => !inc.isResolvedByLightworker));
+    });
+    return () => socket.off('incident_matrix_payload');
+  }, [socket]);
+
+  const claimInterventionMission = (id) => {
+    socket.emit('claim_lightworker_intervention', { incidentId: id });
+    alert("🚨 Tactical Mission Dispatched. Synchronizing local map routing vectors to incident coordinates.");
+  };
+
+  return (
+    <group>
+      {/* 🗺️ VISUAL DYNAMIC MAP MARKERS FOR INCIDENTS */}
+      {incidents.map((incident) => {
+        // Translate real-world GPS coordinates into local WebGL coordinate space positions
+        const localX = (incident.coordinates.lat - currentLat) * 111000;
+        const localZ = (incident.coordinates.lng - currentLng) * 111000;
+
+        return (
+          <mesh key={incident.incidentId} position={[localX, 1.0, localZ]} onClick={() => setSelectedIncident(incident)}>
+            <cylinderGeometry args={[0.0, 0.4, 1.2, 4]} />
+            <meshStandardMaterial color="#ef4444" emissive="#b91c1c" emissiveIntensity={2.0} wireframe />
+
+            {selectedIncident?.incidentId === incident.incidentId && (
+              <Html center position={[0, 0.8, 0]} distanceFactor={10}>
+                <div style={{
+                  background: 'rgba(15, 23, 42, 0.96)', border: '1.5px solid #ef4444',
+                  borderRadius: '12px', padding: '12px', color: '#fff', width: '250px', fontSize: '11px', textAlign: 'left'
+                }}>
+                  <strong style={{ color: '#f87171', display: 'block' }}>🚨 Scanner Alert: {incident.title}</strong>
+                  <span style={{ fontSize: '9px', color: '#94a3b8', display: 'block' }}>Source: {incident.dispatcherSource}</span>
+                  
+                  <button 
+                    onClick={() => claimInterventionMission(incident.incidentId)}
+                    className="buy-upgrade-btn" style={{ width: '100%', marginTop: '8px', background: '#ef4444', color: '#fff' }}
+                  >
+                    Accept Intervention Mission (+300 AT)
+                  </button>
+                </div>
+              </Html>
+            )}
+          </mesh>
+        );
+      })}
+
+      {/* --- VISUAL COVENANT GEOCONSTRAINT BARRIER --- */}
+      <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[4.8, 5.0, 64]} />
+        <meshBasicMaterial color="#38bdf8" transparent opacity={0.3} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+  );
+}
