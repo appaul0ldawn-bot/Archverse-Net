@@ -1,0 +1,85 @@
+const express = require('express');
+const router = express.Router();
+const IdentityCodex = require('./models/IdentityCodex');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// Basic Letter-Weight Extraction Loop
+function calculateStringWeightScore(str) {
+  return str.toLowerCase().replace(/[^a-z]/g, '').split('')
+    .reduce((acc, char) => acc + (char.charCodeAt(0) - 96), 0);
+}
+
+// ==========================================================================
+// 🚀 INGEST NAME FIELDS & INJECT PROCEDURAL ATTRIBUTES
+// ==========================================================================
+router.post('/api/identity/compile-profile-names', async (req, res) => {
+  try {
+    const { username, givenName, middleName, surName, moniker } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Target user proxy node invalid.' });
+
+    let codex = await IdentityCodex.findOne({ userId: user._id });
+    if (!codex) codex = new IdentityCodex({ userId: user._id });
+
+    // Store raw input fields
+    codex.profileNameFields = { givenName, middleName, surName, spiritualMoniker: moniker };
+
+    // Calculate unique linguistic weights
+    const compositeWeight = calculateStringWeightScore(givenName) + 
+                            calculateStringWeightScore(middleName) + 
+                            calculateStringWeightScore(surName) + 
+                            calculateStringWeightScore(moniker);
+
+    // 🏛️ SEED PROCEDURAL GENEALOGY (12 Tribes remainder routing mapping)
+    const TRIBES = ['JUDAH', 'LEVI', 'EPHRAIM', 'MANASSEH', 'BENJAMIN', 'DAN', 'REUBEN', 'SIMEON', 'GAD', 'ASHER', 'ISSACHAR', 'ZEBULUN'];
+    codex.ancestralGenealogy.assignedIsraeliteTribe = TRIBES[compositeWeight % TRIBES.length];
+
+    // 🏛️ SEED PROCEDURAL ETYMO-ATTRIBUTES
+    // Map composite integers directly to specific Solfeggio soundboard frequencies
+    const TONES =;
+    codex.proceduralAttributes.baseResonanceHz = TONES[compositeWeight % TONES.length];
+
+    // Procedural color mapping generation driven by text string hashes
+    const colorShards = ['#38bdf8', '#fbbf24', '#a855f7', '#10b981', '#ef4444', '#ec4899'];
+    codex.proceduralAttributes.auraShaderTintHex = colorShards[compositeWeight % colorShards.length];
+
+    // Extract basic etymology roots based on given name components
+    if (givenName.toLowerCase().startsWith('m') || givenName.toLowerCase().startsWith('j')) {
+      codex.linguisticEtymology = {
+        rootOriginLanguage: "Paleo-Hebrew",
+        primordialMeaningText: "Sovereign Witness or Righteous Messenger of the Airwaves",
+        congruentMythologicalArchetype: "Michael's Forge Artisan"
+      };
+    } else {
+      codex.linguisticEtymology = {
+        rootOriginLanguage: "Classical Aramaic",
+        primordialMeaningText: "Awoken Seeker navigating the multi-verse firmament matrices",
+        congruentMythologicalArchetype: "Watcher of the Veil Scribe"
+      };
+    }
+
+    // Persist changes to user document state fields
+    user.rankBadge = `🧬 Tribe of ${codex.ancestralGenealogy.assignedIsraeliteTribe}`;
+    user.activeVisualState = codex.proceduralAttributes.customShaderTintHex;
+    
+    await codex.save();
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    ArchverseLogger.log('INFO', 'IDENTITY_ENG', `Compiled etymo-genealogy for profile: ${username}. Aligned with Tribe of ${codex.ancestralGenealogy.assignedIsraeliteTribe}`);
+
+    res.json({
+      success: true,
+      etymologyReport: codex.linguisticEtymology,
+      genealogyReport: codex.ancestralGenealogy,
+      injectedAttributes: codex.proceduralAttributes
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Identity compilation pipeline crash.' });
+  }
+});
+
+module.exports = router;
