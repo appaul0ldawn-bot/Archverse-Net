@@ -1,0 +1,27 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🎭 HISTORICAL PUN ARCHITECTURE & CONSTELLATION LEDGER SCHEMA
+// ==========================================================================
+const HistoricalPunSchema = new mongoose.Schema({
+  punId: { type: String, required: true, unique: true, index: true },
+  
+  // Semantic Vector Nodes (The Dots)
+  linguisticAnchors: {
+    historicalNameRef: { type: String, required: true }, // e.g., 'Pharaoh_Khufu', 'Julius_Caesar', 'Nimrod'
+    locationLabelRef: { type: String, required: true },   // e.g., 'Giza_Pyramid', 'Rubicon_Crossing', 'Babel_Tower'
+    actionTagRef: { type: String, required: true }         // e.g., 'Embalming', 'Manna_Harvest', 'Brutus_Betrayal'
+  },
+
+  // Alphanumeric Cipher Patterns
+  gematriaPatternSum: { type: Number, required: true }, // Numeric value used to draw constellation lines
+  vowelFreeConsonantString: { type: String, required: true }, // "The Letter Kills, The Word Lives" structural tracking [14.11]
+
+  // Output Content Card Manifest
+  curatedJokeTextPayload: { type: String, required: true },
+  celestialHumorClassification: { type: String, default: 'BIZARRE_TIMELINE_CONVERGENCE' },
+  
+  lastAcousticPulseAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('HistoricalPun', HistoricalPunSchema);
