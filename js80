@@ -1,0 +1,73 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const MonopolySession = require('./models/MonopolySession');
+
+// ==========================================================================
+// 🎰 TIME CREDITS CONVERTER & PRISON CONTAINMENT ENGINE
+// ==========================================================================
+router.post('/api/monopoly/convert-time-credits', async (req, res) => {
+  try {
+    const { gameId, username, timeCreditsToConvert } = req.body;
+    const game = await MonopolySession.findOne({ gameId });
+
+    if (!game) return res.status(404).json({ success: false, error: 'Celestial match session invalid.' });
+
+    const player = game.playerRoster.find(p => p.username === username);
+    if (!player || player.walletTimeCreditsCrypto < timeCreditsToConvert) {
+      return res.status(400).json({ success: false, error: 'Insolvent Time Credits balance inside Web3 wallet.' });
+    }
+
+    // Conversion rate calculation: 1 Time Credit crypto token yields 100 Angel Tokens
+    const generatedUtilityTokens = timeCreditsToConvert * 100;
+    player.walletTimeCreditsCrypto -= timeCreditsToConvert;
+    player.walletAngelTokensUtility += generatedUtilityTokens;
+
+    await game.save();
+    res.json({ success: true, newCryptoBalance: player.walletTimeCreditsCrypto, newUtilityBalance: player.walletAngelTokensUtility });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Financial conversion crash loop.' });
+  }
+});
+
+router.post('/api/monopoly/process-square-action', async (req, res) => {
+  try {
+    const { gameId, username, rolledSteps } = req.body;
+    const game = await MonopolySession.findOne({ gameId });
+    const player = game.playerRoster.find(p => p.username === username);
+
+    // Compute player translation around the 40-space firmament loop
+    const previousIndex = player.currentSquareIndex;
+    const nextIndex = (previousIndex + rolledSteps) % 40;
+    player.currentSquareIndex = nextIndex;
+
+    const currentSpace = game.boardTerritoriesRegistry.find(s => s.spaceId === nextIndex);
+    let logsReport = `Moved to space ${currentSpace.name}.`;
+
+    // PASS GO COVENANT: Pass God, collect 200 Souls (translated into 200 Angel Tokens)
+    if (nextIndex < previousIndex) {
+      player.walletAngelTokensUtility += 200;
+      logsReport += " Passed God, harvested 200 souls (+200 AT allocation).";
+    }
+
+    // NEPHILIM PRISON RULE
+    if (currentSpace.category === 'NEPHILIM_PRISON') {
+      player.isTrappedInNephilimPrison = true;
+      logsReport = "🚨 Cast down into the Prison of the Nephilim. Bypassing standard movement loops until an unbinding ritual is completed.";
+    }
+
+    // STALEMATE CLAUSE: The Admin House automatically absorbs the pot if the table deadlocks
+    if (rolledSteps === -1) {
+      game.matchStatus = 'HOUSE_STALEMATE_WIN';
+      await game.save();
+      return res.json({ success: true, status: 'HOUSE_STALEMATE_WIN', message: "Dispute declared. House claims the token pot." });
+    }
+
+    await game.save();
+    res.json({ success: true, currentSquare: nextIndex, playerStats: player, report: logsReport });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Board execution loop error.' });
+  }
+});
+
+module.exports = router;
