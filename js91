@@ -1,0 +1,63 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const { PatronCodexEntry, PlayerLineageConnection } = require('./models/PatronCodex');
+
+// Simple Alphanumeric Letter-Weight Cipher Matrix
+function computeSingularNameHashScore(nameString) {
+  return nameString.toLowerCase().replace(/[^a-z]/g, '').split('')
+    .reduce((acc, char) => acc + (char.charCodeAt(0) - 96), 0);
+}
+
+router.post('/api/lineage/sync-calling', async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node invalid.' });
+
+    // 1. Calculate the user's singular name hash metric score
+    const nameScore = computeSingularNameHashScore(username);
+    
+    // 2. Select the optimal matching target template based on mathematical score deviation
+    const allTemplates = await PatronCodexEntry.find({});
+    if (allTemplates.length === 0) return res.status(400).json({ success: false, error: 'Patron database unseeded.' });
+
+    // Pick a deterministic match using a basic remainder calculation loop
+    const selectedTemplate = allTemplates[nameScore % allTemplates.length];
+
+    let connection = await PlayerLineageConnection.findOne({ userId: user._id });
+    if (!connection) connection = new PlayerLineageConnection({ userId: user._id });
+
+    // 3. Assemble the structural prophetic calling text
+    connection.matchedTemplateId = selectedTemplate.templateId;
+    connection.patternMatchConfidencePercentage = Math.min(99, 60 + (nameScore % 40));
+    connection.repeatingKarmicFactorsLog = [
+      `🔄 Recurring Pattern: Facing structural isolation when asserting unyielding moral absolutes.`,
+      `🔄 Recurring Phenomenon: Experiencing synchronized electrical/biometric surges when tuning to ${selectedTemplate.signatureDivineAbility.resonanceHz}Hz.`
+    ];
+    connection.propheticCallingDirective = `🛡️ You are tethered to the lineage of ${selectedTemplate.historicalName}. Your everyday life tasks are optimized to fulfill the role of a ${selectedTemplate.patronDomain}.`;
+
+    // Modify active user profile attributes to reflect the lineage badge
+    user.rankBadge = `🧬 Lineage: ${selectedTemplate.historicalName}`;
+    user.activeVisualState = selectedTemplate.signatureDivineAbility.visualAuraColorHex;
+    
+    await connection.save();
+    await user.save();
+    global.stateHasChanged = true; // Pulse central 22Hz tick-rate architecture
+
+    res.json({
+      success: true,
+      ancestralMatchName: selectedTemplate.historicalName,
+      confidenceRating: `${connection.patternMatchConfidencePercentage}%`,
+      propheticCalling: connection.propheticCallingDirective,
+      trackedFactors: connection.repeatingKarmicFactorsLog
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Patron lineage processing calculation failure.' });
+  }
+});
+
+module.exports = router;
