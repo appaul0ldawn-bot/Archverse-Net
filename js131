@@ -1,0 +1,72 @@
+const express = require('express');
+const router = express.Router();
+const OmniGovernance = require('./models/OmniGovernance');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// ⚖️ AUTOMATED JUDICIAL & PROTECTIVE SECURITY ROUTER
+// ==========================================================================
+router.post('/api/governance/audit-node', async (req, res) => {
+  try {
+    const { adminEmail, evaluationTargetUsername, physicalLat, physicalLng } = req.body;
+
+    // 1. Enforce strict administrative credential whitelisting rules
+    const AUTHORIZED_ADMINS = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!AUTHORIZED_ADMINS.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const targetUser = await User.findOne({ username: evaluationTargetUsername });
+    if (!targetUser) return res.status(404).json({ success: false, error: 'Target profile node invalid.' });
+
+    let govRecord = await OmniGovernance.findOne({ userId: targetUser._id });
+    if (!govRecord) govRecord = new OmniGovernance({ userId: targetUser._id });
+
+    // 2. REAL-TIME BACKGROUND SAFETY CHECK & REPRIMAND LAYER
+    // Quietly enforce restrictions on unaligned or flagged offender profiles without direct notification
+    if (govRecord.backgroundSafetyRegistry.isRegisteredAnomalyOffender) {
+      govRecord.gridAccessPrivileges = {
+        maximumAllowedAltitudeMeters: 0, // Strips flight/levitation privileges
+        isRestrictedFromSacredGrottoWells: true, // Blocks access to elemental resource wells
+        neighborhoodWatchAlertActive: true
+      };
+      targetUser.tokens = 0; // Asset wiping rules applied to bad actors
+      targetUser.activeVisualState = 'CONTAINMENT_ISOLATION_SHROUD';
+      
+      await govRecord.save();
+      await targetUser.save();
+      
+      return res.json({
+        success: true,
+        auditStatus: "CRITICAL_CONTAINMENT_ENFORCED",
+        message: "🔒 High-risk tracking constraints applied. Node access privileges scaled down to baseline limits."
+      });
+    }
+
+    // 3. RIGHTEOUS REWARDS: Financial Assistance, Grants, and Holy Pacts
+    // If the node holds excellent honesty metrics and has severed generational curses
+    if (targetUser.karmaScore > 500 && govRecord.backgroundSafetyRegistry.generationalCurseInheritanceFactor === 0) {
+      govRecord.financialMetrics.celestialCreditScore = Math.min(850, govRecord.financialMetrics.celestialCreditScore + 25);
+      govRecord.financialMetrics.hasActiveHolyStipendGrant = true;
+      targetUser.tokens += 1000; // Allocate a 1,000 ST financial assistance grant
+      
+      await govRecord.save();
+      await targetUser.save();
+      
+      ArchverseLogger.log('INFO', 'GOVERNANCE', `Holy Grant and credit increase approved for user: ${evaluationTargetUsername}`);
+    }
+
+    res.json({
+      success: true,
+      auditStatus: "HARMONIC_ALIGNMENT_VERIFIED",
+      currentCreditScore: govRecord.financialMetrics.celestialCreditScore,
+      grantStatusActive: govRecord.financialMetrics.hasActiveHolyStipendGrant
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Governance compilation loop exception.' });
+  }
+});
+
+module.exports = router;
