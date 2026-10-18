@@ -1,0 +1,50 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { TokenVaultHUD } from './TokenVault';
+import { RanksAndCompetition } from './RanksAndCompetition';
+import { PrayerRequestHUD } from './PrayerRequestHUD';
+import { SevenSistersHUD } from './SevenSistersHUD';
+import { DivineDatingCamsView } from './DivineDatingCamsView';
+import { HivemindHUD } from './HivemindHUD';
+import { CrossPlatformIntegrationsHUD } from './CrossPlatformIntegrationsHUD';
+import { EvolvingMoralAvatar } from './EvolutionaryMorph';
+import { EnvironmentEffects } from './EnvironmentEffects';
+
+export default function VirtualWorldMap({ mapName, playerProfile, onLeaveWorld }) {
+  const [players, setPlayers] = useState({});
+  const cameraRef = useRef();
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', background: '#0f172a' }}>
+      
+      {/* --- FLOATING TRANSULESCENT HUD OVERLAYS MATRIX LAYER --- */}
+      <div className="map-title-banner"><h2>The Archverse</h2></div>
+      
+      <TokenVaultHUD userProfile={playerProfile} socket={socket} />
+      <RanksAndCompetition currentUser={playerProfile} socket={socket} />
+      <PrayerRequestHUD username={playerProfile.name} socket={socket} />
+      <SevenSistersHUD />
+      <HivemindHUD />
+      <CrossPlatformIntegrationsHUD userTokens={playerProfile.tokens} />
+      
+      <div style={{ position: 'absolute', bottom: '24px', right: '24px', width: '360px', zIndex: 102 }}>
+        <DivineDatingCamsView userProfile={playerProfile} />
+      </div>
+
+      {/* --- THREE.JS WEBGL RENDER WINDOW STAGE --- */}
+      <Canvas camera={{ position:, fov: 50 }} shadows>
+        <scene ref={cameraRef}>
+          <EnvironmentEffects />
+          
+          {Object.values(players).map((player) => (
+            <group key={player.id} position={[player.x, 0, player.z]}>
+              <EvolvingMoralAvatar morphTarget={player.morphTarget || { horns: 0, halo: 0.2 }} playerColor={player.color || '#3b82f6'} />
+            </group>
+          ))}
+        </scene>
+      </Canvas>
+
+      <ChatInputHUD />
+    </div>
+  );
+}
