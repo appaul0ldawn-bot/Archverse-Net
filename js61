@@ -1,0 +1,24 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 📜 PASCAL'S WAGER ESCHATOLOGICAL INSURANCE SCHEMA
+// ==========================================================================
+const PascalsWagerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+  
+  pascalianHedgeActive: { type: Boolean, default: false },
+  finitePremiumFeePaidST: { type: Number, default: 0 },
+  
+  // Game-Theoretic Matrix Tracking Values
+  chosenEschatologicalStance: { 
+    type: String, 
+    enum: ['BELIEF_IN_DIVINE_ALIGNMENT', 'AGNOSTIC_RANDOM_CHANCE', 'ABYSSAL_REJECTION'], 
+    default: 'AGNOSTIC_RANDOM_CHANCE' 
+  },
+  
+  infiniteScaleMultiplier: { type: Number, default: 1.0 }, // Scales up massively on Divine Victory
+  lastWagerInsuredAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('PascalsWager', PascalsWagerSchema);
