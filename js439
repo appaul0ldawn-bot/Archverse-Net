@@ -1,0 +1,17 @@
+import React from 'react';
+
+export function EternalComputingPortal() {
+  // Your designated storage connection target hash
+  const targetDriveUrl = "https://google.com";
+
+  return (
+    <div className="login-card" style={{ maxWidth: '400px', margin: '10px auto', borderColor: '#818cf8' }}>
+      <h4 style={{ margin: '0 0 4px 0', color: '#818cf8' }}>💾 Eternal Computing Data Vault</h4>
+      <p style={{ fontSize: '11px', color: '#cbd5e1' }}>Access canonical project files, backup assets, and database schemas.</p>
+      
+      <a href={targetDriveUrl} target="_blank" rel="noopener noreferrer" className="buy-upgrade-btn" style={{ display: 'block', textDecoration: 'none', textAlign: 'center' }}>
+        📂 Open Master Google Drive Repository
+      </a>
+    </div>
+  );
+}
