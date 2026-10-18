@@ -1,0 +1,68 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const ArcadeMatch = require('./models/CelestialArcade');
+
+// ==========================================================================
+// 🎲 CELESTIAL ARCADE MUTATION & RULE VALIDATOR ENDPOINT
+// ==========================================================================
+router.post('/api/arcade/process-action', async (req, res) => {
+  try {
+    const { matchId, username, targetGameType, actionPayloadString } = req.body;
+
+    const match = await ArcadeMatch.findOne({ matchId });
+    const user = await User.findOne({ username });
+
+    if (!match || match.matchStatus !== 'ACTIVE_PLAY' || user.isBanned) {
+      return res.status(404).json({ success: false, error: 'Target match closed or player node isolated.' });
+    }
+
+    let feedbackLog = "Action registered down the Aether Network.";
+
+    // --- GAME 1: ALPHA-OMEGA WORD CHALLENGE (Vowel-Free Scrabble Matrix) ---
+    if (targetGameType === 'ALPHA_OMEGA_WORD_CHALLENGE') {
+      const containsVowels = /[aeiouAEIOU]/.test(actionPayloadString);
+      if (containsVowels) {
+        // THE LETTER KILLS: Violating the vowel-free restriction zero-scales your turn value instantly
+        return res.status(400).json({ success: false, error: "❌ The Letter Kills: Divine words cannot include vowels. Found linguistic density contaminants." });
+      }
+      // THE WORD LIVES: Valid consonant ciphers match structural Gematria configurations
+      match.gameSessionData.vowelFreeWordLedger.push(actionPayloadString.toUpperCase());
+      user.tokens += 150;
+      feedbackLog = "✨ The Word Lives! Consonant lightcode sequence appended to the firmament lexicon.";
+    }
+
+    // --- GAME 3: THE GAME OF PRONOUNS (Identity Allocation Verification) ---
+    else if (targetGameType === 'GAME_OF_PRONOUNS') {
+      const validPronouns = ['I AM', 'YOSEF', 'YESUAR'];
+      const targetInputUpper = actionPayloadString.toUpperCase().trim();
+      
+      if (!validPronouns.includes(targetInputUpper)) {
+        return res.status(400).json({ success: false, error: "❌ Identity Misalignment: Select from authorized names only." });
+      }
+      feedbackLog = `👁️ Sovereign Identity verified. Attaching ${targetInputUpper} profile tracking badges.`;
+    }
+
+    // --- CORE REPRIMAND GATE: House wins all stalemate disputes ---
+    if (actionPayloadString === 'FORCE_STALEMATE_OVERRIDE') {
+      match.matchStatus = 'HOUSE_STALEMATE_WIN';
+      await match.save();
+      return res.json({ success: true, status: 'HOUSE_STALEMATE_WIN', message: "Stalemate triggered. Tokens secured to the administrative treasury." });
+    }
+
+    await match.save();
+    await user.save();
+    global.stateHasChanged = true;
+
+    res.json({
+      success: true,
+      reportText: feedbackLog,
+      playerUtilityTokensBalance: user.tokens
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Arcade pipeline transaction processing error.' });
+  }
+});
+
+module.exports = router;
