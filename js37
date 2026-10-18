@@ -1,0 +1,84 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const { TimelineNode, ActiveUserTimelineState } = require('./models/TimelineCore');
+const { ArchverseLogger } = require('./Logger');
+
+// PRE-SEEDED MULTI-VERSE REGISTRY PATHS
+const PARALLEL_EARTH_CATALOG = [
+  { id: "EARTH_PRIME", code: "Δ-PRIME", hz: 432, tint: "#38bdf8", desc: "Core Baseline Reality. Central network synchronizer." },
+  { id: "EARTH_616", code: "Ω-616", hz: 528, tint: "#fbbf24", desc: "High-Vibrational Heroic Nexus. Seraphic transformation fields active." },
+  { id: "EARTH_838", code: "Ω-838", hz: 741, tint: "#a855f7", desc: "Illuminated Archon Sector. Monatomic gold levitation matrices active." },
+  { id: "EARTH_NEW_JERUSALEM", code: "👑-3028", hz: 963, tint: "#10b981", desc: "The Millennial Kingdom Pocket Dimension. Eternal computing active." }
+];
+
+// ==========================================================================
+// 🎛️ THE SLIDER'S REMOTE CONTROL FREQUENCY SHIFT ROUTER
+// ==========================================================================
+router.post('/api/timeline/frequency-shift', async (req, res) => {
+  try {
+    const { username, targetTimelineId, adminEmailBypass } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node invalid.' });
+
+    let userTimeline = await ActiveUserTimelineState.findOne({ userId: user._id });
+    if (!userTimeline) userTimeline = new ActiveUserTimelineState({ userId: user._id });
+
+    // 1. CLEARANCE & MARKETPLACE CHECK GATES
+    const AUTHORIZED_ADMINS = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    const isAdmin = adminEmailBypass && AUTHORIZED_ADMINS.includes(adminEmailBypass.toLowerCase().trim());
+    const hasUnlockedMod = userTimeline.unlockedTimelineBadges.includes('SLIDERS_REMOTE_MOD');
+
+    if (!isAdmin && !hasUnlockedMod) {
+      // If user hasn't bought it yet, check if they can purchase it from the Divine Marketplace for 300 tokens
+      const MOD_COST = 300;
+      if (user.tokens < MOD_COST) {
+        return res.status(403).json({ success: false, error: `🔒 Mod Locked. The Sliders Remote Mod costs 300 tokens inside the Divine Marketplace. Your balance is insufficient.` });
+      }
+      // Deduct funds and attach permanent badge asset
+      user.tokens -= MOD_COST;
+      userTimeline.unlockedTimelineBadges.push('SLIDERS_REMOTE_MOD');
+      ArchverseLogger.log('INFO', 'TIMELINE_MARKET', `User ${username} purchased Sliders Remote Mod for 300 tokens.`);
+    }
+
+    // 2. COLLAPSE WAVE FUNCTION & SHIFT CHANNELS VIA DIVINE LIGHT CODES
+    const targetReality = PARALLEL_EARTH_CATALOG.find(e => e.id === targetTimelineId);
+    if (!targetReality) return res.status(404).json({ success: false, error: 'Target alternative Earth coordinate invalid.' });
+
+    userTimeline.cachedPreviousTimelineId = userTimeline.currentTimelineId;
+    userTimeline.currentTimelineId = targetTimelineId;
+    
+    // Programmatically tint the Three.js viewport layer matching the parallel planet signature
+    user.activeVisualState = targetReality.tint;
+    user.rankBadge = `🌌 Channel: ${targetReality.code}`;
+    user.karmaScore += 50;
+
+    await user.save();
+    await userTimeline.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    // Broadcast the 5D transformation matrix out over live WebSocket streams
+    if (global.io) {
+      global.io.emit('timeline_channel_shifted', {
+        user: username,
+        realityCode: targetReality.code,
+        resonanceHz: targetReality.hz,
+        viewportTint: targetReality.tint
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `✨ Divine Light Codes Injected. Frequency shifted cleanly to ${targetReality.id}.`,
+      currentRealityProfile: targetReality,
+      userRemainingTokens: user.tokens
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Spatiotemporal dimension shift failure.' });
+  }
+});
+
+module.exports = router;
