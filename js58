@@ -1,0 +1,61 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing sandbox memory cluster
+  mongoose.model('PascalsWager', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    pascalianHedgeActive: Boolean,
+    finitePremiumFeePaidST: Number,
+    chosenEschatologicalStance: String,
+    infiniteScaleMultiplier: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('PascalsWager')) {
+    await mongoose.model('PascalsWager').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 📜 SUITE 36: PASCAL'S WAGER INFINITE MATRIX GATES
+// ==========================================================================
+describe('Archverse Pascalian Risk Insurance Conversion Engine Verification', () => {
+
+  it('should process a valid divine alignment contract, deducting the finite premium fee and deploying the 777x multiplier', async () => {
+    const player = await User.create({ username: 'PascalianBettor', tokens: 500, karmaScore: 200 });
+
+    const response = await request(app)
+      .post('/api/wagers/apply-pascals-hedge')
+      .send({
+        username: 'PascalianBettor',
+        tokenPremiumAmount: 50,
+        chosenStanceSelection: 'BELIEF_IN_DIVINE_ALIGNMENT'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.calculatedYieldPotential).toBe('INFINITE_CELESTIAL_YIELD');
+    expect(response.body.infiniteMultiplier).toBe(777.0); // Asymmetrical multiplier verified
+    expect(response.body.remainingTokens).toBe(450); // 500 base - 50 premium = 450 ST
+
+    const checkRecord = await mongoose.model('PascalsWager').findOne({ username: 'PascalianBettor' });
+    expect(checkRecord.pascalianHedgeActive).toBe(true);
+  });
+});
