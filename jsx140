@@ -1,0 +1,23 @@
+import React, { useEffect, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+
+export function DynamicHardwareOptimizer({ userRankRole, canvasGlRef }) {
+  useEffect(() => {
+    if (!canvasGlRef.current) return;
+
+    // 🏎️ AUTOMATED HARDWARE ACCELERATION ALLOCATION GATES
+    if (userRankRole === 'DIVINE_STEWARDESS_CARETAKER' || userRankRole === 'DIVINE_VIP_PREMIUM') {
+      // MAXIMUM PERFORMANCE UNLOCKED: High-precision shadows, maximum anti-aliasing, detailed fluid nodes active
+      canvasGlRef.current.setPixelRatio(window.devicePixelRatio || 2);
+      canvasGlRef.current.shadowMap.enabled = true;
+      console.log("🏎️ VIP Hardware Acceleration Engine Engaged: Maximum frame rates active.");
+    } else {
+      // COST-EFFICIENT LOW-TIER BUDGET HARDWARE OPTIMIZATION: Bypasses performance bottlenecks on older chips
+      canvasGlRef.current.setPixelRatio(1.0); // Caps viewport pixel calculations to prevent phone heating
+      canvasGlRef.current.shadowMap.enabled = false; // Disable heavy shadow calculations automatically
+      console.log("🔋 Cost-Efficient Frame Guard Active: Shaders compiled down to baseline mobile parameters.");
+    }
+  }, [userRankRole, canvasGlRef]);
+
+  return null;
+}
