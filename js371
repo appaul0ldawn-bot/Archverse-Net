@@ -1,0 +1,33 @@
+import React, { useEffect } from 'react';
+
+export function XrayMeshFilter({ isXrayActive, avatarGroupRef }) {
+  useEffect(() => {
+    if (!avatarGroupRef.current) return;
+
+    avatarGroupRef.current.traverse((child) => {
+      // Check for user-defined vanity tags or custom equipment layers
+      if (child.isMesh && child.userData.layerType === 'COSMETIC_CLOTHING') {
+        // Hide the outmost decorative garments to reveal the underlying model base structures
+        child.visible = !isXrayActive;
+      }
+
+      if (child.isMesh && child.userData.layerType === 'BASE_STRUCTURE') {
+        if (isXrayActive) {
+          // Force a semi-translucent neon wireframe view to easily map base statistics from scratch
+          child.material.wireframe = true;
+          child.material.transparent = true;
+          child.material.opacity = 0.6;
+          child.material.color.setHex(0x38bdf8); // High-visibility laser cyan
+        } else {
+          // Restore standard solid material characteristics
+          child.material.wireframe = false;
+          child.material.transparent = false;
+          child.material.opacity = 1.0;
+          child.material.color.setHex(child.userData.originalColor || 0xffffff);
+        }
+      }
+    });
+  }, [isXrayActive, avatarGroupRef]);
+
+  return null;
+}
