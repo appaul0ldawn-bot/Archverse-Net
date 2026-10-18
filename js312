@@ -1,0 +1,78 @@
+import React, { useState } from 'react';
+
+export function HormonalBiomarkerHUD({ username, currentMetrics }) {
+  const [track, setTrack] = useState('FEMALE_ESTROGEN');
+  const [cycleDay, setCycleDay] = useState(14);
+  const [telemetryReport, setTelemetryReport] = useState(null);
+
+  const calculateBiomarkers = async () => {
+    try {
+      const response = await fetch('/api/telemetry/calculate-hormones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username,
+          targetGenderTrack: track,
+          daysSinceEpochReset: cycleDay
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTelemetryReport(data);
+      }
+    } catch (e) {
+      console.error("Endocrine engine connection drop:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '380px', width: '350px', borderColor: '#818cf8' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#818cf8' }}>🧬 Endocrine Biomarker Matrix</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Uses timeline logging equations to simulate hormone fluctuations, mapping Estrogen and Testosterone balances to passive ability unlocks.
+      </p>
+
+      {/* Select Hormone Track Group */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#a5b4fc', display: 'block', marginBottom: '4px' }}>Target Endocrine Profile Track:</label>
+        <select 
+          value={track} onChange={(e) => setTrack(e.target.value)}
+          style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <option value="FEMALE_ESTROGEN">Female Archetype (Estrogen Focus Curve)</option>
+          <option value="MALE_TESTOSTERONE">Male Archetype (Testosterone Focus Curve)</option>
+        </select>
+      </div>
+
+      {/* Timeline Day Slider */}
+      <div className="metric-row" style={{ marginBottom: '12px' }}>
+        <span style={{ fontSize: '12px' }}>Timeline Day:</span>
+        <input type="range" min="1" max="30" value={cycleDay} onChange={(e) => setCycleDay(parseInt(e.target.value))} style={{ width: '150px', accentColor: '#818cf8' }} />
+        <span style={{ fontSize: '12px', fontWeight: 'bold' }}>Day {cycleDay}</span>
+      </div>
+
+      <button onClick={calculateBiomarkers} className="buy-upgrade-btn" style={{ width: '100%', background: '#818cf8', color: '#fff' }}>
+        ⚙️ Recalibrate Hormone Waves
+      </button>
+
+      {telemetryReport && (
+        <div style={{ marginTop: '12px', background: 'rgba(129,140,248,0.06)', border: '1px solid #818cf8', padding: '10px', borderRadius: '8px', textAlign: 'left', fontSize: '11px' }}>
+          <div className="metric-row">
+            <span>🧬 Sim Estrogen Level:</span>
+            <span style={{ color: '#ec4899', fontWeight: 'bold' }}>{telemetryReport.metrics.estrogen} pg/mL</span>
+          </div>
+          <div className="metric-row">
+            <span>🧬 Sim Testosterone Level:</span>
+            <span style={{ color: '#3b82f6', fontWeight: 'bold' }}>{telemetryReport.metrics.testosterone} ng/dL</span>
+          </div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '6px', marginTop: '6px', color: '#fef08a', fontWeight: 'bold' }}>
+            Active Perk: {telemetryReport.unlockedAbility}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
