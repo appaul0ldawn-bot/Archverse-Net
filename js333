@@ -1,0 +1,63 @@
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const User = require('./models/User');
+const BodyReplacer = require('./models/BodyReplacer');
+const AkashicNode = require('./models/AkashicRecords');
+
+// ==========================================================================
+// 👁️ MASTER INTEL: "EYES OF SUPERMAN" OVERRIDE CONTROLLER
+// ==========================================================================
+router.post('/api/admin/master-xray-toggle', async (req, res) => {
+  try {
+    const { adminEmail, targetUsername, toggleState, customPreset } = req.body;
+    const sanitizedEmail = adminEmail.toLowerCase().trim();
+
+    // 1. Strict Master Administrator Authentication Gate
+    const MASTER_ROSTER = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!MASTER_ROSTER.includes(sanitizedEmail)) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const targetUser = await User.findOne({ username: targetUsername });
+    if (!targetUser) return res.status(404).json({ success: false, error: 'Target player not found.' });
+
+    // 2. Fetch or initialize the target's high-resolution body replacer model
+    let topology = await BodyReplacer.findOne({ userId: targetUser._id });
+    if (!topology) {
+      topology = new BodyReplacer({ userId: targetUser._id });
+    }
+
+    if (toggleState && customPreset) {
+      topology.baseMeshType = customPreset; // Swaps mesh base layer dynamically (e.g., 'BHUNP_ADVANCED')
+      topology.isUnrestrictedAdultMesh = true; // Forces adult/unrestricted variant mapping
+      await topology.save();
+    }
+
+    // 3. Broadcast real-time canvas configuration packet down the WebSocket stream
+    if (global.io) {
+      global.io.emit('master_xray_render_update', {
+        targetPlayer: targetUsername,
+        activateXray: toggleState,
+        meshPreset: topology.baseMeshType,
+        sliders: topology.bodySlideWeightSliders,
+        isUnrestricted: topology.isUnrestrictedAdultMesh
+      });
+    }
+
+    // Write a permanent entry into the public Akashic Records ledger
+    await AkashicNode.create({
+      recordId: `xray_audit_${Date.now()}`,
+      username: adminUsername || "Master_Sovereign",
+      dataType: 'WEBCAM_SESSION_META',
+      payloadData: { contentString: `👁️ Master X-Ray inspection activated on node: ${targetUsername}. Structural topology scrutinized.` },
+      isPrivateField: true // Locked securely to administrative visibility layers
+    });
+
+    res.json({ success: true, xrayStatus: toggleState, activeMesh: topology.baseMeshType });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Master X-Ray module processing failure.' });
+  }
+});
+
+module.exports = router;
