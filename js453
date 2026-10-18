@@ -1,0 +1,38 @@
+import React, { useState } from 'react';
+
+const TAROT_DECK = [
+  { name: "The Archangel Michael", destiny: "Valor active. Arm your defenses; a major reality shift is unfolding.", alignment: "angelic" },
+  { name: "The Watcher of the Veil", destiny: "Deep telepathic pathways open. Interpret the next dream log accurately.", alignment: "angelic" },
+  { name: "The Fallen Sovereign", destiny: "Mischief loops call to you. A shadow mission contract is available nearby.", alignment: "demonic" }
+];
+
+export function AngelOracleTarotGame() {
+  const [drawnCard, setDrawnCard] = useState(null);
+
+  const drawCard = () => {
+    const card = TAROT_DECK[Math.floor(Math.random() * TAROT_DECK.length)];
+    setDrawnCard(card);
+  };
+
+  return (
+    <div className="login-card" style={{ maxWidth: '400px', margin: '20px auto', borderColor: '#eab308' }}>
+      <div style={{ fontSize: '11px', color: '#eab308', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+        🔮 Angel Oracle Tarot Fate Selection
+      </div>
+      <button onClick={drawCard} className="buy-upgrade-btn" style={{ width: '100%', marginBottom: '12px' }}>
+        Cast Your Fate Vector
+      </button>
+
+      {drawnCard && (
+        <div style={{ background: 'rgba(0,0,0,0.4)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <h4 style={{ margin: '0 0 6px 0', color: drawnCard.alignment === 'angelic' ? '#fde047' : '#ef4444' }}>
+            🃏 {drawnCard.name}
+          </h4>
+          <p style={{ margin: 0, fontSize: '12px', color: '#e2e8f0', fontStyle: 'italic', lineHeight: 1.4 }}>
+            "{drawnCard.destiny}"
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
