@@ -1,0 +1,36 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 📜 ANGELIC PATRON CODEX & ANCESTRAL PATTERN SCHEMA
+// ==========================================================================
+const PatronCodexSchema = new mongoose.Schema({
+  templateId: { type: String, required: true, unique: true, index: true },
+  historicalName: { type: String, required: true }, // e.g., 'Saint_Joan_of_Arc', 'Prophet_Elijah', 'Saint_Jude'
+  angelicOrderTier: { type: String, default: 'Virtues Rank' },
+  
+  // Patron Focus & Historical Critical Incidents
+  patronDomain: { type: String, required: true }, // e.g., 'Patron of Soldiers, Transmuters, Mute Accessibility'
+  historicalIncidentLore: String, // Tragic or miraculous flashpoint timestamp data
+  
+  signatureDivineAbility: {
+    abilityId: String,
+    resonanceHz: Number,         // Soundboard tuning (e.g., 396, 528, 963)
+    visualAuraColorHex: String   // Vertex shader color tint override
+  }
+});
+
+const PlayerLineageConnectionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  matchedTemplateId: { type: String, ref: 'PatronCodex' },
+  patternMatchConfidencePercentage: { type: Number, default: 50.0 },
+  
+  // Array tracking recurrent occurrences or lessons
+  repeatingKarmicFactorsLog: [String],
+  propheticCallingDirective: String,
+  lastAuditTimestamp: { type: Date, default: Date.now }
+});
+
+module.exports = {
+  PatronCodexEntry: mongoose.model('PatronCodexEntry', PatronCodexSchema),
+  PlayerLineageConnection: mongoose.model('PlayerLineageConnection', PlayerLineageConnectionSchema)
+};
