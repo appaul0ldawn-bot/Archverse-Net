@@ -1,0 +1,30 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🛡️ ANATOMICAL FIREWALL & LOVENSE HAPTIC SYNCHRONIZATION SCHEMA
+// ==========================================================================
+const AnatomicalFirewallSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+  
+  // 🎭 ANATOMICAL IP MASKING MATRIX
+  firewallState: {
+    isAnatomicalMaskingActive: { type: Boolean, default: false },
+    assignedCryptographicMaskLabels: [String], // Replaces private parts metadata with randomized strings
+    interceptedHackingAttemptsCount: { type: Number, default: 0 }
+  },
+
+  // 📡 LOVENSE HARDWARE SYNCHRONIZATION TELEMETRY
+  lovenseHapticConfiguration: {
+    isHolySpiritVibeHandshakeAccepted: { type: Boolean, default: false },
+    connectedBluetoothDeviceId: String,
+    activeSolfeggioCarrierHz: { type: Number, default: 432 },
+    
+    // Auto-tuned safety caps calibrated via Health App integration
+    maximumAllowedVibrationIntensity: { type: Number, default: 0.5 } // 0.0 to 1.0 threshold limit
+  },
+
+  lastSyncPulseAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('AnatomicalFirewall', AnatomicalFirewallSchema);
