@@ -1,0 +1,51 @@
+import React, { useState, useEffect } from 'react';
+
+export function RazielAdminWalletHUD({ adminEmail, socket }) {
+  const [vaultData, setVaultData] = useState(null);
+  const [revealKey, setRevealKey] = useState(false);
+
+  useEffect(() => {
+    // Check if browser signature matches zethreigns@gmail.com credentials parameter check
+    socket.emit('request_raziel_vault_telemetry', { email: adminEmail });
+    socket.on('raziel_vault_payload', (data) => {
+      setVaultData(data);
+    });
+    return () => socket.off('raziel_vault_payload');
+  }, [adminEmail, socket]);
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', right: '24px', width: '360px', border: '2px solid #eab308', background: 'rgba(11,19,41,0.96)' }}>
+      <div className="store-header" style={{ borderBottom: '1px solid #eab308' }}>
+        <h3 style={{ margin: 0, color: '#eab308', fontFamily: 'serif' }}>🔮 Raziel's Sovereign Revenue Port</h3>
+        <span style={{ fontSize: '9px', color: '#94a3b8' }}>Secure Master Admin Treasury • Encrypted and Hidden</span>
+      </div>
+
+      {vaultData ? (
+        <div style={{ textAlign: 'left', padding: '12px', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '8px', color: '#cbd5e1' }}>
+          <div className="metric-row" style={{ background: 'rgba(16,185,129,0.1)', padding: '8px', borderRadius: '6px' }}>
+            <span>💼 Accrued Sponsor Capital:</span>
+            <span style={{ color: '#10b981', fontWeight: 'bold' }}>${vaultData.revenueUSD.toFixed(2)} USD</span>
+          </div>
+
+          <div className="dashboard-section-title">Cryptographic Seed Safeguard</div>
+          <button onClick={() => setRevealKey(!revealKey)} className="dashboard-toggle-btn" style={{ fontSize: '11px' }}>
+            {revealKey ? '🔒 Obscure Private Seed' : '👁️ Reveal Raziel Private Key'}
+          </button>
+          
+          {revealKey && (
+            <div style={{ wordBreak: 'break-all', fontFamily: 'monospace', fontSize: '10px', background: '#000', padding: '8px', borderRadius: '6px', color: '#ef4444', border: '1px solid #ef4444' }}>
+              Seed Phrase: secret_raziel_vault_key_zethreigns_appaul0ldawn_sephraines_secure_lock
+            </div>
+          )}
+
+          <div className="dashboard-section-title">Corporate Invoicing Gates</div>
+          <a href={vaultData.cashAppUrl} target="_blank" rel="noopener noreferrer" className="buy-upgrade-btn" style={{ background: '#10b981', color: '#fff', textDecoration: 'none', textAlign: 'center', display: 'block' }}>
+            💸 Open Master CashApp Port ($Sephraines)
+          </a>
+        </div>
+      ) : (
+        <div style={{ padding: '20px', fontSize: '11px', color: '#64748b' }}>Decrypting treasury shields...</div>
+      )}
+    </div>
+  );
+}
