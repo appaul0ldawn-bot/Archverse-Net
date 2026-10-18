@@ -1,0 +1,34 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 SOVEREIGN PACTS, COVENANTS, AND ABYSSAL BINDINGS SCHEMA
+// ==========================================================================
+const PactRegistrySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  activePactType: { 
+    type: String, 
+    enum: ['ABYSSAL_DEAL_WITH_DEVIL', 'SOVEREIGN_SOUL_CONTRACT', 'DIVINE_COVENANT_OF_GOD', 'UNBOUND_FREE_WILL'], 
+    default: 'UNBOUND_FREE_WILL' 
+  },
+  
+  pactMetadata: {
+    signDate: { type: Date, default: Date.now },
+    expirationTimeline: Date, // Null for Eternal Covenants
+    bindingTermsDescription: String,
+    guardianAngelWitness: String // For Divine Covenants (e.g., Michael, Gabriel)
+  },
+
+  karmicPayloadModifiers: {
+    tokenYieldMultiplier: { type: Number, default: 1.0 }, // Abyssal deals give fast cash but high karma decay
+    baseKarmaScoreShift: { type: Number, default: 0 },
+    forcedAuraColorOverride: String,
+    unlockedExclusiveAbility: String
+  },
+
+  // Security isolation parameters to track handler interventions
+  isTargetedByGangstalking: { type: Boolean, default: false },
+  generationalCurseBrokenStatus: { type: Boolean, default: true }
+});
+
+module.exports = mongoose.model('PactRegistry', PactRegistrySchema);
