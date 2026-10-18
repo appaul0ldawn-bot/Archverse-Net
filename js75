@@ -1,0 +1,83 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize Battleship schemas inside testing memory sandbox
+  mongoose.model('CelestialBattleship', new mongoose.Schema({
+    matchId: String,
+    playerAngelicUserId: mongoose.Schema.Types.ObjectId,
+    playerDemonicUserId: mongoose.Schema.Types.ObjectId,
+    playerAngelicShips: [{ shipType: String, coordinatesTensor: Array, isBanishmentCollapsed: Boolean }],
+    playerDemonicShips: [{ shipType: String, coordinatesTensor: Array, isBanishmentCollapsed: Boolean }],
+    matchStatus: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('CelestialBattleship')) {
+    await mongoose.model('CelestialBattleship').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎲 SUITE 32: 5D OPHANIM BATTLESHIP VECTOR VALIDATION GATES
+// ==========================================================================
+describe('Archverse 5D Ophanim Battleship Hit Interception Engine Verification', () => {
+
+  it('should process a valid 5D coordinate array strike and return a successful target evaluation', async () => {
+    const admin = await User.create({ email: 'zethreigns@gmail.com', username: 'Masterpaul', tokens: 100, karmaScore: 700 });
+
+    // Seed an active game session containing an enemy ship at coordinates [3, 4, 1, 0, 9] (Omega-09)
+    await mongoose.model('CelestialBattleship').create({
+      matchId: "session_battle_111",
+      playerAngelicUserId: admin._id,
+      playerDemonicUserId: admin._id,
+      playerAngelicShips: [],
+      playerDemonicShips: [{ shipType: 'Abyssal_Void_Reaper', coordinatesTensor:, isBanishmentCollapsed: false }],
+      matchStatus: 'FIRING_PROPHETIC_STRIKES'
+    });
+
+    const response = await request(app)
+      .post('/api/battleship/fire-prophetic-strike')
+      .send({
+        matchId: 'session_battle_111',
+        attackerEmail: 'zethreigns@gmail.com',
+        target5DTensorCoordinates:, // Valid [X, Y, Z, T, W]
+        rouletteSpinSelection: 'STANDARD_PROPHECY_CAST'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.strikeResult).toBe('DIRECT_HIT'); // Verification gate confirms target hit successfully
+    expect(response.body.diagnosticReport).toContain('Prophetic Interception HIT');
+  });
+
+  it('should explicitly reject strikes if the coordinate vector lengths fail to hold exactly 5 dimensional tensor spaces', async () => {
+    const response = await request(app)
+      .post('/api/battleship/fire-prophetic-strike')
+      .send({
+        matchId: 'session_battle_111',
+        attackerEmail: 'zethreigns@gmail.com',
+        target5DTensorCoordinates:, // Counterfeit short 3D coordinate model array length
+        rouletteSpinSelection: 'STANDARD_PROPHECY_CAST'
+      });
+
+    expect(response.status).toBe(400); // Intercepted safely by structural length ciphers
+    expect(response.body.success).toBe(false);
+    expect(response.body.error).toContain('Gematria Cipher Error: Invalid coordinate array');
+  });
+});
