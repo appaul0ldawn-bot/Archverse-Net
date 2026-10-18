@@ -1,0 +1,36 @@
+const mongoose = require('mongoose');
+
+// Schema for Public Art Albums
+const ArtAlbumSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  photoUrl: { type: String, required: true }, // Enforced strict photo-only validation rule
+  likes: { type: Number, default: 0 },
+  comments: [{
+    username: String,
+    text: String,
+    timestamp: { type: Date, default: Date.now }
+  }],
+  uploadedAt: { type: Date, default: Date.now }
+});
+
+// Upgraded Premium States for Channeling Summoners
+const PremiumSubscriptionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true },
+  tier: { type: String, default: 'WATCHER_OF_THE_VEIL' },
+  monthlyFeeUSD: { type: Number, default: 10.00 },
+  channelingProfile: {
+    summonerTitle: String,
+    summonerDescription: String,
+    isDisplayedOnChannelingPage: { type: Boolean, default: true }
+  },
+  unlockedVipPerks: {
+    hasCustomStaffEquipped: { type: Boolean, default: false },
+    hasUnicornWandEquipped: { type: Boolean, default: false },
+    hasEnchantedRings: { type: Boolean, default: false }
+  }
+});
+
+module.exports = {
+  ArtAlbum: mongoose.model('ArtAlbum', ArtAlbumSchema),
+  PremiumSubscription: mongoose.model('PremiumSubscription', PremiumSubscriptionSchema)
+};
