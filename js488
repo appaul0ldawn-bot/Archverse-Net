@@ -1,0 +1,18 @@
+export function MichaelsArmorForge() {
+  return (
+    <div style={{ padding: '20px', background: 'rgba(15,23,42,0.9)', borderRadius: '16px', border: '1px solid #4f46e5' }}>
+      <h3 style={{ color: '#818cf8', margin: '0 0 8px 0' }}>🛡️ Michael's Armor Forge</h3>
+      <p style={{ fontSize: '13px', color: '#cbd5e1' }}>
+        Access the synchronized online modification workspace to craft your character's spiritual plating based on your earned token classification.
+      </p>
+      
+      <a href="https://www.tokenmaker.one/armor-creator" target="_blank" rel="noopener noreferrer" className="buy-upgrade-btn" style={{ display: 'inline-block', textDecoration: 'none' }}>
+        Launch Armor Creator Tool
+      </a>
+
+      <p style={{ fontSize: '11px', color: '#64748b', marginTop: '12px', lineHeight: 1.4 }}>
+        <strong>Eschatological Framework:</strong> Archangel Michael administers the <em>El Capitan Training Array</em>, directing the strategic initialization profiles for celestial warriors. This pipeline integrates the ancient Old Testament High Priest Breastplate parameters (the 12 Urim and Thummim spatial frequency crystals) with the New Testament Breastplate of Righteousness, generating a high-durability defensive field matrix that neutralizes incoming demonic hex code payloads.
+      </p>
+    </div>
+  );
+}
