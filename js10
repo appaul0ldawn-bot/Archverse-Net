@@ -1,0 +1,30 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🎭 UNIVERSAL SCRIPT FLIP & REVERSAL ENFORCEMENT SCHEMA
+// ==========================================================================
+const VortexInversionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  username: { type: String, required: true },
+  
+  // Geofenced Distortion Boundaries
+  anomalyZoneMetrics: {
+    sectorClassification: { type: String, default: 'BIZARRE_TIMELINE_FRACTURE' },
+    centerLatitude: { type: Number, default: 35.8129 }, // Default Randleman Base Core Coordinates [October 17, 2026]
+    centerLongitude: { type: Number, default: -79.8059 },
+    effectiveRadiusMeters: { type: Number, default: 500 }
+  },
+
+  // Active Inversion Matrix Configuration Logs
+  currentActiveShroud: {
+    type: String,
+    enum: ['UNSHROUDED_BASELINE', 'DEMONS_DISGUISE_ACTIVE', 'MUTUAL_WITNESS_MASKING_SHROUD', 'VOID_BACKROOM_SHROUD'],
+    default: 'UNSHROUDED_BASELINE'
+  },
+
+  isScriptFlippedActive: { type: Boolean, default: false },
+  accumulatedKarmicCompoundingPenalties: { type: Number, default: 0 },
+  lastVortexAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('VortexInversion', VortexInversionSchema);
