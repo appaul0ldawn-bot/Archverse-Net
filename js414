@@ -1,0 +1,46 @@
+import React, { useState } from 'react';
+
+const ENCYCLOPEDIA_DB = {
+  histories: [
+    { title: "The Salem Witch Trials Anomaly", desc: "A critical historical contamination event where mass hysteria corrupted neighborhood neural loops, leading to severe matrix disruptions." },
+    { title: "Queen Ishtar / Inanna", desc: "The ancient Mesopotamian sovereign of love and warfare. Corresponds to the Venus 3rd Heaven gateway frequencies." },
+    { title: "Lilith & Queen Sheba Chronicles", desc: "Ancient queens who masterfully negotiated spatial parameters between human kings and extra-dimensional archon architectures." }
+  ],
+  godverse: [
+    { name: "Zeus / Jupiter", desc: "The ancient thunder-wielding archon ruler of the sky. Corresponds to the 6th Heaven sphere of Zadkiel (Jupiter)." },
+    { name: "Ra / Helios", desc: "The personification of solar light. Anchors directly to the 4th Heaven Sun sphere architecture." }
+  ]
+};
+
+export function GodverseEncyclopedia() {
+  const [section, setSection] = useState('HISTORIES');
+
+  return (
+    <div className="login-card" style={{ maxWidth: '650px', margin: '20px auto', textAlign: 'left' }}>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px' }}>
+        <button onClick={() => setSection('HISTORIES')} className={`custom-option-btn ${section === 'HISTORIES' ? 'active' : ''}`}>📜 Ancient Histories</button>
+        <button onClick={() => setSection('GODVERSE')} className={`custom-option-btn ${section === 'GODVERSE' ? 'active' : ''}`}>⚡ Gods & Goddesses</button>
+      </div>
+
+      {section === 'HISTORIES' ? (
+        <div>
+          {ENCYCLOPEDIA_DB.histories.map(h => (
+            <div key={h.title} style={{ marginBottom: '12px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px' }}>
+              <strong style={{ color: '#fbbf24' }}>{h.title}</strong>
+              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#cbd5e1', lineHeight: 1.4 }}>{h.desc}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div>
+          {ENCYCLOPEDIA_DB.godverse.map(g => (
+            <div key={g.name} style={{ marginBottom: '12px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px' }}>
+              <strong style={{ color: '#818cf8' }}>{g.name}</strong>
+              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#cbd5e1', lineHeight: 1.4 }}>{g.desc}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
