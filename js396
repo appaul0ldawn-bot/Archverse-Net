@@ -1,0 +1,50 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🔑 SUITE 19: BASE44 MASTER IDENTITY INTEGRATION
+// ==========================================================================
+describe('Archverse Base44 Master Profile Sync Tests', () => {
+
+  it('should grant access and long-lived session tokens for the zethreigns@gmail.com administrative identity', async () => {
+    await User.create({
+      username: 'MasterPaul',
+      rank: 'Council',
+      passwordHash: 'MOCKED_HASHED_PASSPHRASE',
+      recognizedDevicesList: []
+    });
+
+    const loginPayload = {
+      email: 'zethreigns@gmail.com',
+      sacredPassphrase: 'The Light Reigns Eternal',
+      deviceFingerprintString: 'BASE44_SECURE_HARDWARE_NODE'
+    };
+
+    const response = await request(app)
+      .post('/api/auth/admin-universal-login')
+      .send(loginPayload);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.headers['set-cookie']).toBeDefined(); // Verifies persistence cookie issued
+  });
+});
