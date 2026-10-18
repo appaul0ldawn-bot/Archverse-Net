@@ -1,0 +1,35 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// ⚖️ CELSTIAL CREDIT, BACKGROUND CHECK, & COVENANT REGISTRY
+// ==========================================================================
+const OmniGovernanceSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // 1. FINANCIAL ENERGY MANAGEMENT
+  financialMetrics: {
+    celestialCreditScore: { type: Number, default: 700 }, // 300 to 850 range scaling rules
+    hasActiveHolyStipendGrant: { type: Boolean, default: false },
+    accruedGenerationalLegacyWealth: { type: Number, default: 0 },
+    assignedSovereignTrustParty: { type: String, default: 'FATHERS_BUSINESS_GUILD' }
+  },
+
+  // 2. SOCIAL INTEGRITY & ETHICAL BACKGROUND CHECKS
+  backgroundSafetyRegistry: {
+    isIdentityVerifiedHonest: { type: Boolean, default: true },
+    hasPassedSpiritualBackgroundCheck: { type: Boolean, default: true },
+    isRegisteredAnomalyOffender: { type: Boolean, default: false }, // Enforces quiet background monitoring
+    generationalCurseInheritanceFactor: { type: Number, default: 0.0 } // 0.0 = Broken/Cleansed
+  },
+
+  // 3. SECTOR GEOSPATIAL BOUNDS ACCESS
+  gridAccessPrivileges: {
+    maximumAllowedAltitudeMeters: { type: Number, default: 1000 },
+    isRestrictedFromSacredGrottoWells: { type: Boolean, default: false },
+    neighborhoodWatchAlertActive: { type: Boolean, default: false }
+  },
+
+  lastGovernanceAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('OmniGovernance', OmniGovernanceSchema);
