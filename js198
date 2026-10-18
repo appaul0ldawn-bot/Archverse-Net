@@ -1,0 +1,80 @@
+const express = require('express');
+const router = express.Router();
+const PactRegistry = require('./models/PactRegistry');
+const User = require('./models/User');
+
+// ==========================================================================
+// 📜 SOVEREIGN CONTRACT MUTATION & CONVERTOR ENDPOINT
+// ==========================================================================
+router.post('/api/contracts/transmute-pact', async (req, res) => {
+  try {
+    const { username, targetPactSelection, secretPassphraseSignature } = req.body;
+    
+    // 1. Verify structural administrative/sacred passphrase integrity rules
+    if (!secretPassphraseSignature || secretPassphraseSignature.trim().split(/\s+/).length < 4) {
+      return res.status(401).json({ success: false, error: 'Secured multi-word sacred passphrase required to unbind contracts.' });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign target node invalid.' });
+
+    let pact = await PactRegistry.findOne({ userId: user._id });
+    if (!pact) pact = new PactRegistry({ userId: user._id });
+
+    // 2. Compute specific transactional state alignments
+    switch (targetPactSelection) {
+      case 'DIVINE_COVENANT_OF_GOD':
+        pact.activePactType = 'DIVINE_COVENANT_OF_GOD';
+        pact.karmicPayloadModifiers = {
+          tokenYieldMultiplier: 1.5,
+          baseKarmaScoreShift: 1000,
+          forcedAuraColorOverride: '#fde047', // Brilliant Golden Light Shroud
+          unlockedExclusiveAbility: 'Seraphic_Ignition'
+        };
+        user.rank = 'Archangel'; // Promotes player stance within the 7 Heavens hierarchy
+        break;
+
+      case 'ABYSSAL_DEAL_WITH_DEVIL':
+        pact.activePactType = 'ABYSSAL_DEAL_WITH_DEVIL';
+        pact.karmicPayloadModifiers = {
+          tokenYieldMultiplier: 3.0, // High extraction rate payout
+          baseKarmaScoreShift: -2000, // Forces immediate descent down Dante's circles
+          forcedAuraColorOverride: '#ef4444', // Dark crimson plasma
+          unlockedExclusiveAbility: 'Abyssal_Phase_Blink'
+        };
+        user.tokens += 5000; // Immediate upfront Faustian capital allocation injection
+        break;
+
+      case 'SOVEREIGN_SOUL_CONTRACT':
+        pact.activePactType = 'SOVEREIGN_SOUL_CONTRACT';
+        pact.generationalCurseBrokenStatus = true;
+        pact.karmicPayloadModifiers = {
+          tokenYieldMultiplier: 1.0,
+          baseKarmaScoreShift: 500,
+          forcedAuraColorOverride: '#a855f7', // Sovereign Violet Light
+          unlockedExclusiveAbility: 'Quantum_Superposition'
+        };
+        break;
+
+      default:
+        return res.status(400).json({ success: false, error: 'Invalid cosmic contractual selection.' });
+    }
+
+    await pact.save();
+    await user.save();
+    
+    global.stateHasChanged = true; // Pulse central 22Hz tick system engine broadcast
+
+    res.json({
+      success: true,
+      currentPactState: pact.activePactType,
+      appliedModifiers: pact.karmicPayloadModifiers,
+      userRankBadge: `👑 ${user.rank}`
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Contractual transaction execution crash.' });
+  }
+});
+
+module.exports = router;
