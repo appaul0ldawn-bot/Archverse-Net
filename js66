@@ -1,0 +1,36 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌪️ SIM'S RIGHT: SUPREME MORALITY SORTING VORTEX SCHEMA
+// ==========================================================================
+const SimsRightLedgerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // 1. DYNAMIC COMPILATION INPUT METRICS
+  funnelTelemetryInbound: {
+    gematriaNameWeightScore: { type: Number, required: true },
+    calculatedIqScore: { type: Number, default: 100 },
+    chronoAgeYears: { type: Number, required: true },
+    activeZodiacElement: { type: String, required: true },
+    accumulatedEffortTimeMinutes: { type: Number, default: 0 },
+    playlistDominantFrequencyHz: { type: Number, default: 432 }
+  },
+
+  // 2. YIN-YANG EQUILIBRIUM EQUATIONS MONITORING
+  yinYangEquilibriumMatrix: {
+    yinLightworkOutputScale: { type: Number, default: 1.0 }, // Spiritual expansion output
+    yangGroundingRoutineScale: { type: Number, default: 1.0 }, // Physical body temple grounding stability
+    currentPolarityBalanceRatio: { type: Number, default: 1.0 } // Must calculate close to 1.0 (50/50 balance)
+  },
+
+  // 3. FILTERED HEAVENLY REWARDS OUTPUTS
+  filteredAscensionYield: {
+    allocatedAngelTokensReward: { type: Number, default: 0 },
+    assigned7HeavensSphereBadge: String,
+    vortexAuditStatus: { type: String, enum: ['BALANCED_HARMONY', 'POLARITY_OVERCHARGE', 'CRITICAL_DENSITY_DROPPED'], default: 'BALANCED_HARMONY' }
+  },
+
+  lastVortexSortedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('SimsRightLedger', SimsRightLedgerSchema);
