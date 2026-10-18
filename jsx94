@@ -1,0 +1,67 @@
+import React, { useState, useEffect } from 'react';
+
+export function CognitiveDistributionHUD({ currentUsername, socket }) {
+  const [cognitionData, setCognitionData] = useState(null);
+  const [sponsorAd, setSponsorAd] = useState(null);
+
+  useEffect(() => {
+    // Subtle background check request fired to system telemetry loops
+    socket.emit('request_cognitive_placement_profile', { username: currentUsername });
+    socket.on('cognitive_placement_payload', (data) => {
+      setCognitionData(data.placement);
+      setSponsorAd(data.adLink);
+    });
+    return () => socket.off('cognitive_placement_payload');
+  }, [currentUsername, socket]);
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '1130px', width: '350px', border: '1px solid #6366f1', background: 'linear-gradient(135deg, #0b0f19 0%, rgba(99,102,241,0.03) 100%)' }}>
+      <div className="store-header" style={{ borderBottom: '1px solid rgba(99,102,241,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#818cf8', fontFamily: 'serif' }}>🧠 Cognitive Placement Matrix</h3>
+        <span style={{ fontSize: '9px', color: '#64748b' }}>Implicit Statistical Evaluation • Balanced Curve Active</span>
+      </div>
+
+      {cognitionData ? (
+        <div style={{ padding: '12px', fontSize: '11px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          
+          {/* --- REVERBERATING PERCENTILE GRAPHICS DISPLAY --- */}
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="metric-row">
+              <span>📊 Global Percentile Standing:</span>
+              <span style={{ color: '#818cf8', fontWeight: 'bold' }}>Top {100 - cognitionData.percentileRank}%</span>
+            </div>
+            {/* Renders a localized slider layout mapping the standard deviation distribution */}
+            <div style={{ width: '100%', height: '4px', background: '#334155', borderRadius: '2px', marginTop: '6px', position: 'relative' }}>
+              <div style={{ position: 'absolute', left: `${cognitionData.percentileRank}%`, top: '-4px', width: '12px', height: '12px', borderRadius: '50%', background: '#818cf8', boxShadow: '0 0 8px #6366f1' }} />
+            </div>
+          </div>
+
+          <div className="metric-row"><span>🧬 Calculated IQ Index Rank:</span><strong style={{ color: '#fff' }}>{cognitionData.computedIqIndex} Points</strong></div>
+          <div className="metric-row"><span>🎯 Aligned Intellect Faction:</span><span style={{ color: '#fbbf24', fontWeight: 'bold' }}>{cognitionData.activeFactionAlliance.replace('_', ' ')}</span></div>
+
+          {/* Achievements Badge Render Map */}
+          {cognitionData.badges && cognitionData.badges.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+              {cognitionData.badges.map((b, i) => (
+                <span key={i} className="badge-indicator" style={{ backgroundColor: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontSize: '9px' }}>{b}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{ padding: '20px', fontSize: '11px', color: '#64748b' }}>Evaluating subtle choice latency metrics...</div>
+      )}
+
+      {/* --- CONTEXTUAL SPONSORED LINKS GRID AD BLOCK --- */}
+      {sponsorAd && (
+        <div style={{ margin: '0 12px 12px 12px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', padding: '10px', borderRadius: '8px', textAlign: 'left' }}>
+          <span style={{ fontSize: '8px', color: '#64748b', textTransform: 'uppercase', display: 'block', fontWeight: 'bold' }}>Sponsored Communication Port</span>
+          <a href={sponsorAd.destinationUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#fbbf24', fontSize: '12px', fontWeight: 'bold', display: 'block', marginTop: '2px' }}>
+            {sponsorAd.headline} →
+          </a>
+          <p style={{ margin: '2px 0 0 0', fontSize: '10px', color: '#cbd5e1', lineHeight: 1.3 }}>{sponsorAd.caption}</p>
+        </div>
+      )}
+    </div>
+  );
+}
