@@ -1,0 +1,38 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// ⚖️ CIVIL ECONOMICS, THEOLOGY, AND LOGISTICS MATRICES
+// ==========================================================================
+const CivilEcosystemSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // 🏦 CIVIC ECONOMICS & DECISION SYSTEMS
+  bankingLedger: {
+    vaultBalanceST: { type: Number, default: 100 },
+    accumulatedMicroTaxesOwed: { type: Number, default: 0 },
+    hasVotedInCurrentConstitutionalPoll: { type: Boolean, default: false }
+  },
+
+  // 🕊️ FRUITS OF THE SPIRIT & THEOLOGICAL HARMONICS
+  spiritualAttributes: {
+    fruitsRatio: {
+      love: { type: Number, default: 1.0 },
+      joy: { type: Number, default: 1.0 },
+      peace: { type: Number, default: 1.0 },
+      longSuffering: { type: Number, default: 1.0 }
+    },
+    titheLedgerAccountST: { type: Number, default: 0 }, // Tracks historical 10% baseline offerings
+    equippedInstrument: { type: String, enum: ['NONE', 'MOSES_SHOFAR_OF_GLORY', 'CELESTIAL_HARP'], default: 'NONE' }
+  },
+
+  // 🔋 UTILITIES, AGE CLOCKS, & TRAFFIC NETWORKS
+  infrastructureGrid: {
+    electricityAmperageDraw: { type: Number, default: 15.0 }, // Tracks real-time compute hardware consumption
+    chronoAgeYears: { type: Number, default: 20 },           // Controls childhood-to-parenthood morph scales
+    currentTrafficDensityIndex: { type: Number, default: 0.1 } // Real-time transit congestion metric
+  },
+
+  lastCivilAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('CivilEcosystem', CivilEcosystemSchema);
