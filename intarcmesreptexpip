@@ -1,0 +1,12 @@
+
+Integrating the Archverse Mesh Replacer & Texture Pipeline
+
+The Archverse Engine has been upgraded to natively support advanced vertex-deformation maps and high-fidelity body mesh structural swaps [October 17, 2026]. This allows administrators to replace standard vanilla player rigs with custom, high-resolution topology layers based on the modular architecture found in advanced game engines.
+       [ HIGH-FIDELITY ARCHVERSE TEXTURE PIPELINE ]
+                            |
+   +------------------------+------------------------+
+
+   |                                                 |
+[ Base Topology Mesh ]                     [ Shader Mapping Layer ]
+  - CBBE / BHUNP Formats                     - Subsurface Scattering (SSS)
+  - Vertex Morph Weights                     - High-Res Normal Maps (Pores)
