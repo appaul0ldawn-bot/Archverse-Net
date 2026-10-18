@@ -1,0 +1,24 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌿 LITHO-BOTANICAL ACOUSTIC TRANSMUTATION SCHEMA
+// ==========================================================================
+const FrequencyCodexSchema = new mongoose.Schema({
+  sourceId: { type: String, required: true, unique: true, index: true },
+  sourceName: { type: String, required: true }, // e.g., 'Megalithic_Basalt_Node', 'Mycelium_Root_Weave'
+  category: { type: String, enum: ['MINERAL_ELEMENT', 'BOTANICAL_PLANT'], required: true },
+  
+  // Spectral Waveform Telemetry
+  measuredFrequencyHz: { type: Number, required: true }, // Piezoelectric or organic oscillation value
+  baseWaveformType: { type: String, default: 'SINUSOIDAL_RESONANCE' },
+
+  // Alphanumeric Decryption Outputs
+  decryptedConsonantAlphabet: {
+    translatedTextString: String,
+    rootOriginLanguage: { type: String, default: 'Paleo-Hebrew' }
+  },
+
+  lastAcousticPulseAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('FrequencyCodex', FrequencyCodexSchema);
