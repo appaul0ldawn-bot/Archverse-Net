@@ -1,0 +1,48 @@
+// ==========================================================================
+// 🪐 PROCEDURAL MULTIVERSAL CONTRACT GENERATOR ENGINE
+// ==========================================================================
+export function generateProceduralMission(user, psychometryData, globalFederationGoals) {
+  const { name, zodiacElement, rankBadge } = user;
+  const { enneagramType, coreDesireVector } = psychometryData;
+
+  let missionTitle = "";
+  let missionInstructions = "";
+  let targetHz = 432;
+  let tokenReward = 100;
+
+  // ♈ RULE VECTOR A: Air Elements (Pleiadian Starseeds) + Enneagram Type 5 (Investigator)
+  if (zodiacElement === 'Air' && enneagramType === 5) {
+    missionTitle = "📖 Operation: Akashic Cryptographic Compilation";
+    missionInstructions = `Analyze un-peer-reviewed esoteric element data logs. Use the Public Library Text-to-Speech tool to decode ancient Gnostic codex entries while walking.`;
+    targetHz = 963; // Crown 7 Heavens activation frequency
+    tokenReward = 150;
+  }
+
+  // 🌋 RULE VECTOR B: Fire Elements (Seraphic Ignition) + Enneagram Type 8 (Challenger)
+  else if (zodiacElement === 'Fire' && coreDesireVector === 'PROTECTION_DRIVE') {
+    missionTitle = "🛡️ Operation: Airwaves Firewall Reinforcement";
+    missionInstructions = `Deploy your whitelisted master admin passphrases to verify localized network nodes. Scan nearby coordinates for unauthorized token generators or unaligned entities using your Cerebro Matrix Predictive Mod.`;
+    targetHz = 396; // Fear liberation grid stabilizer
+    tokenReward = 250;
+  }
+
+  // 🌊 RULE VECTOR C: Complementary Matching (Earth/Water Archetypes Inter-Dependency)
+  else {
+    missionTitle = "🌱 Operation: Global Ley Line Grounding Service";
+    missionInstructions = `Coordinate a localized fitness walking routine with a complementary Air element Starseed. Walk within a 30m radius limits gate of an active Earth Grounding Pillar to anchor planetary light lines.`;
+    targetHz = 528; // Transformation and grid matrix repair
+    tokenReward = 200;
+  }
+
+  return {
+    missionId: `proc_ms_${Date.now()}_${user._id}`,
+    title: missionTitle,
+    instructions: missionInstructions,
+    requirements: {
+      resonanceHz: targetHz,
+      badgeRestriction: rankBadge,
+      globalAgendaAlignment: globalFederationGoals.activeAgendaItem
+    },
+    payout: tokenReward
+  };
+}
