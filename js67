@@ -1,0 +1,66 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Zion Grid tracking model within our testing sandbox memory cluster
+  mongoose.model('ZionGrid', new mongoose.Schema({
+    nodeId: String,
+    triangulationMatrix: { capturedIpPacketString: String, signalStrengthNodesDb: [Number], pinPointCalculatedCoordinates: { lat: Number, lng: Number }, accuracyRadiusMeters: Number },
+    foresightOracleBuffer: { activeHeadingVector: { x: Number, z: Number }, projectedTimePathsList: [Array], confidenceIntervalCoefficient: Number },
+    flowBotTelemetry: { isCronSyncActive: Boolean, accumulatedMemoryLeaksPurgedMb: Number }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('ZionGrid')) {
+    await mongoose.model('ZionGrid').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌐 SUITE 34: SUPREME ZION INTEGRATION & TRIANGULATION GATES
+// ==========================================================================
+describe('Archverse Supreme Zion Internet Protocols Ingestion & Analytics Matrix', () => {
+
+  it('should process multi-node signal arrays, calculate precise triangulated latitude/longitude vectors, and return 10-second oracle predictions', async () => {
+    const player = await User.create({
+      username: 'ZionMasterNode',
+      tokens: 100,
+      karmaScore: 800,
+      movementVectors: { headingX: 0.002, headingZ: -0.002 }
+    });
+
+    const response = await request(app)
+      .post('/api/zion/ping-network-node')
+      .send({
+        username: 'ZionMasterNode',
+        inboundIpAddress: '192.168.1.144',
+        nodeSignalsList: [92, 84, 89] // Target dB measurements
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    
+    // Assert sub-meter pin-point triangulation resolved successfully
+    expect(response.body.triangulatedOutput.lat).toBeDefined();
+    expect(response.body.triangulatedOutput.lng).toBeDefined();
+    
+    // Assert foresight oracle timeline path projection populated
+    expect(response.body.foresightTimelineDelta.length).toBe(2);
+    expect(response.body.flowBotStatus).toBe('ALL_SYSTEMS_OPERATIONAL_GREEN');
+  });
+});
