@@ -1,0 +1,79 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our memory sandbox
+  mongoose.model('ActiveGhostTrack', new mongoose.Schema({
+    entityId: String,
+    spectralFrequencyHz: Number,
+    currentCoordinates: { lat: Number, lng: Number },
+    missionObjectiveText: String,
+    existentialDilemma: String,
+    isTrappedInVessel: Boolean,
+    trappedByUserId: mongoose.Schema.Types.ObjectId
+  }));
+
+  mongoose.model('MetaphysicalContainer', new mongoose.Schema({
+    containerId: String,
+    ownerUserId: mongoose.Schema.Types.ObjectId,
+    boundElementSymbol: String,
+    storedEssenceMassGrams: Number,
+    lockExpirationTimestamp: Date
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('ActiveGhostTrack')) await mongoose.model('ActiveGhostTrack').deleteMany({});
+  if (mongoose.modelNames().includes('MetaphysicalContainer')) await mongoose.model('MetaphysicalContainer').deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 29: SPECTRAL ANALYSIS RECYCLER & TIMED VESSEL LOCK GATES
+// ==========================================================================
+describe('Archverse Necro-Acoustic Ingestion & Timed Element Binding Systems', () => {
+
+  it('should successfully trap an unaligned entity node and establish a 1-hour timed container lock inside metaphysical storage', async () => {
+    const user = await User.create({ username: 'ExorcistSeraph', tokens: 100 });
+    
+    const ghostNode = await mongoose.model('ActiveGhostTrack').create({
+      entityId: "ghost_anomaly_99",
+      spectralFrequencyHz: 350,
+      currentCoordinates: { lat: 31.7683, lng: 35.2137 },
+      missionObjectiveText: "Unbound energy dispersion",
+      existentialDilemma: "Trapped between dimensions",
+      isTrappedInVessel: false
+    });
+
+    const response = await request(app)
+      .post('/api/necro/trap-and-recycle')
+      .send({
+        username: 'ExorcistSeraph',
+        targetEntityId: 'ghost_anomaly_99',
+        actionExecutionMode: 'EXECUTE_TRAP_CONTAINMENT'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.currentStatus).toBe('ENTITY_SECURED_IN_CONTAINER');
+
+    // Confirm that the ectoplasmic mass container entry was committed with a valid expiration date
+    const containerRecord = await mongoose.model('MetaphysicalContainer').findOne({ ownerUserId: user._id });
+    expect(containerRecord).toBeDefined();
+    expect(containerRecord.boundElementSymbol).toBe('Ect');
+    expect(containerRecord.lockExpirationTimestamp.getTime()).toBeGreaterThan(Date.now()); // Lock expiration set in future
+  });
+});
