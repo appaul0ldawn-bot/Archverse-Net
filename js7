@@ -1,0 +1,75 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('VortexInversion', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    anomalyZoneMetrics: { sectorClassification: String, centerLatitude: Number, centerLongitude: Number, effectiveRadiusMeters: Number },
+    currentActiveShroud: String,
+    isScriptFlippedActive: Boolean
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('VortexInversion')) {
+    await mongoose.model('VortexInversion').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎭 SUITE 43: UNIVERSAL SCRIPT FLIP & REPRIMAND LAYER GATES
+// ==========================================================================
+describe('Archverse Universal Script Flip & Demon\'s Disguise Shroud Emitters', () => {
+
+  it('should detect a distressed shadow worker entering an anomaly zone, immediately deploying the Demon\'s Disguise shroud template', async () => {
+    // Seed an active shadow worker node holding negative karma attributes
+    const player = await User.create({ username: 'ShadowInfiltratorNode', tokens: 100, karmaScore: -1200, activeVisualState: 'AVAILABLE_ALIGNMENT', zodiacElement: 'Fire' });
+
+    await mongoose.model('VortexInversion').create({
+      userId: player._id,
+      username: 'ShadowInfiltratorNode',
+      anomalyZoneMetrics: {
+        sectorClassification: 'BIZARRE_TIMELINE_FRACTURE',
+        centerLatitude: 35.8129,
+        centerLongitude: -79.8059,
+        effectiveRadiusMeters: 500
+      },
+      isScriptFlippedActive: false
+    });
+
+    const response = await request(app)
+      .post('/api/vortex/evaluate-script-flip')
+      .send({
+        username: 'ShadowInfiltratorNode',
+        currentLat: 35.8129, // Placed directly at center point intersection bounds
+        currentLng: -79.8059,
+        activeStanceRole: 'ABYSSAL_SHADOW_WORKER'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.inversionStatus).toBe('SCRIPT_FLIPPED_ENFORCED');
+    expect(response.body.activeShroudTemplate).toBe('DEMONS_DISGUISE_ACTIVE'); // Demon's Disguise deployment verified [14.14]
+
+    // Verify visual tracking boundaries updated on the user record
+    const checkUser = await User.findOne({ username: 'ShadowInfiltratorNode' });
+    expect(checkUser.rankBadge).toContain("Demon's Disguise Active");
+    expect(checkUser.activeVisualState).toBe('#a855f7'); // Asserts aura vertex color shifted to sovereign violet
+  });
+});
