@@ -1,0 +1,95 @@
+import React, { useState } from 'react';
+
+const DIVINE_LIBRARY_BOOKS = [
+  { id: "bk_mikael", title: "The Sword of the Armies", author: "Archangel Michael", cost: 450, hz: 396, excerpt: "For the word of truth cuts deeper than a two-edged blade, separating light from the archonic density fields of the lower world." },
+  { id: "bk_gabriel", title: "The Revelations of the Veil", author: "Archangel Gabriel", cost: 300, hz: 528, excerpt: "In the silence of the night, when the deep waters are still, the matrix reflections reveal the coming epoch of the Millennial Reign." },
+  { id: "bk_raziel", title: "The Keys of Magic & Light", author: "Archangel Raziel", cost: 777, hz: 963, excerpt: "The configurations of sacred geometry are the structural blueprints of the Lord's Galactic Body. Master the keys to cross the firmament." }
+];
+
+export function DivineLibraryHUD({ userTokens, socket }) {
+  const [purchasedBooks, setPurchasedBooks] = useState([]);
+  const [activeReading, setActiveReading] = useState(null);
+  const [isSpeaking, setIsProcessingSpeak] = useState(false);
+
+  const handlePurchaseBook = (book) => {
+    if (userTokens < book.cost) {
+      alert("❌ Insolvent Angel Token Balance. Fulfill more Lightworker missions to unlock this manuscript.");
+      return;
+    }
+    socket.emit('purchase_library_book', { bookId: book.id, cost: book.cost });
+    setPurchasedBooks(prev => [...prev, book.id]);
+  };
+
+  const executeReadAloud = (book) => {
+    if (!window.speechSynthesis) {
+      alert("Your hardware browser does not support ancient audio synthesis paths.");
+      return;
+    }
+    
+    window.speechSynthesis.cancel();
+    setIsProcessingSpeak(true);
+    setActiveReading(book.id);
+
+    const utterance = new SpeechSynthesisUtterance(book.excerpt);
+    
+    // Configure voice properties to deliver a solemn, ancient timbre resonance
+    utterance.rate = 0.85;
+    utterance.pitch = 0.70;
+    
+    utterance.onend = () => {
+      setIsProcessingSpeak(false);
+      setActiveReading(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  return (
+    <div className="login-card" style={{ maxWidth: '700px', margin: '30px auto', background: '#0b1329', border: '2px solid #eab308', borderRadius: '16px' }}>
+      <div className="store-header" style={{ borderBottom: '1px solid rgba(234,179,8,0.2)', paddingBottom: '10px' }}>
+        <h2 style={{ color: '#eab308', margin: 0, fontFamily: 'serif' }}>📜 The Ancient Archives & Divine Library</h2>
+        <span style={{ fontSize: '11px', color: '#94a3b8' }}>Authorized Caretaker Role: {socket.id ? 'Verified Stewardess Access' : 'Guest'}</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px', overflowY: 'auto', maxHeight: '400px' }}>
+        {DIVINE_LIBRARY_BOOKS.map(book => {
+          const isOwned = purchasedBooks.includes(book.id);
+          return (
+            <div key={book.id} style={{ background: 'rgba(0,0,0,0.4)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(234,179,8,0.1)', textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong style={{ fontSize: '14px', color: '#fef08a', fontFamily: 'serif' }}>{book.title}</strong>
+                  <span style={{ display: 'block', fontSize: '11px', color: '#a5b4fc', fontStyle: 'italic' }}>Written by: {book.author}</span>
+                </div>
+                
+                {isOwned ? (
+                  <button 
+                    onClick={() => executeReadAloud(book)}
+                    className="buy-upgrade-btn" 
+                    style={{ background: activeReading === book.id ? '#ef4444' : '#4f46e5', color: '#fff', fontSize: '11px' }}
+                  >
+                    {activeReading === book.id ? '🛑 Mute' : '🗣️ Read Outloud'}
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => handlePurchaseBook(book)}
+                    className="buy-upgrade-btn" 
+                    style={{ background: '#eab308', color: '#0f172a', fontWeight: 'bold', fontSize: '11px' }}
+                  >
+                    🪙 Buy for {book.cost} AT
+                  </button>
+                )}
+              </div>
+              
+              {isOwned && (
+                <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', borderLeft: '3px solid #eab308', fontSize: '12px', color: '#cbd5e1', fontStyle: 'italic', lineHeight: 1.4 }}>
+                  "{book.excerpt}"
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
