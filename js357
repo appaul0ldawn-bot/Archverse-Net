@@ -1,0 +1,34 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧬 ARCHVERSE HIGH-FIDELITY AVATAR TOPOLOGY SCHEMA
+// ==========================================================================
+const BodyReplacerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  
+  // Core Body Mesh Mod Selection
+  baseMeshType: { 
+    type: String, 
+    enum: ['CBBE_DEFAULT', 'BHUNP_ADVANCED', 'UNP_SLENDER', 'SAM_MALE_ATLAS'], 
+    default: 'CBBE_DEFAULT' 
+  },
+  
+  // High-Resolution Skin Textures & Normal Maps
+  appliedTextureSet: {
+    femaleTexture: { type: String, enum: ['MATURE_SKIN', 'FAIR_SKIN_COMPLEXION', 'REAL_GIRLS_HD'], default: 'FAIR_SKIN_COMPLEXION' },
+    maleTexture: { type: String, enum: ['TEMPERED_SKINS_MALE', 'SAM_ATLAS_BASE'], default: 'TEMPERED_SKINS_MALE' }
+  },
+
+  // Supporting Framework Telemetry
+  skeletonFramework: { type: String, default: 'XPMSSE_EXTENDED' },
+  bodySlideWeightSliders: {
+    weight: { type: Number, default: 0.5 },    // 0.0 to 1.0 (BodySlide BlendShape Range)
+    muscleTone: { type: Number, default: 0.5 },
+    curvesScale: { type: Number, default: 0.5 }
+  },
+
+  // Strict SFW vs. Unrestricted Flag Selection
+  isUnrestrictedAdultMesh: { type: Boolean, default: false } // TRUE = Adult/NSFW Variant; FALSE = NeverNude Base
+});
+
+module.exports = mongoose.model('BodyReplacer', BodyReplacerSchema);
