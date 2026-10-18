@@ -1,0 +1,64 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Reprimand Ledger schema within our testing sandbox
+  mongoose.model('ReprimandLedger', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    violationType: String,
+    isAccountPermanentlyShrouded: Boolean,
+    disciplinaryMetrics: { wipedSoulTokenBalance: Number, assignedPunishmentSector: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('ReprimandLedger')) {
+    await mongoose.model('ReprimandLedger').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🛡️ SUITE 38: JUDICIAL REPRIMAND GATES & ASSET EVICTION CHECKS
+// ==========================================================================
+describe('Archverse Emergency Incident Reporting & Asset Wiping Filters', () => {
+
+  it('should immediately zero out an offending user\'s tokens and force an un-deletable containment isolation shroud upon report ingestion', async () => {
+    const reporter = await User.create({ username: 'VigilantLightworker', tokens: 100 });
+    const offender = await User.create({ username: 'UnalignedRogueNode', tokens: 8500, karmaScore: 50 });
+
+    const response = await request(app)
+      .post('/api/judicial/report-incident')
+      .send({
+        reporterUsername: 'VigilantLightworker',
+        offendingUsername: 'UnalignedRogueNode',
+        incidentDescription: 'Observed prohibited sexual actions or density violations.'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.incidentStatus).toBe('OFFENDER_IMMEDIATELY_EVICTED');
+
+    // Re-query database to verify absolute account isolation and asset wiping held true
+    const postReprimandOffender = await User.findOne({ username: 'UnalignedRogueNode' });
+    expect(postReprimandOffender.tokens).toBe(0); // Financial utility tokens successfully cleared
+    expect(postReprimandOffender.activeVisualState).toBe('CONTAINMENT_ISOLATION_SHROUD'); // Mesh blacked out
+    expect(postReprimandOffender.isBanned).toBe(true);
+
+    const checkLedger = await mongoose.model('ReprimandLedger').findOne({ username: 'UnalignedRogueNode' });
+    expect(checkLedger).toBeDefined();
+  });
+});
