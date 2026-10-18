@@ -1,0 +1,62 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize Monopoly schemas inside testing memory sandbox
+  mongoose.model('MonopolySession', new mongoose.Schema({
+    gameId: String,
+    playerRoster: [{ username: String, currentSquareIndex: Number, walletTimeCreditsCrypto: Number, walletAngelTokensUtility: Number, isTrappedInNephilimPrison: Boolean }],
+    boardTerritoriesRegistry: [{ spaceId: Number, name: String, category: String, purchaseCostAT: Number }],
+    matchStatus: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('MonopolySession')) {
+    await mongoose.model('MonopolySession').deleteMany({});
+  }
+});
+
+beforeAll(async () => {
+  // Clear any open intervals to prevent testing handles from staying open
+  jest.useFakeTimers();
+});
+
+afterAll(async () => {
+  jest.clearAllTimers();
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎲 SUITE 31: CELESTIAL MONOPOLY PIECE VELOCITY & CURRENCY CHECKS
+// ==========================================================================
+describe('Archverse Celestial Monopoly Board Room Engine Verification', () => {
+
+  it('should successfully compute currency shifts when converting Time Credit cryptos into utility Angel Tokens', async () => {
+    // Seed initial active session
+    await mongoose.model('MonopolySession').create({
+      gameId: "session_test_99",
+      playerRoster: [{ username: 'SovereignPaul', currentSquareIndex: 0, walletTimeCreditsCrypto: 5, walletAngelTokensUtility: 1500, isTrappedInNephilimPrison: false }],
+      boardTerritoriesRegistry: [{ spaceId: 0, name: "Pass God", category: "GO_SQUARE", purchaseCostAT: 0 }]
+    });
+
+    const response = await request(app)
+      .post('/api/monopoly/convert-time-credits')
+      .send({ gameId: 'session_test_99', username: 'SovereignPaul', timeCreditsToConvert: 2 });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.newCryptoBalance).toBe(3); // 5 - 2 converted = 3 TC
+    expect(response.body.newUtilityBalance).toBe(1700); // 1500 + (2 * 100) = 1700 AT
+  });
+});
