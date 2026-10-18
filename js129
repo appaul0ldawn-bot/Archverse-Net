@@ -1,0 +1,30 @@
+import React, { useState } from 'react';
+
+export function MarriageRegistryHUD({ currentUsername, socket }) {
+  const [partnerUsername, setPartnerUsername] = useState('');
+
+  const executeCovenantBond = () => {
+    if (!partnerUsername.trim()) return;
+    socket.emit('propose_marriage_covenant', { source: currentUsername, target: partnerUsername.trim() });
+    alert(`💍 Marriage Covenant proposal dispatched to ${partnerUsername.trim()} under the oversight of the High Council.`);
+  };
+
+  return (
+    <div className="login-card" style={{ maxWidth: '400px', margin: '20px auto', borderColor: '#db2777' }}>
+      <div style={{ fontSize: '11px', color: '#db2777', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+        💍 Celestial Marriage Covenant Portal
+      </div>
+      <p style={{ fontSize: '11px', color: '#cbd5e1', textAlign: 'left' }}>
+        Bind your profile with a complementary partner node. Spouses share token vaults, unlock dual-avatar protection shields, and sync their Three.js aura shaders.
+      </p>
+      
+      <div style={{ display: 'flex', gap: '4px' }}>
+        <input 
+          type="text" value={partnerUsername} onChange={(e) => setPartnerUsername(e.target.value)} placeholder="Partner username..."
+          style={{ flex: 1, background: 'rgba(0,0,0,0.4)', color: '#fff', border: '1px solid #db2777', borderRadius: '4px', padding: '6px', fontSize: '12px' }}
+        />
+        <button onClick={executeCovenantBond} className="buy-upgrade-btn" style={{ background: '#db2777' }}>Seal Bond</button>
+      </div>
+    </div>
+  );
+}
