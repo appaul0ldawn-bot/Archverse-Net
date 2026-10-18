@@ -1,0 +1,70 @@
+import React, { useState } from 'react';
+
+export function SensoryMonitorHUD({ currentUsername, socket }) {
+  const [expression, setExpression] = useState('ZYGOMATIC_ELEVATION');
+  const [vocalTrack, setVocalTrack] = useState('EXCITEMENT_BURST');
+  const [report, setReport] = useState(null);
+
+  const processSensoryPing = async () => {
+    try {
+      const response = await fetch('/api/sensory/log-interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUsername, observedExpression: expression, witnessedAcousticReaction: vocalTrack, dbLevel: 65 })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setReport(data);
+      }
+    } catch (e) {
+      console.error("Failed to commit sensory packet data:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '380px', width: '350px', borderColor: '#ec4899', background: 'linear-gradient(135deg, #0f172a 0%, rgba(236,72,153,0.02) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(236,72,153,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#f472b6', fontFamily: 'serif' }}>👅 Multi-Sensor Biometric Monitor</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Translates facial expressions and vocal acoustics into documented taste, touch, and texture data logs for case evaluation.
+      </p>
+
+      {/* Input Selection Dropdowns */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'left', fontSize: '11px' }}>
+        <div>
+          <span>Observed Facial Expression:</span>
+          <select value={expression} onChange={(e) => setExpression(e.target.value)} style={{ background: '#0f172a', color: '#fff', width: '100%', padding: '4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <option value="ZYGOMATIC_ELEVATION">Smile Elevation (Sweet/Manna Induction)</option>
+            <option value="GLABELLAR_FROWN">Glabellar Frown (Bitter/Absinthe Induction)</option>
+          </select>
+        </div>
+        <div>
+          <span>Witnessed Vocal Reaction:</span>
+          <select value={vocalTrack} onChange={(e) => setVocalTrack(e.target.value)} style={{ background: '#0f172a', color: '#fff', width: '100%', padding: '4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <option value="EXCITEMENT_BURST">Vocal Excitement Burst (Smooth Texture Feel)</option>
+            <option value="MOAN_RESONANCE">Moan Resonance (Smooth Texture Feel)</option>
+            <option value="CRY_DISTRESS">Cry of Distress (Rough Abyssal Feel)</option>
+            <option value="ANGER_VOCAL_SPIKE">Anger Vocal Spike (Rough Abyssal Feel)</option>
+          </select>
+        </div>
+      </div>
+
+      <button onClick={processSensoryPing} className="buy-upgrade-btn" style={{ width: '100%', background: '#ec4899', marginTop: '10px', color: '#fff', fontWeight: 'bold' }}>
+        🔄 Log Multi-Sensor Interaction
+      </button>
+
+      {report && (
+        <div style={{ marginTop: '10px', background: 'rgba(236,72,153,0.06)', border: '1px solid #ec4899', padding: '10px', borderRadius: '8px', textAlign: 'left', fontSize: '11px', lineHeight: 1.4 }}>
+          <div>👅 <strong>Inferred Taste Sensation:</strong> {report.computedTasteSensation.replace('_', ' ')}</div>
+          <div>✋ <strong>Perceived Tactile Touch:</strong> {report.computedTouchFeel.replace('_', ' ')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+            <span>Calculated Aura Sync:</span>
+            <div style={{ width: '20px', height: '10px', borderRadius: '2px', backgroundColor: report.vortexAuraShiftColor }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
