@@ -1,0 +1,77 @@
+const express = require('express');
+const router = express.Router();
+const OphansOverlook = require('./models/OphansOverlook');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🕊️ DYNAMIC GRACE MITIGATION & COGNITIVE REALIGNMENT ROUTER
+// ==========================================================================
+router.post('/api/judicial/apply-ophans-overlook', async (req, res) => {
+  try {
+    const { username, rawFrictionIntensityScore } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node proxy invalid.' });
+
+    let overlook = await OphansOverlook.findOne({ userId: user._id });
+    if (!overlook) overlook = new OphansOverlook({ userId: user._id, username });
+
+    // 🧠 MUTUAL BALANCING: Ingest friction but execute an automatic mercy dampening loop
+    // Overlooks minor day-to-day errors by scaling down the infraction raw weight
+    const rawAbsorbed = rawFrictionIntensityScore || 10;
+    
+    let processedMutedFriction = 0;
+    let graceBonusAT = 100; // Baseline token reward for finding the good in all things
+    let visualAuraHex = '#38bdf8'; // Protective Cyan Shroud
+
+    if (rawAbsorbed < 50) {
+      // 🕊️ OVERLOOK CAP: Infractions below a threshold are completely wiped and let slide
+      overlook.graceFrictionTracking.overlookedAnomaliesCount += 1;
+      overlook.graceFrictionTracking.absorbedDailyFrictionIndex = 0;
+      user.karmaScore += 200; // Bolsters spiritual credit indices
+      graceBonusAT = 250;
+      visualAuraHex = '#10b981'; // Brilliant Emerald Harmony Shroud
+    } else {
+      // For more severe real-world disruptions, apply a 60% mitigation compression filter
+      processedMutedFriction = Math.floor(rawAbsorbed * 0.4);
+      overlook.graceFrictionTracking.absorbedDailyFrictionIndex += processedMutedFriction;
+      user.karmaScore += 50;
+    }
+
+    // Update persistent database document tracking variables
+    overlook.mercyMitigationCalculated = {
+      graceCoefficientMultiplier: 2.0,
+      activeAuraRestorationShader: visualAuraHex,
+      overlookStatus: 'HARMONIC_MERCY_ENGAGED'
+    };
+
+    user.tokens += graceBonusAT;
+    user.activeVisualState = visualAuraHex;
+
+    await overlook.save();
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    ArchverseLogger.log('INFO', 'MERCY_ENGINE', `Ophan's Overlook engaged for ${username}. Overlooked count: ${overlook.graceFrictionTracking.overlookedAnomaliesCount}. Allocated: ${graceBonusAT} AT.`);
+
+    res.json({
+      success: true,
+      overlookAuditStatus: overlook.mercyMitigationCalculated.overlookStatus,
+      mitigationMetrics: {
+        rawInboundFriction: rawAbsorbed,
+        compressedFrictionFiled: processedMutedFriction,
+        totalOverlookedAnomalies: overlook.graceFrictionTracking.overlookedAnomaliesCount
+      },
+      rewardsYielded: {
+        mercyTokensBonusPaid: graceBonusAT,
+        activeAuraShaderColor: visualAuraHex
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Ophans Overlook processing loop crash.' });
+  }
+});
+
+module.exports = router;
