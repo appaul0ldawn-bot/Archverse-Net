@@ -1,0 +1,93 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const MissionWager = require('./models/WagerModels');
+const { AlignedMission } = require('./models/AscensionModels');
+const User = require('./models/User');
+
+// ==========================================================================
+// 🎰 1. PLACE A SECURE TOKEN-ONLY WAGER LAYER
+// ==========================================================================
+router.post('/api/wagers/place', async (req, res) => {
+  try {
+    const { bettorUsername, targetMissionId, tokenStake, prediction } = req.body;
+
+    const bettor = await User.findOne({ username: bettorUsername });
+    const mission = await AlignedMission.findOne({ missionId: targetMissionId });
+
+    if (!bettor || !mission || mission.isSealedAndCompleted) {
+      return res.status(404).json({ success: false, error: 'Target mission closed or profile invalid.' });
+    }
+
+    // INSIDER INSIDER TRADING CHECK: No player involved in the mission may place a wager
+    if (mission.assignedToUserId.toString() === bettor._id.toString()) {
+      return res.status(403).json({ success: false, error: '🚨 Exploitation Guard: You are structurally barred from betting on contracts assigned to your own avatar container.' });
+    }
+
+    if (bettor.tokens < tokenStake) {
+      return res.status(400).json({ success: false, error: 'Insolvent ST Treasury balance. Earn more tokens to open wagers.' });
+    }
+
+    // Deduct stake and log the active wager document
+    bettor.tokens -= tokenStake;
+    await bettor.save();
+
+    const activeWager = await MissionWager.create({
+      wagerId: `wag_${Date.now()}_${bettorUsername}`,
+      linkedMissionId: targetMissionId,
+      bettorUsername,
+      betAmountST: tokenStake,
+      predictionDirection: prediction
+    });
+
+    res.json({ success: true, message: "🎲 Wager committed to the arena ledger.", currentBalance: bettor.tokens });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to process wager placement.' });
+  }
+});
+
+// ==========================================================================
+// ⚖️ 2. RESOLVE OR RESOLVE STALEMATE RESOLUTIONS (HOUSE COVENANT)
+// ==========================================================================
+router.post('/api/wagers/settle-pool', async (req, res) => {
+  try {
+    const { adminEmail, targetMissionId, settlementResolution } = req.body;
+
+    // Strict Master Admin check (zethreigns@gmail.com, appaul0ldawn@gmail.com, sephraines@gmail.com)
+    const MASTER_ROSTER = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!MASTER_ROSTER.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Admin clearance required.' });
+    }
+
+    const activePoolWagers = await MissionWager.find({ linkedMissionId: targetMissionId, wagerStatus: 'PLACED_ACTIVE' });
+
+    for (let wager of activePoolWagers) {
+      if (settlementResolution === 'STALEMATE' || settlementResolution === 'FREEZE') {
+        // 🔒 CORE ANTI-CHEAT RULE: House wins all tokens if a stalemate or deadlock is called
+        wager.wagerStatus = 'STALEMATE_HOUSE_WIN';
+        await wager.save();
+
+        // Divert tokens directly into Archangel Raziel's Hidden Treasury Port
+        await mongoose.model('FinancialLedger').updateOne(
+          { 'razielTreasuryVault.isVaultHidden': true },
+          { \$inc: { 'razielTreasuryVault.soulTokenBalance': wager.betAmountST } }
+        );
+      } else if (wager.predictionDirection === settlementResolution) {
+        wager.wagerStatus = 'SETTLED_WIN';
+        await wager.save();
+        
+        // Return 2x payout to accurate observers
+        await User.updateOne({ username: wager.bettorUsername }, { \$inc: { tokens: wager.betAmountST * 2 } });
+      } else {
+        wager.wagerStatus = 'SETTLED_LOSS';
+        await wager.save();
+      }
+    }
+
+    res.json({ success: true, message: `Pool settled successfully. Resolution profile: ${settlementResolution}.` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Pool resolution pipeline collapse.' });
+  }
+});
+
+module.exports = router;
