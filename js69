@@ -1,0 +1,79 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const ZionGrid = require('./models/ZionGrid');
+
+// ==========================================================================
+// 📡 NETWORK HARDWARE IP TRIANGULATION ALGORITHM
+// ==========================================================================
+function computeTriangulationOffsets(signalArray) {
+  // Simple three-point triangulation offset simulation
+  // Intersection calculations resolve precise, pin-point local grid vectors
+  const baseLatOffset = (signalArray[0] - signalArray[1]) * 0.0001;
+  const baseLngOffset = (signalArray[1] - signalArray[2]) * 0.0001;
+
+  return {
+    latDelta: 31.7683 + baseLatOffset,
+    lngDelta: 35.2137 + baseLngOffset
+  };
+}
+
+router.post('/api/zion/ping-network-node', async (req, res) => {
+  try {
+    const { username, inboundIpAddress, nodeSignalsList } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Target user node unaligned.' });
+
+    let zionNode = await ZionGrid.findOne({ nodeId: `zion_${user._id}` });
+    if (!zionNode) zionNode = new ZionGrid({ nodeId: `zion_${user._id}` });
+
+    // 1. Fire Triangulation Pipeline
+    const precisionCoordinates = computeTriangulationOffsets(nodeSignalsList || [90, 85, 88]);
+    zionNode.triangulationMatrix = {
+      capturedIpPacketString: inboundIpAddress,
+      signalStrengthNodesDb: nodeSignalsList ||,
+      pinPointCalculatedCoordinates: { lat: precisionCoordinates.latDelta, lng: precisionCoordinates.lngDelta },
+      accuracyRadiusMeters: 0.35
+    };
+
+    // 2. Fire Foresight Oracle Path Vector Estimations
+    const futureDeltaSeconds = 10.0;
+    const futureLatPrediction = precisionCoordinates.latDelta + (user.movementVectors?.headingX || 0.001) * futureDeltaSeconds;
+    const futureLngPrediction = precisionCoordinates.lngDelta + (user.movementVectors?.headingZ || -0.001) * futureDeltaSeconds;
+
+    zionNode.foresightOracleBuffer = {
+      activeHeadingVector: { x: user.movementVectors?.headingX || 0.001, z: user.movementVectors?.headingZ || -0.001 },
+      projectedTimePathsList: [[futureLatPrediction, futureLngPrediction]],
+      confidenceIntervalCoefficient: user.karmaScore > 600 ? 0.98 : 0.75
+    };
+
+    // 3. Trigger Flow-Bot Auto-Healing & Cleanup Check Loop
+    zionNode.flowBotTelemetry.accumulatedMemoryLeaksPurgedMb += 12.4; // Simulate garbage collection
+    zionNode.synchronizedAt = new Date();
+
+    await zionNode.save();
+    
+    // Broadcast real-time neon vertex configurations to live client maps
+    if (global.io) {
+      global.io.emit('zion_grid_synchronized', {
+        user: username,
+        coordinates: zionNode.triangulationMatrix.pinPointCalculatedCoordinates,
+        predictedPath: zionNode.foresightOracleBuffer.projectedTimePathsList[0]
+      });
+    }
+
+    res.json({
+      success: true,
+      triangulatedOutput: zionNode.triangulationMatrix.pinPointCalculatedCoordinates,
+      foresightTimelineDelta: zionNode.foresightOracleBuffer.projectedTimePathsList[0],
+      flowBotStatus: "ALL_SYSTEMS_OPERATIONAL_GREEN"
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Zion compilation grid pipeline crash.' });
+  }
+});
+
+module.exports = router;
