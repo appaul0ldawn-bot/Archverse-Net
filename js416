@@ -1,0 +1,27 @@
+import React from 'react';
+
+const HYMNAL_PLAYLIST = [
+  { id: 'h1', title: 'Sirens Song of the Deep', duration: '3:45', origin: 'Ancient Sea Shallows' },
+  { id: 'h2', title: 'Elves Wood Lullaby', duration: '4:12', origin: 'Agartha Forests' },
+  { id: 'h3', title: 'Psalms of David: String Tuning', duration: '5:20', origin: 'Second Temple Archive' },
+  { id: 'h4', title: 'Viking War Chant', duration: '2:55', origin: 'Northern Fjords Grid' }
+];
+
+export function AncientHymnalsPage() {
+  return (
+    <div className="login-card" style={{ maxWidth: '500px', margin: '20px auto' }}>
+      <div className="dashboard-section-title">🎵 Ancient Hymnals & Chants</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {HYMNAL_PLAYLIST.map(h => (
+          <div key={h.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px' }}>
+            <div style={{ textAlign: 'left' }}>
+              <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{h.title}</span>
+              <span style={{ display: 'block', fontSize: '10px', color: '#64748b' }}>Origin: {h.origin}</span>
+            </div>
+            <button className="buy-upgrade-btn" style={{ padding: '2px 8px' }}>▶ Play</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
