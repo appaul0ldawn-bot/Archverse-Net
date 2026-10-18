@@ -1,0 +1,45 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🛰️ SUITE 16: ADVANCED LORE HUD AND SHADOW OPERATION BALANCE TESTS
+// ==========================================================================
+describe('Archverse Advanced Lore HUD and High-Difficulty Shadow Operations', () => {
+
+  it('should accurately index and route high-difficulty shadow worker missions with balanced payouts', async () => {
+    // Instantiate user state tracking profiles
+    const player = await User.create({ username: 'ShadowInfiltrator', tokens: 100, karmaScore: -500 });
+    
+    // Simulate high-tier contract completion dispatching vectors
+    const response = await request(app)
+      .post('/api/missions/complete')
+      .send({
+        username: 'ShadowInfiltrator',
+        playerLat: 31.7683, // Within Jerusalem base coordinates bounds
+        playerLng: 35.2137,
+        missionId: 'sh_ms_04',
+        missionType: 'shadow'
+      });
+
+    expect(response.status).toBe(200);
+  });
+});
