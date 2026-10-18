@@ -1,0 +1,65 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+
+// ==========================================================================
+// 🌦️ CHRONO-WEATHER FORECAST & SEASONAL MAPPING PIPELINE
+// ==========================================================================
+async function fetchRealtimeWeatherCoordinates(lat, lng) {
+  // Real-world integration loop pulls from automated Open-Weather API parameters
+  // [Internal System Simulation Snapshot - October 17, 2026]:
+  const currentHour = new Date().getHours();
+  const isDaylight = currentHour >= 6 && currentHour <= 18;
+  
+  return {
+    ambientTemperatureCelsius: 22.5,
+    relativeHumidityPercentage: 65,
+    activeCondition: "METEOR_SHOWER_CLEAR_SKIES", // e.g., 'RAIN_FALL', 'BRIMSTONE_SMOG', 'CLEAR'
+    isDaylight: isDaylight,
+    activeSeason: "AUTUMN_EQUILIBRIUM" // Computes equinox matrices for Libra weight alignments
+  };
+}
+
+router.post('/api/environment/sync-weather', async (req, res) => {
+  try {
+    const { username, currentLat, currentLng } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User coordinate node invalid.' });
+
+    const weatherData = await fetchRealtimeWeatherCoordinates(currentLat, currentLng);
+    
+    // 🌌 METAPHYSICAL ENVIRONMENT MODIFIERS GATES
+    let seasonalAuraOverride = "#38bdf8"; // Autumn calm cyan
+    let environmentalMissionText = "Fulfill standard Lightworker grounding tasks.";
+
+    if (weatherData.activeCondition === "METEOR_SHOWER_CLEAR_SKIES") {
+      seasonalAuraOverride = "#fbbf24"; // Radiant golden shower flash
+      environmentalMissionText = "🌌 [Chrono Event]: Celestial gates are open over your immediate coordinates. Step outdoor, execute a 15-minute meditation sweep, and harvest 3 spawned Monatomic Gold nodes.";
+    }
+
+    if (global.io) {
+      global.io.emit('firmament_weather_render', {
+        player: username,
+        tintColor: seasonalAuraOverride,
+        isDay: weatherData.isDaylight,
+        season: weatherData.activeSeason
+      });
+    }
+
+    res.json({
+      success: true,
+      currentForecast: weatherData,
+      inspiredSeasonalMission: {
+        title: "☄️ Operation: Firmament Ingestion",
+        instructions: environmentalMissionText,
+        rewardTokens: 300
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Chrono-weather telemetry alignment failure.' });
+  }
+});
+
+module.exports = router;
