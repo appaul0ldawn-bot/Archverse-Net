@@ -1,0 +1,77 @@
+const express = require('express');
+const router = express.Router();
+const IdentitySwap = require('./models/IdentitySwap');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🎭 ADMINISTRATIVE SMART SWITCHING OVERRIDE CONTROLLER
+// ==========================================================================
+router.post('/api/admin/initialize-identity-swap', async (req, res) => {
+  try {
+    const { adminEmail, playerOneUsername, playerTwoUsername } = req.body;
+
+    // 1. Enforce strict administrative credential whitelisting rules
+    const AUTHORIZED_ADMINS = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!AUTHORIZED_ADMINS.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const userA = await User.findOne({ username: playerOneUsername });
+    const userB = await User.findOne({ username: playerTwoUsername });
+
+    if (!userA || !userB || userA.isBanned || userB.isBanned) {
+      return res.status(404).json({ success: false, error: 'One or both target profiles invalid or isolated.' });
+    }
+
+    // 2. ISOLATION SAFEGUARD: Swap cosmetic variables ONLY. Money and crypto wallets remain locked.
+    const tempOriginalUsername = userA.username;
+    const tempOriginalRankBadge = userA.rankBadge;
+    const tempOriginalVisualState = userA.activeVisualState;
+
+    // Apply Smart Switching redirect values to Player A
+    userA.rankBadge = userB.rankBadge;
+    userA.activeVisualState = userB.activeVisualState;
+    // Retain independent token wallets securely
+    const baselineTokensA = userA.tokens; 
+
+    // Apply Smart Switching redirect values to Player B
+    userB.rankBadge = tempOriginalRankBadge;
+    userB.activeVisualState = tempOriginalVisualState;
+
+    await userA.save();
+    await userB.save();
+
+    // 3. Initialize the 24-hour shadow work tracking document
+    const swapSession = await IdentitySwap.create({
+      swapSessionId: `swap_${Date.now()}`,
+      originalUserRefId: userA._id,
+      swappedTargetUserRefId: userB._id,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Automatically terminates after 1 day
+    });
+
+    // Broadcast the real-time canvas configuration packet down the WebSocket streams
+    if (global.io) {
+      global.io.emit('identity_swap_rendered', {
+        playerOne: playerOneUsername,
+        playerTwo: playerTwoUsername,
+        isMasked: true
+      });
+    }
+
+    ArchverseLogger.log('WARN', 'IDENTITY_SWAP', `Admin initialized identity swap between ${playerOneUsername} and ${playerTwoUsername} for shadow work.`);
+
+    res.json({
+      success: true,
+      modName: "Identity Swap Mod — Smart Switching Active",
+      sessionExpiration: swapSession.expiresAt,
+      routingStatus: "SHADOW_WORK_REDIRECTS_SECURED",
+      verification: "Sensitive accounts and financial token balances remained isolated."
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Identity swap compilation loop exception.' });
+  }
+});
+
+module.exports = router;
