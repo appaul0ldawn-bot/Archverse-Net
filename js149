@@ -1,0 +1,64 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Moral Absolute model inside our testing sandbox memory cluster
+  mongoose.model('MoralAbsoluteLedger', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    hygienePurityScore: Number,
+    physicalKineticOutput: Number,
+    mannerismsGraceIndex: Number,
+    sovereignPropertyHonor: Boolean,
+    sacredLifePreservation: Boolean,
+    libraEquilibriumRatio: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('MoralAbsoluteLedger')) {
+    await mongoose.model('MoralAbsoluteLedger').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧭 SUITE 23: ETHICAL COMPASS & VIRTUES ABSOLUTE VALIDATION GATES
+// ==========================================================================
+describe('Archverse Ethical Compass & Virtues Rank Absolute Mandates', () => {
+
+  it('should successfully evaluate player profile records and identify a perfect Libra scale equilibrium status', async () => {
+    const userNode = await User.create({ username: 'RighteousSeraph', tokens: 100 });
+
+    // Seed exemplary metric records into the database collection
+    await mongoose.model('MoralAbsoluteLedger').create({
+      userId: userNode._id,
+      hygienePurityScore: 100,
+      physicalKineticOutput: 12000, // Meets active workout parameters
+      mannerismsGraceIndex: 1.0,
+      sovereignPropertyHonor: true,
+      sacredLifePreservation: true,
+      libraEquilibriumRatio: 1.0 // Set at perfect balanced index
+    });
+
+    const response = await request(app)
+      .post('/api/analytics/audit-virtues-purity') // Simulated backend execution trigger
+      .send({ username: 'RighteousSeraph' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.scaleStatus).toBe('PERFECTLY_BALANCED');
+  });
+});
