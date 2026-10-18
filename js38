@@ -1,0 +1,43 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 PARALLEL TIMELINE COUPLING & FIXED-POINT REGISTRY SCHEMA
+// ==========================================================================
+const TimelineNodeSchema = new mongoose.Schema({
+  timelineId: { type: String, required: true, unique: true, index: true }, // e.g., 'EARTH_616', 'EARTH_PRIME', 'EARTH_838'
+  designatorCode: { type: String, required: true }, // e.g., 'Ω-616', 'Δ-PRIME'
+  
+  // Alternative Realities Structural Dimensions
+  resonanceFrequencyHz: { type: Number, required: true }, // The baseline carrier wave of that alternative Earth
+  repeatingKarmicFactorIndex: { type: Number, default: 0.5 }, // Likelihood ratio of identical events repeating
+  environmentalShaderHex: { type: String, default: '#38bdf8' }, // Neon hue tint driving WebGL viewport layers
+
+  // Fixed Temporal Anchors (Time Bridges preventing universe collapses)
+  fixedPointAnchorsList: [{
+    anchorEventId: String,
+    eventTitle: String,
+    spatialCoordinates: { x: Number, z: Number },
+    isChronologicallyLocked: { type: Boolean, default: true }
+  }],
+
+  activeParticipatorCount: { type: Number, default: 0 }
+});
+
+const ActiveUserTimelineStateSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  currentTimelineId: { type: String, ref: 'TimelineNode', default: 'EARTH_PRIME' },
+  cachedPreviousTimelineId: String,
+  
+  // 5D Quantum Coordinates tracking cross-timeline interference
+  quantumChronometer: {
+    divergenceScale: { type: Number, default: 0.0 }, // 0.0 = Absolute alignment with the unified stream
+    isInterferenceMeshActive: { type: Boolean, default: false }
+  },
+  
+  unlockedTimelineBadges: [String]
+});
+
+module.exports = {
+  TimelineNode: mongoose.model('TimelineNode', TimelineNodeSchema),
+  ActiveUserTimelineState: mongoose.model('ActiveUserTimelineState', ActiveUserTimelineStateSchema)
+};
