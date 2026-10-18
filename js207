@@ -1,0 +1,94 @@
+import React, { useState } from 'react';
+import { AngelFrequencyEngine } from './AngelSynth';
+
+export function OmniversalMatrixHUD({ currentUser, socket }) {
+  const [activeTab, setActiveTab] = useState('WEAPONS');
+  const [isPlaying, setIsPlaying] = useState(null);
+
+  const executeMarketPurchase = (assetId, cost) => {
+    if (currentUser.tokens < cost) {
+      alert("❌ Insolvent ST Treasury balance. Complete more Lightworker tasks to proceed.");
+      return;
+    }
+    socket.emit('purchase_omni_asset', { assetId, cost });
+    alert(`⚡ [Divine Marketplace]: Transaction authorized for asset ${assetId}. Balance updated.`);
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', right: '24px', width: '380px', maxHeight: '80%', background: 'linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(129,140,248,0.05) 100%)', border: '2px solid #818cf8', borderRadius: '24px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid rgba(129,140,248,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#818cf8' }}>🌌 Omniversal Matrix Dashboard</h3>
+        <span style={{ fontSize: '10px', color: '#94a3b8' }}>Connected Profile: zethreigns@gmail.com (Master Admin Mode)</span>
+      </div>
+
+      {/* Grid Tab Controls */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', padding: '8px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        {['WEAPONS', 'HYMNALS', 'LIFESTYLE', 'POCKET_REALMS'].map(tab => (
+          <button 
+            key={tab} onClick={() => setActiveTab(tab)}
+            className={`custom-option-btn ${activeTab === tab ? 'active' : ''}`}
+            style={{ fontSize: '9px', padding: '4px' }}
+          >
+            {tab.replace('_', ' ')}
+          </button>
+        ))}
+      </div>
+
+      {/* --- TAB 1: WEAPONS STORAGE --- */}
+      {activeTab === 'WEAPONS' && (
+        <div style={{ overflowY: 'auto', flex: 1, padding: '12px' }}>
+          <div className="store-item-card" style={{ padding: '8px', marginBottom: '6px' }}>
+            <div style={{ textAlign: 'left' }}>
+              <strong>🗡️ Sword of Truth (Knowledge Blade)</strong>
+              <span style={{ display: 'block', fontSize: '10px', color: '#94a3b8' }}>Queries Scripture & Public Libraries Natively</span>
+            </div>
+            <button onClick={() => executeMarketPurchase('wp_truth_sword', 2500)} className="buy-upgrade-btn" style={{ padding: '4px 8px', fontSize: '11px' }}>🪙 2500 ST</button>
+          </div>
+          <div className="store-item-card" style={{ padding: '8px' }}>
+            <div style={{ textAlign: 'left' }}>
+              <strong>🪄 Broken-off Unicorn Horn Wand</strong>
+              <span style={{ display: 'block', fontSize: '10px', color: '#94a3b8' }}>Emits Continuous 528Hz Mesh Repair Waves</span>
+            </div>
+            <button onClick={() => executeMarketPurchase('wp_unicorn_wand', 1800)} className="buy-upgrade-btn" style={{ padding: '4px 8px', fontSize: '11px' }}>🪙 1800 ST</button>
+          </div>
+        </div>
+      )}
+
+      {/* --- TAB 2: ANCIENT HYMNALS --- */}
+      {activeTab === 'HYMNALS' && (
+        <div style={{ overflowY: 'auto', flex: 1, padding: '12px' }}>
+          <div style={{ background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <div style={{ textAlign: 'left' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold' }}>🎵 Sirens Song of the Deep</span>
+              <span style={{ display: 'block', fontSize: '9px', color: '#64748b' }}>Resonance: 432Hz (Syncs Lovense reactors)</span>
+            </div>
+            <button className="buy-upgrade-btn" style={{ padding: '4px 8px' }} onClick={() => { AngelFrequencyEngine.play(432); setIsPlaying('siren'); }}>▶ Tune</button>
+          </div>
+        </div>
+      )}
+
+      {/* --- TAB 3: LIFESTYLE & MANNA --- */}
+      {activeTab === 'LIFESTYLE' && (
+        <div style={{ overflowY: 'auto', flex: 1, padding: '12px', textAlign: 'left' }}>
+          <span style={{ fontSize: '11px', color: '#34d399', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>🍞 NUTRAMENT MANNA & APPAREL STATE</span>
+          <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.4 }}>
+            Your **Apple HealthKit & Google Health Connect** data streams are monitoring in the background. Running or walking milestones generate +10 Angel Tokens automatically, while consuming Liquid Manna items sets your Three.js avatar mesh color to bright radiant gold.
+          </p>
+        </div>
+      )}
+
+      {/* --- TAB 4: REALMS & DIMENSIONS --- */}
+      {activeTab === 'POCKET_REALMS' && (
+        <div style={{ overflowY: 'auto', flex: 1, padding: '12px', textAlign: 'left' }}>
+          <span style={{ fontSize: '11px', color: '#818cf8', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>🛣️ The Christian-Witch's Road Portal</span>
+          <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: 1.4 }}>
+            Click to engage **Remote Viewing or Astral Projection** modes inside the 10th Heaven layer. Your movement footprints will be completely hidden from lower Archon detection grids.
+          </p>
+          <button onClick={() => socket.emit('teleport_zone_request', { zone: 'CHRISTIAN_WITCH_ROAD' })} className="buy-upgrade-btn" style={{ width: '100%', background: '#4f46e5' }}>
+            🌌 Project Astral Body to 10th Heaven
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
