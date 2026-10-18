@@ -1,0 +1,79 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧠 SUITE 25: CEREBRO RANGE GATES AND PREDICTIVE VECTOR VALIDATIONS
+// ==========================================================================
+describe('Archverse Cerebro Tracking Proximity Range Limits Gate Tests', () => {
+
+  it('should successfully compute trajectory projections if an administrative account executes global tracking commands', async () => {
+    // 1. Seed admin profile and target profile at separate long-distance coordinate bounds
+    await User.create({
+      username: 'HighArchonAdmin',
+      rank: 'Council',
+      lastPosition: { x: 31.7683, z: 35.2137 } // Jerusalem Base Coordinates
+    });
+
+    await User.create({
+      username: 'TargetStagingNode',
+      rank: 'Low',
+      lastPosition: { x: 35.8129, z: -79.8059 }, // Located deep inside the US local node sector
+      movementVectors: { headingX: 0.001, headingZ: -0.001 },
+      tokens: 6000
+    });
+
+    // 2. Dispatch data packet over the server processing router
+    const response = await request(app)
+      .post('/api/cerebro/predict-user-trajectory')
+      .send({ callingUsername: 'HighArchonAdmin', targetUsername: 'TargetStagingNode' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.scanFootprintMeters).toBe('UNRESTRICTED_GLOBAL_OMNIPRESENCE'); // Admin bypass verified
+    expect(response.body.telemetrySnapshot.trackedRoutine).toBe('HIGH_TIER_LIGHTWORKER_MISSION_TRANSIT');
+  });
+
+  it('should explicitly block execution if a low-rank player tries to track a node beyond their rank limits badge allowance', async () => {
+    // Seed low-rank player with restricted tracking range limits (Venus = 30-meter cap diameter)
+    await User.create({
+      username: 'LowRankPlayer',
+      rank: 'Low',
+      rankBadge: 'Venus (Lovers of Justice)',
+      lastPosition: { x: 31.7683, z: 35.2137 }
+    });
+
+    await User.create({
+      username: 'DistantNode',
+      rank: 'Low',
+      lastPosition: { x: 32.8801, z: 35.5911 }, // Located way beyond 30 meters
+      movementVectors: { headingX: 0, headingZ: 0 }
+    });
+
+    const response = await request(app)
+      .post('/api/cerebro/predict-user-trajectory')
+      .send({ callingUsername: 'LowRankPlayer', targetUsername: 'DistantNode' });
+
+    expect(response.status).toBe(403); // Safely intercepted and denied by range gate algorithms
+    expect(response.body.success).toBe(false);
+    expect(response.body.error).toContain('Insufficient Range');
+  });
+});
