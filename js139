@@ -1,0 +1,41 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🪙 DUAL-WALLET INFRASTRUCTURE SCHEMA (CRYPTO VS SOUL TOKENS)
+// ==========================================================================
+const FinancialLedgerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // 1. PUBLIC IN-GAME UTILITY WALLET
+  soulTokenBalance: { type: Number, default: 100 }, // Utility tokens (AT/ST) generated via Lightworker tasks
+
+  // 2. ON-CHAIN CRYPTOCURRENCY WALLET (Web3 Handshake Layer)
+  cryptoWalletAddress: { type: String, unique: true, sparse: true },
+  cryptoBalanceETH: { type: Number, default: 0.0000 },
+  
+  // 3. ADMIN-ONLY HIDDEN TREASURY PORT (Raziel's Security Seal)
+  razielTreasuryVault: {
+    isVaultHidden: { type: Boolean, default: true },
+    encryptedPrivateSeedHash: String, // SHA-256 armored key string
+    accruedSponsorshipRevenueUSD: { type: Number, default: 0.00 },
+    linkedCashAppUrl: { type: String, default: "https://cash.app" }
+  },
+
+  lastTransactionSyncedAt: { type: Date, default: Date.now }
+});
+
+// ==========================================================================
+// 🏢 CORPORATE SPONSOR & REVENUE MATRIX SCHEMA
+// ==========================================================================
+const CorporateSponsorSchema = new mongoose.Schema({
+  sponsorId: { type: String, required: true, unique: true },
+  brandName: { type: String, required: true },
+  fundingContributionUSD: { type: Number, required: true },
+  activeCampaignTier: { type: String, enum: ['CELESTIAL_PARTNER', ' Ley_LINE_SPONSOR'], default: 'Ley_LINE_SPONSOR' },
+  developerIdeaInclusionProposal: String
+});
+
+module.exports = {
+  FinancialLedger: mongoose.model('FinancialLedger', FinancialLedgerSchema),
+  CorporateSponsor: mongoose.model('CorporateSponsor', CorporateSponsorSchema)
+};
