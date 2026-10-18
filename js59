@@ -1,0 +1,78 @@
+import React, { useState } from 'react';
+
+export function PascalsWagerHUD({ currentUsername, userTokensCurrent }) {
+  const [stance, setStance] = useState('BELIEF_IN_DIVINE_ALIGNMENT');
+  const [premium, setPremium] = useState(50); // Finite stake amount
+  const [hedgeReport, setHedgeReport] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleApplyPascalHedge = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/wagers/apply-pascals-hedge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          tokenPremiumAmount: premium,
+          chosenStanceSelection: stance
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setHedgeReport(data);
+        alert(`📜 Pascalian Protection Applied!\nYield Potential: ${data.calculatedYieldPotential}`);
+      } else {
+        alert(`❌ Matrix Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Failed to sync Pascalian hedge values:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '760px', width: '350px', borderColor: '#fbbf24', background: 'linear-gradient(135deg, #0b1329 0%, rgba(234,179,8,0.03) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(234,179,8,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>📜 Pascal’s Wager Risk Shield</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#cbd5e1', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Protect your wagers using the laws of infinite game theory. Capping your downside risk to a small finite loss while unlocking infinite return curves.
+      </p>
+
+      {/* Stance Choice Select Box */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#a5b4fc', display: 'block', marginBottom: '4px' }}>Select Philosophical Stance:</label>
+        <select 
+          value={stance} onChange={(e) => setStance(e.target.value)}
+          style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <option value="BELIEF_IN_DIVINE_ALIGNMENT">👍 Affirm Divine Existence (Infinite Gain / Finite Loss)</option>
+          <option value="AGNOSTIC_RANDOM_CHANCE">🤷 Agnostic Random Chance (High Double-Sided Risk)</option>
+        </select>
+      </div>
+
+      {/* Premium Fee Slider */}
+      <div className="metric-row" style={{ marginBottom: '12px' }}>
+        <span style={{ fontSize: '11px' }}>Finite Loss Premium:</span>
+        <input type="range" min="10" max="100" step="10" value={premium} onChange={(e) => setPremium(parseInt(e.target.value))} style={{ width: '120px', accentColor: '#fbbf24' }} />
+        <span style={{ fontSize: '11px', fontWeight: 'bold' }}>🪙 {premium} ST</span>
+      </div>
+
+      <button onClick={handleApplyPascalHedge} disabled={isProcessing} className="buy-upgrade-btn" style={{ width: '100%', background: '#fbbf24', color: '#0f172a', fontWeight: 'bold' }}>
+        {isProcessing ? '🔄 Calculating Probabilities...' : '✍️ Seal Pascalian Risk Contract'}
+      </button>
+
+      {/* Output Report Display */}
+      {hedgeReport && (
+        <div style={{ marginTop: '10px', background: 'rgba(234,179,8,0.06)', border: '1px solid #eab308', padding: '10px', borderRadius: '8px', textAlign: 'left', fontSize: '11px', lineHeight: 1.4 }}>
+          <div>🔮 <strong>Yield Potential:</strong> <span style={{ color: '#34d399', fontWeight: 'bold' }}>{hedgeReport.calculatedYieldPotential.replace('_', ' ')}</span></div>
+          <div>📈 <strong>Active Multiplier Cap:</strong> {hedgeReport.infiniteMultiplier}x</div>
+          <div style={{ color: '#94a3b8', fontSize: '9px', marginTop: '2px' }}>Remaining Token Pool: 🪙 {hedgeReport.remainingTokens} ST</div>
+        </div>
+      )}
+    </div>
+  );
+}
