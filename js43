@@ -1,0 +1,99 @@
+const express = require('express');
+const router = express.Router();
+const WitnessRelocation = require('./models/WitnessRelocation');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// ==========================================================================
+// 🛡️ DYNAMIC WITNESS LOCATION MASKER & TIMELINE SPLITTER
+// ==========================================================================
+router.post('/api/protection/evaluate-timeline-fork', async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Sovereign player node invalid.' });
+
+    // Query whether this player node is flagged under an active timeline-split protection file
+    const activeCase = await WitnessRelocation.findOne({
+      \$or: [ { protectedUserId: user._id }, { harasserUserId: user._id } ],
+      isHarassmentChargeDropped: false
+    });
+
+    if (!activeCase) {
+      return res.json({
+        success: true,
+        timelineState: "UNIFIED_MAIN_GRID",
+        message: "Unified firmament active. Normal coordinate visibility channels engaged."
+      });
+    }
+
+    // Determine which fork to stream to the user based on their role in the case
+    const isProtectedNode = activeCase.protectedUserId.toString() === user._id.toString();
+    const activeForkHash = isProtectedNode 
+      ? activeCase.timelineSplittingData.timelineAlphaHash 
+      : activeCase.timelineSplittingData.timelineBetaHash;
+
+    // Apply the mutual visual blackout shroud parameters to the player's active state
+    user.activeVisualState = 'MUTUAL_WITNESS_MASKING_SHROUD';
+    await user.save();
+
+    // Broadcast coordinate data packets over Socket.io ONLY to matching timeline fork hashes
+    if (global.io) {
+      global.io.to(activeForkHash).emit('spatial_position_tick', {
+        player: username,
+        position: user.lastPosition,
+        timelineChannel: activeForkHash
+      });
+    }
+
+    res.json({
+      success: true,
+      timelineState: "TIMELINE_SPLIT_FORKED",
+      assignedChannelHash: activeForkHash,
+      environmentalStatus: isProtectedNode 
+        ? "🛡️ Protected Shroud Active: Harasser isolated to parallel timeline fork." 
+        : "⚠️ Containment Restriction Active: Core map coordinates masked for sector security overrides.",
+      maskingRadiusMeters: activeCase.timelineSplittingData.mutualMaskingRadiusMeters
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Timeline splitting processor error.' });
+  }
+});
+
+// ==========================================================================
+// ⚖️ DROP HARASSMENT CHARGE & RE-UNIFY WORLD TIMELINES
+// ==========================================================================
+router.post('/api/protection/drop-charge', async (req, res) => {
+  try {
+    const { adminEmail, caseId } = req.body;
+
+    // Strict Master Admin Roster Verification
+    const MASTER_ROSTER = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!MASTER_ROSTER.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const caseRecord = await WitnessRelocation.findOne({ caseId });
+    if (!caseRecord) return res.status(404).json({ success: false, error: 'Target protection file not found.' });
+
+    caseRecord.isHarassmentChargeDropped = true;
+    await caseRecord.save();
+
+    // Restore standard rendering visual states to both users
+    await User.updateMany(
+      { _id: { \$in: [caseRecord.protectedUserId, caseRecord.harasserUserId] } },
+      { activeVisualState: 'AVAILABLE_ALIGNMENT' }
+    );
+
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine collapse
+    ArchverseLogger.log('INFO', 'WITNESS_RELO', `Harassment case ${caseId} dropped by admin. Re-unifying world timeline channels.`);
+
+    res.json({ success: true, message: "🚀 Parallel timelines collapsed successfully. Main grid coordinates re-unified." });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Timeline re-unification pipeline crash.' });
+  }
+});
+
+module.exports = router;
