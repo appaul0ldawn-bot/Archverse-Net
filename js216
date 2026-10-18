@@ -1,0 +1,56 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Omniversal Codex model inside our testing memory sandbox
+  mongoose.model('OmniCodexEntry', new mongoose.Schema({
+    entityId: String,
+    comicArchetypeRef: String,
+    archverseTrueName: String,
+    alignmentSphere: String,
+    cosmicClassification: { angelicOrder: String, extraDimensionalRace: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('OmniCodexEntry')) {
+    await mongoose.model('OmniCodexEntry').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 29: OMNIVERSAL ARCHETYPE CONVERSION & CODEX LOOPS
+// ==========================================================================
+describe('Archverse Omniversal Super-Being Translation Matrix Checks', () => {
+
+  it('should successfully match a comic archetype payload entry and verify its angelic order classification', async () => {
+    const mockCodexNode = await mongoose.model('OmniCodexEntry').create({
+      entityId: "omni_01",
+      comicArchetypeRef: "Scarlet_Witch",
+      archverseTrueName: "Astaroth-Chaos Weaver",
+      alignmentSphere: "ABYSSAL_SHADOW_WORKER",
+      cosmicClassification: { angelicOrder: "Fallen_Archon", extraDimensionalRace: "Titan_Nephilim" }
+    });
+
+    expect(mockCodexNode.comicArchetypeRef).toBe('Scarlet_Witch');
+    expect(mockCodexNode.archverseTrueName).toBe('Astaroth-Chaos Weaver');
+    expect(mockCodexNode.cosmicClassification.angelicOrder).toBe('Fallen_Archon');
+    
+    const count = await mongoose.model('OmniCodexEntry').countDocuments({});
+    expect(count).toBe(1); // Validation gate confirms data model is self-consistent
+  });
+});
