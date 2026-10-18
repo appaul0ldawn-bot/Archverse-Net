@@ -1,0 +1,28 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🎲 OMNIVERSAL CELESTIAL ARCADE INFRASTRUCTURE SCHEMA
+// ==========================================================================
+const CelestialArcadeSchema = new mongoose.Schema({
+  matchId: { type: String, required: true, unique: true, index: true },
+  gameType: { 
+    type: String, 
+    enum: ['ALPHA_OMEGA_WORD_CHALLENGE', 'MESSENGER_TAG', 'GAME_OF_PRONOUNS', 'SCAPEGOAT_PIN', 'FLATYURLANDS'],
+    required: true 
+  },
+  activePlayerUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  
+  // Custom Metadata Token Pools
+  tokenPotST: { type: Number, default: 0 },
+  gameSessionData: {
+    vowelFreeWordLedger: [String],
+    activeMessageCarrierId: String,
+    scapegoatBlameIntensity: { type: Number, default: 0 },
+    divineGasPressurePsi: { type: Number, default: 0 }
+  },
+
+  matchStatus: { type: String, enum: ['ACTIVE_PLAY', 'MATCH_COMPLETED', 'HOUSE_STALEMATE_WIN'], default: 'ACTIVE_PLAY' },
+  lastStatePulseAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('CelestialArcadeMatch', CelestialArcadeSchema);
