@@ -1,0 +1,56 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the Archon Registry model within our testing sandbox memory cluster
+  mongoose.model('ArchonRegistry', new mongoose.Schema({
+    archonId: String,
+    gnosticName: String,
+    associatedSphere: String,
+    frequencyInterferenceHz: Number,
+    counterSolfeggioHz: Number
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('ArchonRegistry')) {
+    await mongoose.model('ArchonRegistry').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 30: GNOSTIC ARCHON REGISTRIES & CHANNELS VALIDATIONS
+// ==========================================================================
+describe('Archverse Gnostic Archon Registries Database Ingestion', () => {
+
+  it('should successfully index a Demiurgic faction entity and verify its counter-solfeggio parameters', async () => {
+    // Test direct document creation mapping
+    const mockArchon = await mongoose.model('ArchonRegistry').create({
+      archonId: "arch_01",
+      gnosticName: "Yaldabaoth / Lion-Faced Archon",
+      associatedSphere: "9 Circles: Material Density Hub",
+      frequencyInterferenceHz: 120, // Low-vibrational trap wave
+      counterSolfeggioHz: 963     // Crown connection shortcut breaker
+    });
+
+    expect(mockArchon.gnosticName).toContain('Yaldabaoth');
+    expect(mockArchon.counterSolfeggioHz).toBe(963);
+    
+    const count = await mongoose.model('ArchonRegistry').countDocuments({});
+    expect(count).toBe(1);
+  });
+});
