@@ -1,0 +1,96 @@
+import React, { useState, useEffect } from 'react';
+
+export function VoiceSynthesisHUD({ currentUsername, socket }) {
+  const [typedPhrase, setTypedPhrase] = useState('');
+  const [chosenLanguage, setChosenLanguage] = useState('en-GB'); // Default to Pleiadian accent
+  const [vocalPitch, setVocalPitch] = useState(1.0);
+  const [vocalRate, setVocalRate] = useState(0.85);
+  const [availableVoices, setAvailableVoices] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const loadVoices = () => {
+        setAvailableVoices(window.speechSynthesis.getVoices());
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  const executeVoiceSynthesis = () => {
+    if (!typedPhrase.trim() || !window.speechSynthesis) return;
+
+    window.speechSynthesis.cancel(); // Terminate pending audio queues instantly to prevent buffer overlap
+
+    const utterance = new SpeechSynthesisUtterance(typedPhrase.trim());
+    
+    // Bind targeted accent and hardware synthesis characteristics
+    utterance.lang = chosenLanguage;
+    utterance.pitch = vocalPitch;
+    utterance.rate = vocalRate;
+
+    // Find the first hardware voice matching the chosen language culture code
+    const matchingVoice = availableVoices.find(v => v.lang.startsWith(chosenLanguage));
+    if (matchingVoice) utterance.voice = matchingVoice;
+
+    // Broadcast the text packet across local WebSocket loops for translation synchronization
+    socket.emit('vocal_thoughtform_transmitted', {
+      username: currentUsername,
+      text: typedPhrase.trim(),
+      languageCode: chosenLanguage
+    });
+
+    window.speechSynthesis.speak(utterance);
+    setTypedPhrase('');
+  };
+
+  return (
+    <div className="login-card" style={{ maxWidth: '450px', margin: '20px auto', border: '1px solid #38bdf8' }}>
+      <div style={{ fontSize: '11px', color: '#38bdf8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+        🗣️ Text-to-Speech & Mute Accessibility Gateway
+      </div>
+      
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '0 0 12px 0', textAlign: 'left' }}>
+        Allows mute or non-verbal super-beings to broadcast thoughtforms into audible frequencies. Select beautiful celestial accents below.
+      </p>
+
+      {/* Accent Selection Dropdown */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#cbd5e1', display: 'block', marginBottom: '4px' }}>Select Voice Accent Template:</label>
+        <select 
+          value={chosenLanguage} onChange={(e) => setChosenLanguage(e.target.value)}
+          style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <option value="en-GB">Pleiadian Cadence (Beautiful British-Melodic)</option>
+          <option value="en-US">Arcturian Resonance (Deep United States Solemn)</option>
+          <option value="en-AU">Sirian Flow (Fluid Australian Fluid)</option>
+        </select>
+      </div>
+
+      {/* Sliders for Pitch and Rate Customization */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+        <div className="metric-row">
+          <span style={{ fontSize: '11px' }}>Vocal Pitch Frequency:</span>
+          <input type="range" min="0.5" max="1.5" step="0.05" value={vocalPitch} onChange={(e) => setVocalPitch(parseFloat(e.target.value))} style={{ width: '120px', accentColor: '#38bdf8' }} />
+        </div>
+        <div className="metric-row">
+          <span style={{ fontSize: '11px' }}>Vocal Delivery Rate:</span>
+          <input type="range" min="0.5" max="1.2" step="0.05" value={vocalRate} onChange={(e) => setVocalRate(parseFloat(e.target.value))} style={{ width: '120px', accentColor: '#38bdf8' }} />
+        </div>
+      </div>
+
+      {/* Input Field */}
+      <div style={{ display: 'flex', gap: '4px' }}>
+        <input 
+          type="text" value={typedPhrase} onChange={(e) => setTypedPhrase(e.target.value)}
+          placeholder="Type phrase to manifest into vocal soundwaves..."
+          style={{ flex: 1, background: 'rgba(0,0,0,0.4)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '10px', fontSize: '12px' }}
+          onKeyDown={(e) => { if(e.key === 'Enter') executeVoiceSynthesis(); }}
+        />
+        <button onClick={executeVoiceSynthesis} className="buy-upgrade-btn" style={{ background: '#38bdf8', color: '#0f172a', fontWeight: 'bold' }}>
+          🗣️ Speak
+        </button>
+      </div>
+    </div>
+  );
+}
