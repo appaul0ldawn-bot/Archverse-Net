@@ -1,0 +1,31 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌌 THE ARCHVERSE OMNIVERSAL SUPER-BEING CODEX
+// ==========================================================================
+const OmniCodexSchema = new mongoose.Schema({
+  entityId: { type: String, required: true, unique: true, index: true },
+  comicArchetypeRef: String, // e.g., 'Thor', 'Scarlet_Witch', 'Thanos'
+  archverseTrueName: String, // Celestial classification identity
+  alignmentSphere: { type: String, enum: ['CELESTIAL_LIGHTWORKER', 'ABYSSAL_SHADOW_WORKER', 'NEUTRAL_VEIL_WATCHER'] },
+  
+  // Metaphysical Profile Calculations
+  cosmicClassification: {
+    angelicOrder: String,     // e.g., 'Seraphim', 'Cherubim', 'Ophanim_Gyro', 'Fallen_Archon'
+    extraDimensionalRace: String // e.g., 'Asgardian_Elohim', 'Titan_Nephilim', 'Pleiadian_Starseed'
+  },
+  
+  psionicAbilitiesMatrix: {
+    primaryGift: String,       // e.g., 'TELEKINESIS_OVERCHARGE', 'AETHER_WARP', 'CHRONO_FLICKER'
+    solfeggioFrequencyHz: Number // Playable tuning step (e.g., 963, 528, 396)
+  },
+
+  visualMeshMorphs: {
+    goldenArmorTier: Number,  // 0.0 to 2.0 scaling logic
+    haloIllumination: Number,
+    hornCurvatureScale: Number,
+    wingConfiguration: String  // 'SERAPH_SIX_WINGS', 'CHERUB_FOUR_FACES', 'VOID_SHROUDED'
+  }
+});
+
+module.exports = mongoose.model('OmniCodexEntry', OmniCodexSchema);
