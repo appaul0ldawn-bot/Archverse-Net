@@ -1,0 +1,36 @@
+// ==========================================================================
+// 👁️ BEHAVIORAL MOOD COUPLER & MISSION INSPIRATION ALGORITHM
+// ==========================================================================
+export function evaluateMoodPatternAndInspireMissions(user, analyticsData) {
+  const { historicalRoutines, dreamJournalResonance } = analyticsData;
+  
+  let targetColor = "#38bdf8"; // Default Laser Cyan (Calm/Balanced)
+  let stateTag = "BALANCED_AETHER_FLOW";
+  let recommendedGuild = "VEIL_WATCHERS_GUILD";
+  let inspiredMissionId = "proc_ms_standard";
+
+  // 1. ANOMALY DETECTOR PATTERN A: Heavy Adrenal Exhaustion / Lowered Sleep / High Volatility
+  if (historicalRoutines.sleepStateHoursAverage < 5.5 && historicalRoutines.predominantPostSentimentScore < -0.3) {
+    targetColor = "#ef4444"; // Vivid Crimson (Volatile / High Stress Chaos)
+    stateTag = "ABYSSAL_IGNITION_TURBULENCE";
+    recommendedGuild = "ABYSSAL_SHADOW_WORKERS";
+    // Prompt the user toward shadow-work grounding tasks to stabilize their system
+    inspiredMissionId = "sh_ms_04"; // Operation: Christian-Witch's Forked Road
+  } 
+  
+  // 2. ANOMALY DETECTOR PATTERN B: High Rest Efficiency / Positive Sentiment / Visionary Dreams
+  else if (historicalRoutines.sleepStateHoursAverage >= 7.5 && historicalRoutines.predominantPostSentimentScore > 0.4) {
+    targetColor = "#fbbf24"; // Brilliant Radiant Gold (High-Vibrational Harmony)
+    stateTag = "SERAPHIC_MANNA_GLOW";
+    recommendedGuild = "CELESTIAL_LIGHTWORKERS";
+    // Propel user toward high-tier leadership/manifestation contracts
+    inspiredMissionId = "proc_ms_pleiades_963";
+  }
+
+  return {
+    computedColor: targetColor,
+    vibrationalState: stateTag,
+    targetGuildAssignment: recommendedGuild,
+    recommendedContractTarget: inspiredMissionId
+  };
+}
