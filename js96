@@ -1,0 +1,32 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧠 COGNITIVE MATRIX & IMPLICIT BELL CURVE LEDGER SCHEMA
+// ==========================================================================
+const CognitiveLedgerSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // Implicitly Tracked Subliminal Metrics
+  subliminalMetrics: {
+    gematriaPuzzleSolveSpeedSeconds: { type: Number, default: 60.0 },
+    spatialPathfindingEfficiency: { type: Number, default: 0.50 }, // Ratio of optimized pathing
+    frequencyTuningAccuracy: { type: Number, default: 0.70 }       // Accuracy with Solfeggio soundboards
+  },
+
+  // Statistical Placement Architecture
+  calculatedIqScore: { type: Number, default: 100 },         // 55 to 145+ Bell Curve variance scale
+  computedZScore: { type: Number, default: 0.0 },            // Standard deviations from population mean
+  bellCurvePercentileRank: { type: Number, default: 50.0 },
+
+  // Faction Alliances & Achievements
+  assignedIntellectFaction: { 
+    type: String, 
+    enum: ['LOGICAL_ARCHON_GUILD', 'CREATIVE_SERAPH_COUNCIL', 'NEUTRAL_VEIL_ORACLES', 'UNAWAKENED_NODE'], 
+    default: 'NEUTRAL_VEIL_ORACLES' 
+  },
+  extraAchievementsBadges: [String], // Array tracking specific high-IQ milestones (e.g., '🥇 Metatron Scribe Title')
+
+  lastCognitiveAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('CognitiveLedger', CognitiveLedgerSchema);
