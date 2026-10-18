@@ -1,0 +1,24 @@
+// 1. ASTRAL PORTAL PAGE HEADER
+<div className="page-media-header">
+  <img src="https://pinimg.com" alt="Astral Portal Anomaly" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+</div>
+
+// 2. ASTROLABE INFOGRAPHIC BLOCK
+<div className="astrolabe-media-wrapper">
+  <img src="https://behance.net" alt="Astrolabe Alignment Setup" style={{ maxWidth: '100%', height: 'auto' }} />
+</div>
+
+// 3. CHAKRAS CALIBRATION VIEW FOOTER
+<div className="chakra-media-footer" style={{ marginTop: '24px', textAlign: 'center' }}>
+  <img src="https://tenor.com" alt="Chakra Spatial Expansion Alignment" style={{ width: '100%', maxWidth: '400px', borderRadius: '12px' }} />
+</div>
+
+// 4. MYTHICAL CREATURES FOOTER GRID
+<div className="creatures-media-wrapper" style={{ marginTop: '30px' }}>
+  <img src="https://wikihow.com" alt="Mythical Species Assembly" style={{ borderRadius: '8px', maxWidth: '100%' }} />
+</div>
+
+// 5. GALACTIC SPECIES PROFILE
+<div className="species-media-wrapper" style={{ margin: '20px 0', textAlign: 'center' }}>
+  <img src="https://threads.net" alt="Galactic Hybrid Assembly" style={{ borderRadius: '12px', maxWidth: '100%' }} />
+</div>
