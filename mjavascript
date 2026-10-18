@@ -1,0 +1,29 @@
+onst mongoose = require('mongoose');
+
+// ==========================================================================
+// 👾 POKETANJEL CHARACTER PROGRESSION & MONSTAR DEX SCHEMA
+// ==========================================================================
+const PoketanjelProfileSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  trainerHandle: { type: String, default: 'CatchEMP' }, // Default Asher Signature
+  
+  companionOphanim: {
+    name: { type: String, default: 'Dreidel' },
+    typeClassification: { type: String, default: 'FLYING_GYRO_SPIN' },
+    currentVelocityLevel: { type: Number, default: 1 }
+  },
+
+  // The Demadek Autofiller Journal Log
+  demadekAutofillerJournal: [{
+    monstarId: { type: String, required: true },
+    name: { type: String, required: true },
+    originalSpectralHz: Number,
+    transmutedToGoodStatus: { type: Boolean, default: true },
+    capturedAt: { type: Date, default: Date.now }
+  }],
+
+  gymExorcismsCompletedCount: { type: Number, default: 0 },
+  lastLibWebDatabaseSyncAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('PoketanjelProfile', PoketanjelProfileSchema);
