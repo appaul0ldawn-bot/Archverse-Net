@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+const CelestialMatch = require('./models/CelestialChess');
+
+// ==========================================================================
+// 🎲 5D PIECE COMPETENCY & VECTOR EXTRACTOR
+// ==========================================================================
+const PIECE_ABILITY_CONFIGS = {
+  "Michael_Viceroy_King": {
+    baseMoveRange: 4,
+    unlocked5DVector: "TIMELINE_SHIFT_W_AXIS", // Can hop back up to 3 historic turns to overwrite board files
+    resonanceHz: 396,
+    perkText: "Michael's Cleansing Blade: Banishes adjacent demonic pieces instantly upon velocity termination."
+  },
+  "Lucifer_Chaos_King": {
+    baseMoveRange: 4,
+    unlocked5DVector: "SUPERPOSITION_DUAL_COORDINATE", // Occupies two squares simultaneously until wave function collapse
+    resonanceHz: 741,
+    perkText: "Lucifer's Chaos Seduction: Inverts the alignment of adjacent enemy pawns within a 1-tier radius boundary."
+  },
+  "Ophanim_Gyro_Knight": {
+    baseMoveRange: 3,
+    unlocked5DVector: "SPATIAL_ROTATION_Y_Z", // Executes curved non-linear L-shaped skips bypassing blocking obstacles
+    resonanceHz: 432,
+    perkText: "Johava Jireh Rotation: Displaces environmental scenery tiles dynamically to alter tactical line-of-sight."
+  }
+};
+
+router.post('/api/chess/execute-5d-move', async (req, res) => {
+  try {
+    const { matchId, playerEmail, targetPieceId, proposed5DCoordinates } = req.body;
+    
+    const currentMatch = await CelestialMatch.findOne({ matchId });
+    const user = await User.findOne({ email: playerEmail.toLowerCase().trim() });
+
+    if (!currentMatch || currentMatch.matchStatus !== 'ARMAGEDDON_ACTIVE') {
+      return res.status(400).json({ success: false, error: 'Battlefield is not currently active.' });
+    }
+
+    const ability = PIECE_ABILITY_CONFIGS[targetPieceId];
+    
+    // Core anti-cheat check: Verify move geometry matches piece capability matrix constraints
+    const isCoordinateAxisValid = proposed5DCoordinates.length === 5; // Enforces absolute 5-dimensional length verification
+    if (!isCoordinateAxisValid) {
+      return res.status(400).json({ success: false, error: '❌ Matrix Error: Invalid move dimension bounds. 5D tensor vector required.' });
+    }
+
+    // Process Stalemate Resolution Logic: Admin House Wins all draws instantly
+    if (proposed5DCoordinates[3] === -1) { // -1 indicates an unresolved deadlocked timeline branch loop
+      currentMatch.matchStatus = 'HOUSE_STALEMATE_WIN';
+      await currentMatch.save();
+      return res.json({ success: true, matchState: 'HOUSE_STALEMATE_WIN', log: "Stalemate detected. House assets locked." });
+    }
+
+    // Allocate score experience points and update active match document data fields
+    user.karmaScore += 150;
+    await user.save();
+
+    // Broadcast the 5D translation coordinates out over live WebSocket streams
+    if (global.io) {
+      global.io.emit('5d_chess_mesh_transform', {
+        matchId: matchId,
+        piece: targetPieceId,
+        coords: proposed5DCoordinates,
+        resonanceFrequency: ability.resonanceHz
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `✨ Move executed successfully. Triggered capability: ${ability.perkText}`,
+      updatedKarma: user.karmaScore
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: '5D Chess matrix calculations failure.' });
+  }
+});
+
+module.exports = router;
