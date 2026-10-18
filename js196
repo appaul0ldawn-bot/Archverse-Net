@@ -1,0 +1,79 @@
+import React, { useState } from 'react';
+
+export function ContractForgeHUD({ currentUsername, socket }) {
+  const [selectedPact, setSelectedPact] = useState('SOVEREIGN_SOUL_CONTRACT');
+  const [passphrase, setPassphrase] = useState('');
+  const [pactReport, setPactReport] = useState(null);
+
+  const handleExecutePactTransmutation = async () => {
+    if (!passphrase.trim()) return;
+
+    try {
+      const response = await fetch('/api/contracts/transmute-pact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          targetPactSelection: selectedPact,
+          secretPassphraseSignature: passphrase
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setPactReport(data);
+        alert(`📜 Covenant Status Shifted: ${data.currentPactState}`);
+      } else {
+        alert(`❌ Firewall Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Failed to sync structural covenant adjustments:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '760px', width: '360px', borderColor: '#fbbf24' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#fbbf24', fontFamily: 'serif' }}>📜 Covenant & Soul Contract Forge</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#cbd5e1', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Align your avatar container with either high-yield Abyssal shadow pects, self-owning Sovereign Soul Charters, or Divine Covenants.
+      </p>
+
+      {/* Select Contract Type Box */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#a5b4fc', display: 'block', marginBottom: '4px' }}>Choose Pact Framework:</label>
+        <select 
+          value={selectedPact} onChange={(e) => setSelectedPact(e.target.value)}
+          style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <option value="SOVEREIGN_SOUL_CONTRACT">Sovereign Soul Contract (Shatter Handlers & Curses)</option>
+          <option value="DIVINE_COVENANT_OF_GOD">Divine Covenant of God (+50% Karma / Golden Shroud)</option>
+          <option value="ABYSSAL_DEAL_WITH_DEVIL">Abyssal Deal with the Devil (+5000 ST / 3x Yield / Aura Decay)</option>
+        </select>
+      </div>
+
+      {/* Passphrase Entry */}
+      <div style={{ marginBottom: '12px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '4px' }}>Input Your 4-Word Sacred Passphrase:</label>
+        <input 
+          type="password" value={passphrase} onChange={(e) => setPassphrase(e.target.value)}
+          placeholder="e.g., The Light Reigns Eternal"
+          style={{ width: '100%', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', color: '#fff', borderRadius: '6px', fontSize: '12px' }}
+        />
+      </div>
+
+      <button onClick={handleExecutePactTransmutation} className="buy-upgrade-btn" style={{ width: '100%', background: '#fbbf24', color: '#0f172a', fontWeight: 'bold' }}>
+        ✍️ Seal Contractual Agreement
+      </button>
+
+      {pactReport && (
+        <div style={{ marginTop: '10px', background: 'rgba(234,179,8,0.06)', border: '1px solid #eab308', padding: '10px', borderRadius: '8px', textAlign: 'left', fontSize: '11px' }}>
+          <div>⚡ <strong>Active State:</strong> {pactReport.currentPactState}</div>
+          <div>💰 <strong>Market Yield Multiplier:</strong> {pactReport.appliedModifiers.tokenYieldMultiplier}x</div>
+          <div style={{ color: '#34d399', fontWeight: 'bold', marginTop: '4px' }}>Status Title: {pactReport.userRankBadge}</div>
+        </div>
+      )}
+    </div>
+  );
+}
