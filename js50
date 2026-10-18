@@ -1,0 +1,75 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('KinematicEcosystem', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    activeKinematicState: String,
+    homePrivacyZoning: { registeredAddressString: String, bathroomBoundaryGeofenceBox: { centerLat: Number, centerLng: Number, radiusMeters: Number }, isBathroomAreaBlackedOutMesh: Boolean },
+    utilityConsumptionGrid: { electricityAmperageDraw: Number, waterConsumptionGallonsPerMinute: Number }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('KinematicEcosystem')) {
+    await mongoose.model('KinematicEcosystem').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🏃 SUITE 33: GEOSPATIAL PRIVACY ZONING & KINEMATIC INTEGRITY CHECKS
+// ==========================================================================
+describe('Archverse Kinematic Displacement & Home Privacy Zoning Gating', () => {
+
+  it('should detect when an avatar coordinates cross a registered bathroom geofence boundary, forcing an immediate visual blackout shroud', async () => {
+    const user = await User.create({ username: 'PrivacyMindedNode', tokens: 100, activeVisualState: 'AVAILABLE_ALIGNMENT' });
+
+    // Seed localized home privacy parameters matching exact coordinate parameters
+    await mongoose.model('KinematicEcosystem').create({
+      userId: user._id,
+      activeKinematicState: 'IDLE_MEDITATION',
+      homePrivacyZoning: {
+        registeredAddressString: "144 Pearlescent Way",
+        bathroomBoundaryGeofenceBox: {
+          centerLat: 31.7683, // Core testing intersection node
+          centerLng: 35.2137,
+          radiusMeters: 5.0
+        },
+        isBathroomAreaBlackedOutMesh: true
+      },
+      utilityConsumptionGrid: { electricityAmperageDraw: 12.0, waterConsumptionGallonsPerMinute: 0.0 }
+    });
+
+    const response = await request(app)
+      .post('/api/kinerig/update-state')
+      .send({
+        username: 'PrivacyMindedNode',
+        requestedState: 'DANCING_HARMONY',
+        currentLat: 31.7683, // Placed directly at center point intersection bounds
+        currentLng: 35.2137,
+        waterFlowRate: 2.2
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.gridAlertStatus).toBe('PRIVACY_BLACKOUT_ENFORCED'); // Verification gate confirms blackout triggered correctly
+
+    const checkUser = await User.findOne({ username: 'PrivacyMindedNode' });
+    expect(checkUser.activeVisualState).toBe('CONTAINMENT_ISOLATION_SHROUD'); // Visual mesh blacked out
+  });
+});
