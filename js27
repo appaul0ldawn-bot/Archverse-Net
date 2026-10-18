@@ -1,0 +1,64 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize Historical Pun schemas inside testing memory sandbox
+  mongoose.model('HistoricalPun', new mongoose.Schema({
+    punId: String,
+    linguisticAnchors: { historicalNameRef: String, locationLabelRef: String, actionTagRef: String },
+    gematriaPatternSum: Number,
+    vowelFreeConsonantString: String,
+    curatedJokeTextPayload: String
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('HistoricalPun')) {
+    await mongoose.model('HistoricalPun').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎭 SUITE 34: HISTORICAL JOKE CONSTRELLATIONS & LANGUAGE GATES
+// ==========================================================================
+describe('Archverse Historical Alphanumeric Pun Constellation Matrix Engine', () => {
+
+  it('should process user balances, return a valid pre-seeded joke string from the Pro Writing Pad library, and verify vowel-free ciphers', async () => {
+    await User.create({ username: 'HumorousSeraph', tokens: 100, karmaScore: 50 });
+
+    const response = await request(app)
+      .post('/api/arcade/generate-historical-pun')
+      .send({
+        username: 'HumorousSeraph',
+        currentCoordinates: [31.7683, 35.2137],
+        requestedStyleFilter: 'STANDARD_CELESTIAL_HUMOR'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.unlockedJokePayload).toBeDefined();
+    
+    // Assert the vowel-free signature token parsed correctly
+    const key = response.body.patternRecognitionData.vowelFreeKey;
+    const hasVowels = /[aeiouAEIOU]/.test(key);
+    expect(hasVowels).toBe(false); // Vowel exclusion metrics validated [14.11]
+
+    // Verify token rewards updated permanently on the user model record
+    const updatedUser = await User.findOne({ username: 'HumorousSeraph' });
+    expect(updatedUser.tokens).toBe(150); // 100 starting + 50 reward = 150 Soul Tokens total
+  });
+});
