@@ -1,0 +1,37 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🌐 SUPREME ZION ARCHITECTURE INTEGRATION SCHEMA
+// ==========================================================================
+const ZionGridSchema = new mongoose.Schema({
+  nodeId: { type: String, required: true, unique: true, index: true },
+  
+  // 🧭 3-NODE HARDWARE TRIANGULATION NETWORK
+  triangulationMatrix: {
+    capturedIpPacketString: String,
+    signalStrengthNodesDb: [Number], // Dispatches from 3 proximity servers
+    pinPointCalculatedCoordinates: {
+      lat: { type: Number, default: 31.7683 }, // Default Zion Zero-Point Center
+      lng: { type: Number, default: 35.2137 }
+    },
+    accuracyRadiusMeters: { type: Number, default: 0.5 } // Absolute sub-meter accuracy target
+  },
+
+  // 🔮 FORESIGHT ORACLE PREDICTION REGISTRY
+  foresightOracleBuffer: {
+    activeHeadingVector: { x: Number, z: Number },
+    projectedTimePathsList: [Array], // Future multi-timeline coordinates
+    confidenceIntervalCoefficient: { type: Number, default: 1.0 }
+  },
+
+  // 🤖 AUTOMATED FLOW-BOT SYSTEM COMPLIANCE
+  flowBotTelemetry: {
+    isCronSyncActive: { type: Boolean, default: true },
+    accumulatedMemoryLeaksPurgedMb: { type: Number, default: 0 },
+    lastAutoSaveJournalFile: String
+  },
+
+  synchronizedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('ZionGrid', ZionGridSchema);
