@@ -1,0 +1,28 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧬 THE ARCHVERSE EXTENDED METAPHYSICAL PERIODIC SCHEMAS
+// ==========================================================================
+const MetaphysicalElementSchema = new mongoose.Schema({
+  elementSymbol: { type: String, required: true, unique: true, index: true }, // e.g., 'Ao', 'Lo', 'V2K'
+  name: { type: String, required: true },
+  tierCategory: { 
+    type: String, 
+    enum: ['ANCIENT_ALCHEMICAL', 'SPIRITUAL_VIBRATIONAL', 'METAPHYSICAL_ESSENCE', 'DIGITAL_AETHER'],
+    required: true 
+  },
+  vibrationalProperties: {
+    resonanceHz: Number,         // Matches your playable Solfeggio soundboard slots (e.g., 396, 528, 963)
+    quantumStateHash: String     // Links cryptographically to the Quantum Physics Engine
+  },
+  gameplayModifier: {
+    unlockedSuperability: String, // e.g., 'Chrono-Flicker', 'Seraphic_Ignition'
+    auraColorOverride: String     // Tints the Three.js glassmorphic user rig dynamically
+  },
+  loreMetadata: {
+    ancientOriginText: String,   // Sourced from Enochian Chronicles, Book of John, or Gnostic codexes
+    description: String
+  }
+});
+
+module.exports = mongoose.model('MetaphysicalElement', MetaphysicalElementSchema);
