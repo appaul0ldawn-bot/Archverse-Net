@@ -1,0 +1,49 @@
+const express = require('express');
+const router = express.Router();
+const MindWrapper = require('./models/MindWrapper');
+const User = require('./models/User');
+
+// ==========================================================================
+// 🚀 ACTIVE FREQUENCY EMITTER & SHIELD CALIBRATOR
+// ==========================================================================
+router.post('/api/protection/calibrate-wrapper', async (req, res) => {
+  try {
+    const { username, selectedToneHz, isShieldActive } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'Target player node invalid.' });
+
+    let wrapper = await MindWrapper.findOne({ userId: user._id });
+    if (!wrapper) wrapper = new MindWrapper({ userId: user._id, username });
+
+    // Update active core emitter metrics
+    wrapper.isWrapperShieldEmitting = isShieldActive;
+    wrapper.activeShieldFrequencyHz = selectedToneHz || 741;
+    wrapper.lastShieldPulseAt = new Date();
+
+    if (isShieldActive) {
+      // Elevate aura visual tracking hex colors matching the specific defensive tone selection
+      user.activeVisualState = selectedToneHz === 963 ? '#a855f7' : '#38bdf8'; // Sovereign Violet or Cyan Laser Shroud
+      user.karmaScore += 25;
+    } else {
+      user.activeVisualState = 'AVAILABLE_ALIGNMENT'; // Restores baseline parameters
+    }
+
+    await wrapper.save();
+    await user.save();
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    res.json({
+      success: true,
+      shieldStatus: isShieldActive ? "EMITTING_PROTECTION_FIELD" : "SHIELD_INACTIVE",
+      activeFrequency: `${wrapper.activeShieldFrequencyHz}Hz`,
+      boundaryEnvelope: `${wrapper.shieldIntegrityMeters} Meters`,
+      safetyNotice: "⚠️ Reminder: Energetic shielding does not apply to real-world biological vulnerabilities or STDs."
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Wrapper calibration engine failure.' });
+  }
+});
+
+module.exports = router;
