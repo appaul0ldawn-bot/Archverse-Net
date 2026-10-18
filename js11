@@ -1,0 +1,74 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox cluster
+  mongoose.model('ColonyInfiltration', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    username: String,
+    colonyBoundaryBox: { sectorLabel: String, centerLat: Number, centerLng: Number, boundaryRadiusMeters: Number },
+    cachedPreInfiltrationState: { originalRoleTrack: String, originalArmorMeshId: String },
+    isInfiltrationActive: Boolean
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('ColonyInfiltration')) {
+    await mongoose.model('ColonyInfiltration').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🎭 SUITE 42: MISSION INFILTRATION SCRIPT FLIPS & MESH EXTRACTIONS
+// ==========================================================================
+describe('Archverse Environmental Script Flip Infiltration Engine Validation Gates', () => {
+
+  it('should detect when an active Lightworker node enters colony bounds, seamlessly flipping their track to Shadow Worker variables', async () => {
+    const player = await User.create({ username: 'InfiltrationAgent', tokens: 1500, activeVisualState: '#fbbf24', zodiacElement: 'Air' });
+
+    // Seed localized colony geocentered bounds parameters matching center point targets
+    await mongoose.model('ColonyInfiltration').create({
+      userId: player._id,
+      username: 'InfiltrationAgent',
+      colonyBoundaryBox: {
+        sectorLabel: 'NATURAL_FELLOWSHIP_COLONY',
+        centerLat: 35.8129,
+        centerLng: -79.8059,
+        boundaryRadiusMeters: 300
+      },
+      isInfiltrationActive: false
+    });
+
+    const response = await request(app)
+      .post('/api/missions/evaluate-colony-proximity')
+      .send({
+        username: 'InfiltrationAgent',
+        currentLat: 35.8129, // Placed exactly at center point intersection bounds
+        currentLng: -79.8059
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.activeTrackStatus).toBe('SHADOW_WORKER_INFILTRATION'); // Script flip verified
+
+    // Re-query database to ensure public indicators morphed while financial parameter tokens remained isolated
+    const checkUser = await User.findOne({ username: 'InfiltrationAgent' });
+    expect(checkUser.rankBadge).toContain('Shadow Worker');
+    expect(checkUser.activeVisualState).toBe('MUTUAL_WITNESS_MASKING_SHROUD'); // Visual mesh successfully masked
+    expect(checkUser.tokens).toBe(1500); // Financial token data completely un-mutated and isolated
+  });
+});
