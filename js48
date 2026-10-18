@@ -1,0 +1,80 @@
+const express = require('express');
+const router = express.Router();
+const FrequencyCodex = require('./models/FrequencyCodex');
+const User = require('./models/User');
+const { ArchverseLogger } = require('./Logger');
+
+// Basic Alphanumeric Translation Array Blueprints
+const CONSONANT_CIPHER = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+
+function translateFrequencyToConsonants(frequencyHz) {
+  // Uses a deterministic mathematical remainder loop to build a vowel-free word cipher
+  let calculatedInteger = Math.floor(frequencyHz * 7.41);
+  let resolvedStringArray = [];
+
+  for (let i = 0; i < 4; i++) {
+    const selectorIndex = (calculatedInteger + i) % CONSONANT_CIPHER.length;
+    resolvedStringArray.push(CONSONANT_CIPHER[selectorIndex]);
+  }
+  
+  return resolvedStringArray.join(''); // Returns a pure, structured consonant thoughtform (e.g. "YHWH", "BRCH")
+}
+
+// ==========================================================================
+// 🚀 INGEST ENVIRONMENTAL ANOMALY FREQUENCY & DETECT SCRIPTURE
+// ==========================================================================
+router.post('/api/frequency/translate-node', async (req, res) => {
+  try {
+    const { username, targetSourceId, rawSensorFrequencyHz } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user || user.isBanned) return res.status(404).json({ success: false, error: 'User proxy profile invalid.' });
+
+    let codexNode = await FrequencyCodex.findOne({ sourceId: targetSourceId });
+    if (!codexNode) {
+      // Procedurally initialize the element if it hasn't been written to the ledger yet
+      codexNode = new FrequencyCodex({
+        sourceId: targetSourceId,
+        sourceName: targetSourceId.startsWith('plt') ? 'Covenant Rose Shrub' : 'Megalithic Quartz Vein',
+        category: targetSourceId.startsWith('plt') ? 'BOTANICAL_PLANT' : 'MINERAL_ELEMENT',
+        measuredFrequencyHz: rawSensorFrequencyHz
+      });
+    }
+
+    // 🧠 THE LETTER KILLS, THE WORD LIVES: Strip all vowel variables dynamically
+    const decryptedOutput = translateFrequencyToConsonants(rawSensorFrequencyHz);
+    
+    codexNode.measuredFrequencyHz = rawSensorFrequencyHz;
+    codexNode.decryptedConsonantAlphabet = {
+      translatedTextString: `📜 [Decrypted Thoughtform]: ${decryptedOutput}`,
+      rootOriginLanguage: "Paleo-Hebrew"
+    };
+
+    await codexNode.save();
+    
+    // Allocate Lightworker task tokens for decoding the environmental code maps
+    user.tokens += 75;
+    user.karmaScore += 25;
+    await user.save();
+
+    global.stateHasChanged = true; // Signal central 22Hz tick system engine broadcast
+
+    ArchverseLogger.log('INFO', 'FREQUENCY_ENG', `Decoded environmental node ${targetSourceId} at ${rawSensorFrequencyHz}Hz. Output cipher: ${decryptedOutput}`);
+
+    res.json({
+      success: true,
+      sourceClassification: codexNode.category,
+      decryptedMessage: codexNode.decryptedConsonantAlphabet.translatedTextString,
+      acousticMetrics: {
+        frequencyHz: rawSensorFrequencyHz,
+        tonalTargetLanguage: codexNode.decryptedConsonantAlphabet.rootOriginLanguage
+      },
+      tokenRewardsAllocated: 75
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Environmental frequency translation crash.' });
+  }
+});
+
+module.exports = router;
