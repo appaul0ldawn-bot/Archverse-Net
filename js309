@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🌌 THE ARCHVERSE ADVANCED RESONANCE MATCHMAKER CONTROLLER
+// ==========================================================================
+router.post('/api/matchmaker/evaluate-candidates', async (req, res) => {
+  try {
+    const { adminEmail, sourceUsername, filterPreferenceModifiers } = req.body;
+
+    // 1. Authorization Check for Master Administration Roster
+    const MASTER_ROSTER = ["appaul0ldawn@gmail.com", "sephraines@gmail.com", "zethreigns@gmail.com"];
+    if (!MASTER_ROSTER.includes(adminEmail.toLowerCase().trim())) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Supreme master clearance required.' });
+    }
+
+    const sourcePlayer = await User.findOne({ username: sourceUsername });
+    if (!sourcePlayer) return res.status(404).json({ success: false, error: 'Source profile not found.' });
+
+    // 2. Fetch adjacent prospective candidates within the regional matrix grid
+    const candidateNodes = await User.find({ 
+      username: { $ne: sourceUsername },
+      isBanned: false 
+    }).limit(20);
+
+    let matchingRoster = [];
+
+    candidateNodes.forEach((candidate) => {
+      let affinityScore = 50; // Baseline starting score
+
+      // Metric A: Cosmic Element Evaluation (Zodiac Resonance Mapping)
+      if (sourcePlayer.zodiacElement === candidate.zodiacElement) {
+        affinityScore += 15; // Elements on the same channel blend easily
+      } else if (
+        (sourcePlayer.zodiacElement === 'Fire' && candidate.zodiacElement === 'Air') ||
+        (sourcePlayer.zodiacElement === 'Earth' && candidate.zodiacElement === 'Water')
+      ) {
+        affinityScore += 25; // Complementary elemental structures generate a high-vibrational jump
+      }
+
+      // Metric B: Behavioral Posture Matching (Routines & Fitness Tracking)
+      if (sourcePlayer.activeVisualState === candidate.activeVisualState) {
+        affinityScore += 15; // Synchronized physical routines indicate congruent lifestyles
+      }
+
+      // Metric C: Visual Apparel Compatibility (Equipped Relics & Shaders)
+      if (sourcePlayer.equippedInventory?.headgear === candidate.equippedInventory?.headgear) {
+        affinityScore += 10;
+      }
+
+      // Apply Tweak Modifiers sent dynamically by the admin console panel sliders
+      if (filterPreferenceModifiers.prioritizeElement) affinityScore += 10;
+      if (filterPreferenceModifiers.strictAlignmentMatch && sourcePlayer.alignment !== candidate.alignment) {
+        affinityScore -= 30; // Strictly drops score if a Lightworker matches a Shadow Worker unnecessarily
+      }
+
+      matchingRoster.push({
+        username: candidate.username,
+        rank: candidate.rank,
+        alignment: candidate.alignment,
+        zodiacElement: candidate.zodiacElement,
+        computedAffinityPercentage: Math.min(100, Math.max(0, affinityScore))
+      });
+    });
+
+    // Sort candidates descending by their computed affinity percentage
+    matchingRoster.sort((a, b) => b.computedAffinityPercentage - a.computedAffinityPercentage);
+
+    res.json({
+      success: true,
+      sourcePlayer: sourceUsername,
+      recommendedCandidates: matchingRoster.slice(0, 5) // Return the top 5 highly synchronized profiles
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Matchmaker resonance extraction pipeline failure.' });
+  }
+});
+
+module.exports = router;
