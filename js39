@@ -1,0 +1,58 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Initialize the specific tracking schemas within our testing memory sandbox
+  mongoose.model('SensoryAnalytics', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    tasteProfileLogs: { inferredTasteSensation: String, facialMicroExpressionVector: String, perceivedPalatabilityScore: Number },
+    tactileTouchLogs: { perceivedTextureFeel: String, vocalReactionClassification: String, measuredDecibelLevelDb: Number, calculatedTactileIntensity: Number }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('SensoryAnalytics')) {
+    await mongoose.model('SensoryAnalytics').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧬 SUITE 39: BIOMETRIC SENSORY TRANSLATION & TEXTURE CHECKS
+// ==========================================================================
+describe('Archverse Biometric Sensory Ingestion & Texture Translation Engine', () => {
+
+  it('should process a distress vocal spike and correctly infer a rough abyssal brimstone tactile texture feel', async () => {
+    const player = await User.create({ username: 'SensoryObserverNode', tokens: 100, karmaScore: 10 });
+
+    const response = await request(app)
+      .post('/api/sensory/log-interaction')
+      .send({
+        username: 'SensoryObserverNode',
+        observedExpression: 'GLABELLAR_FROWN',
+        witnessedAcousticReaction: 'CRY_DISTRESS',
+        dbLevel: 78
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.computedTasteSensation).toBe('BITTER_ABSINTHE');
+    expect(response.body.computedTouchFeel).toBe('ROUGH_ABYSSAL_BRIMSTONE'); // Texture translation verified
+
+    // Confirm that the aura color flipped to volatile crimson
+    expect(response.body.vortexAuraShiftColor).toBe('#ef4444');
+  });
+});
