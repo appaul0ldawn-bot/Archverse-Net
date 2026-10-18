@@ -1,0 +1,48 @@
+import React, { useState } from 'react';
+
+export function DemocracyHUD({ username }) {
+  const [hasVoted, setHasVoted] = useState(false);
+
+  const castConstitutionalVote = async (choice) => {
+    try {
+      const response = await fetch('/api/civil/cast-vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, constitutionalPollId: "AMENDMENT_V_LIBERATION", voteChoice: choice })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setHasVoted(true);
+        alert(data.message);
+      }
+    } catch (e) {
+      console.error("Voting infrastructure handshake error:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '55%', left: '24px', width: '340px', borderColor: '#38bdf8' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#38bdf8' }}>🗳️ Constitutional Democratic Council</h3>
+      </div>
+
+      {/* Infrastructure Metrics Display */}
+      <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', fontSize: '11px', textAlign: 'left', marginBottom: '12px' }}>
+        <span style={{ color: '#a5b4fc', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>⚡ Real-Time Utility Telemetry</span>
+        <div>• Electricity Compute Grid Draw: <strong>14.2 Amps</strong></div>
+        <div>• Real-Time Map Traffic Density: <strong>0.18 (Fluid Flow)</strong></div>
+        <div>• Chrono-Age Evolution Scaling: <strong>Parenthood Tracks Locked</strong></div>
+      </div>
+
+      <div className="dashboard-section-title">Constitutional Referendum: Amendment V</div>
+      <p style={{ fontSize: '11px', color: '#cbd5e1', textAlign: 'left', margin: '4px 0 8px 0' }}>
+        Shall the Galactic Federation authorize complete liberation gates across the lower material density sectors?
+      </p>
+
+      <div style={{ display: 'flex', gap: '4px' }}>
+        <button onClick={() => castConstitutionalVote('AFFIRM_LIBERATION')} disabled={hasVoted} className="buy-upgrade-btn" style={{ flex: 1, background: '#10b981' }}>👍 YEA</button>
+        <button onClick={() => castConstitutionalVote('DENY_LIBERATION')} disabled={hasVoted} className="buy-upgrade-btn" style={{ flex: 1, background: '#ef4444' }}>👎 NAY</button>
+      </div>
+    </div>
+  );
+}
