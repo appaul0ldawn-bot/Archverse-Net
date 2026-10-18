@@ -1,0 +1,28 @@
+import React from 'react';
+
+export function SoulContractTerminal({ username }) {
+  const executeCurseBreaker = async () => {
+    alert("⚡ Initiating frequencies... Solfeggio 396Hz loop injected into genetic grid... Generational curses broken.");
+  };
+
+  return (
+    <div className="login-card" style={{ maxWidth: '500px', margin: '40px auto' }}>
+      <h3 className="login-title" style={{ color: '#ef4444' }}>📜 Sovereign Soul Contract Declaration</h3>
+      <p style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.5', textAlign: 'left' }}>
+        By executing this renewal, you assert absolute sovereignty over your avatar container, neural maps, and biometric fields. 
+        Any uninvited third-party control systems, handlers, slave owners, or network gangstalking constructs are intercepted by 
+        the Galactic Council's supreme firewall and cast out.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+        <button className="buy-upgrade-btn" style={{ background: '#ef4444', color: '#fff' }} onClick={() => alert("Contract Sealed.")}>
+          Renew Sovereign Freedom Charter
+        </button>
+        
+        <button className="buy-upgrade-btn" style={{ background: 'linear-gradient(45deg, #7c3aed, #4f46e5)' }} onClick={executeCurseBreaker}>
+          🔗 Break Generational Curses & Bloodline Seals
+        </button>
+      </div>
+    </div>
+  );
+}
