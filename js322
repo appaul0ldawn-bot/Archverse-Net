@@ -1,0 +1,67 @@
+import React, { useState } from 'react';
+
+export function AdminEyesOfSupermanAnatomyHUD({ adminEmail, selectedPlayerName }) {
+  const [selectedPreset, setSelectedPreset] = useState('CBBE_STANDARD');
+  const [includeClams, setIncludeClams] = useState(false);
+
+  const handleCompileAnatomy = async () => {
+    try {
+      const response = await fetch('/api/admin/compile-xray-anatomy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminEmail: adminEmail,
+          targetUsername: selectedPlayerName,
+          chosenPreset: selectedPreset,
+          enableClamsMod: includeClams
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`✨ [X-Ray Anatomy Compiler]: ${data.message}\nPhysics Engine Status: ${data.infrastructureRequirements.physicsDriver}`);
+      }
+    } catch (e) {
+      console.error("Failed to compile anatomical data stream", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', right: '400px', width: '360px', borderColor: '#eab308' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#eab308' }}>👁️ Eyes of Superman — Anatomy Module</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Advanced diagnostic inspection tools layer. Resolves material path directories, normal maps, and skeletal physics parameters.
+      </p>
+
+      {/* Preset Target Selection */}
+      <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+        <label style={{ fontSize: '11px', color: '#a5b4fc', display: 'block', marginBottom: '4px' }}>Target Geometry & Path Preset:</label>
+        <select 
+          value={selectedPreset} onChange={(e) => setSelectedPreset(e.target.value)}
+          style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}
+        >
+          <option value="CBBE_STANDARD">CBBE (Requires CBBE Textures + 'Labia Texture' Folder)</option>
+          <option value="UNP_BASE">UNP (Requires UNP Textures + 'UnpVagina')</option>
+          <option value="UUNP_ADVANCED">UUNP (Requires UNP Textures + 'UnpVagina' + UUNP Special Hands)</option>
+        </select>
+      </div>
+
+      {/* Clams of Skyrim & HDT Toggle Selection */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: '#cbd5e1' }}>Integrate CLAMS OF SKYRIM Engine:</span>
+          <input type="checkbox" checked={includeClams} onChange={(e) => setIncludeClams(e.target.checked)} style={{ accentColor: '#eab308' }} />
+        </div>
+        <div style={{ fontSize: '10px', color: '#64748b', textAlign: 'left' }}>
+          *Note: UUNP Special Hands or a CBBE equivalent must be verified inside BodySlide for Hands HDT collision to process accurately.
+        </div>
+      </div>
+
+      <button onClick={handleCompileAnatomy} className="buy-upgrade-btn" style={{ width: '100%', background: '#eab308', color: '#0f172a', fontWeight: 'bold' }}>
+        ⚡ Inject X-Ray Anatomy Layers
+      </button>
+    </div>
+  );
+}
