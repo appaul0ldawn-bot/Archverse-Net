@@ -1,0 +1,31 @@
+import React from 'react';
+import { AngelFrequencyEngine } from './AngelSynth';
+
+const FREQUENCY_HIERARCHY_DB = [
+  { hz: 396, name: "Limbo Cleanse / Liberation", desc: "Dissolves systemic density layers, clearing fear vectors from the aura profile state." },
+  { hz: 432, name: "Ophanim Gyro Alignment", desc: "Tunes the local client frame loop to natural geometry patterns, aligning with Johava Jireh movements." },
+  { hz: 528, name: "Seraph Wave Transformation", desc: "Triggers organic repair animations across localized plant and player mesh structures." },
+  { hz: 963, name: "7 Heavens Crown Connectivity", desc: "Establishes a telepathic network bridge linked directly to the Divine Galactic Council array." }
+];
+
+export function DivineFrequenciesPage() {
+  return (
+    <div className="login-card" style={{ maxWidth: '600px', width: '100%' }}>
+      <h3 className="login-title">✨ Divine Frequency Matrix</h3>
+      <p style={{ fontSize: '12px', color: '#94a3b8' }}>Select a Solfeggio step to generate pure mathematical waves via the Web Audio API.</p>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+        {FREQUENCY_HIERARCHY_DB.map(f => (
+          <div key={f.hz} style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ textAlign: 'left', marginRight: '12px' }}>
+              <strong style={{ color: '#fde047' }}>{f.hz} Hz — {f.name}</strong>
+              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#cbd5e1' }}>{f.desc}</p>
+            </div>
+            <button className="buy-upgrade-btn" onClick={() => AngelFrequencyEngine.play(f.hz)}>▶ Tune</button>
+          </div>
+        ))}
+      </div>
+      <button className="buy-upgrade-btn" style={{ background: '#ef4444', color: '#fff', marginTop: '12px', width: '100%' }} onClick={() => AngelFrequencyEngine.stop()}>🛑 Halt Tone Broadcast</button>
+    </div>
+  );
+}
