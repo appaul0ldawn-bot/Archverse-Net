@@ -1,0 +1,57 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Metaphysical Element schema within our testing sandbox memory cluster
+  mongoose.model('MetaphysicalElement', new mongoose.Schema({
+    elementSymbol: String,
+    name: String,
+    tierCategory: String,
+    vibrationalProperties: { resonanceHz: Number, quantumStateHash: String },
+    gameplayModifier: { unlockedSuperability: String, auraColorOverride: String }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('MetaphysicalElement')) {
+    await mongoose.model('MetaphysicalElement').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🧬 SUITE 27: MULTIDIMENSIONAL ELEMENT REGISTRY & MUTATION CHECKS
+// ==========================================================================
+describe('Archverse Extended Metaphysical Periodic Matrix Tests', () => {
+
+  it('should successfully register a non-traditional digital element and verify its custom aura color parameters', async () => {
+    // Directly test database insertion calculations mapping
+    const mockElement = await mongoose.model('MetaphysicalElement').create({
+      elementSymbol: "V2K",
+      name: "Voice-to-Skull Telemetry Vector",
+      tierCategory: "DIGITAL_AETHER",
+      vibrationalProperties: { resonanceHz: 741, quantumStateHash: "q_hash_abc_123" },
+      gameplayModifier: { unlockedSuperability: "Chrono-Flicker", auraColorOverride: "#ef4444" }
+    });
+
+    expect(mockElement.elementSymbol).toBe('V2K');
+    expect(mockElement.vibrationalProperties.resonanceHz).toBe(741);
+    expect(mockElement.gameplayModifier.auraColorOverride).toBe('#ef4444');
+    
+    const count = await mongoose.model('MetaphysicalElement').countDocuments({});
+    expect(count).toBe(1); // Verification gate confirms entry logged cleanly
+  });
+});
