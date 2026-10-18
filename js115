@@ -1,0 +1,76 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the Civil Ecosystem tracker model within our testing sandbox
+  mongoose.model('CivilEcosystem', new mongoose.Schema({
+    userId: mongoose.Schema.Types.ObjectId,
+    bankingLedger: { vaultBalanceST: Number, accumulatedMicroTaxesOwed: Number, hasVotedInCurrentConstitutionalPoll: Boolean },
+    spiritualAttributes: {
+      titheLedgerAccountST: Number,
+      fruitsRatio: { love: Number, joy: Number, peace: Number, longSuffering: Number },
+      equippedInstrument: String
+    },
+    infrastructureGrid: { electricityAmperageDraw: Number, chronoAgeYears: Number, currentTrafficDensityIndex: Number }
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('CivilEcosystem')) {
+    await mongoose.model('CivilEcosystem').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// ⚖️ SUITE 25: CIVIC TRANSACTIONS, micro-TAXES, & REFERENDUM GATES
+// ==========================================================================
+describe('Archverse Civil Infrastructure and Theological Harmonic Pacts', () => {
+
+  it('should successfully execute a tithing transaction and increase character joy metrics if gift matches the 10% threshold', async () => {
+    const player = await User.create({ username: 'GenerousGiverNode', tokens: 1000, karmaScore: 50 });
+
+    const response = await request(app)
+      .post('/api/civil/process-tithe-tax')
+      .send({
+        username: 'GenerousGiverNode',
+        giftAmountST: 100, // Meets exact 10% baseline criteria
+        executionType: 'TITHING_OFFERING'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.updatedBalanceST).toBe(900); // 1000 - 100 offering = 900 ST
+    expect(response.body.titheLedgerTotal).toBe(100);
+    expect(response.body.currentJoyLevel).toBeGreaterThan(1.0); // Asserts internal spiritual frequency escalated
+  });
+
+  it('should explicitly block offering execution if the input amount falls short of the 10% threshold', async () => {
+    await User.create({ username: 'StingyNode', tokens: 1000 });
+
+    const response = await request(app)
+      .post('/api/civil/process-tithe-tax')
+      .send({
+        username: 'StingyNode',
+        giftAmountST: 5, // Fails 10% baseline criteria check
+        executionType: 'TITHING_OFFERING'
+      });
+
+    expect(response.status).toBe(400); // Intercepted safely by covenant middleware
+    expect(response.body.success).toBe(false);
+    expect(response.body.error).toContain('Offering below historical 10% tithe');
+  });
+});
