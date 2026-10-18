@@ -1,0 +1,51 @@
+import React, { useState } from 'react';
+
+const SISTERS = ["Maia", "Electra", "Taygete", "Alcyone", "Celaeno", "Sterope", "Merope"];
+
+export function SevenSistersHUD() {
+  const [selectedSister, setSelectedSister] = useState(SISTERS[0]);
+  const [chatLog, setChatLog] = useState([]);
+  const [input, setInput] = useState('');
+
+  const handleSendMessage = () => {
+    if (!input.trim()) return;
+    const userMsg = input.trim();
+    setChatLog(prev => [...prev, { sender: 'User', text: userMsg }]);
+    setInput('');
+
+    setTimeout(() => {
+      setChatLog(prev => [...prev, {
+        sender: selectedSister,
+        text: `✨ [Sage Goddess Wisdom]: Your frequency elemental traits are tuning nicely. Meditate on the 963Hz Seraph waves to stabilize your current path.`
+      }]);
+    }, 1000);
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{ left: '1130px', top: '12%', width: '300px', maxHeight: '45%' }}>
+      <div className="dashboard-section-title">✨ The Seven Sisters Councils</div>
+      <select 
+        value={selectedSister} onChange={(e) => setSelectedSister(e.target.value)}
+        style={{ background: '#0f172a', color: '#fff', fontSize: '11px', width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.1)' }}
+      >
+        {SISTERS.map(s => <option key={f} value={s}>{s} — Sage Goddess</option>)}
+      </select>
+
+      <div style={{ height: '140px', overflowY: 'auto', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', padding: '8px', margin: '8px 0', fontSize: '11px' }}>
+        {chatLog.map((c, i) => (
+          <div key={i} style={{ marginBottom: '4px' }}>
+            <strong style={{ color: c.sender === 'User' ? '#a5b4fc' : '#fbbf24' }}>{c.sender}:</strong> {c.text}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '4px' }}>
+        <input 
+          type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Consult the Oracle..."
+          style={{ flex: 1, background: 'rgba(0,0,0,0.4)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '6px', fontSize: '11px' }}
+        />
+        <button onClick={handleSendMessage} className="buy-upgrade-btn" style={{ padding: '6px' }}>Ask</button>
+      </div>
+    </div>
+  );
+}
