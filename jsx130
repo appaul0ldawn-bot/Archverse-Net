@@ -1,0 +1,56 @@
+import React, { useState } from 'react';
+
+export function SovereignTrustHUD({ adminEmail, selectedPlayerName }) {
+  const [auditLog, setAuditLog] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const triggerSovereignAudit = async () => {
+    if (!selectedPlayerName) return;
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/api/governance/audit-node', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminEmail: adminEmail,
+          evaluationTargetUsername: selectedPlayerName,
+          physicalLat: 31.7683,
+          physicalLng: 35.2137
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAuditLog(data);
+      }
+    } catch (e) {
+      console.error("Failed to query governance database matrix:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '1130px', width: '350px', border: '1px solid #10b981' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#10b981', fontFamily: 'serif' }}>⚖️ Sovereign Trust & Governance</h3>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Processes celestial credit parameters, background check indicators, financial grants, and neighborhood watch overrides.
+      </p>
+
+      <button onClick={triggerSovereignAudit} disabled={isProcessing} className="buy-upgrade-btn" style={{ width: '100%', background: '#10b981', color: '#fff', fontWeight: 'bold' }}>
+        {isProcessing ? '🔄 Synchronizing Ledgers...' : '👁️ Run Sovereign Governance Audit'}
+      </button>
+
+      {auditLog && (
+        <div style={{ marginTop: '12px', background: 'rgba(16,185,129,0.06)', border: '1px solid #10b981', padding: '10px', borderRadius: '8px', textAlign: 'left', fontSize: '11px' }}>
+          <div style={{ fontWeight: 'bold', color: '#34d399', marginBottom: '4px' }}>Status: {auditLog.auditStatus}</div>
+          {auditLog.currentCreditScore && <div>• <strong>Celestial Credit Score:</strong> {auditLog.currentCreditScore} Points</div>}
+          <div>• <strong>Holy Grant Eligibility:</strong> {auditLog.grantStatusActive ? "APPROVED (+1000 ST Stipend Allocated)" : "BASELINE"}</div>
+        </div>
+      )}
+    </div>
+  );
+}
