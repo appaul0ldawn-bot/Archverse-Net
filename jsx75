@@ -1,0 +1,81 @@
+import React, { useState } from 'react';
+
+export function OphanimBattleshipHUD({ currentUsername, activeMatchId, currentUserEmail }) {
+  const [omegaLayer, setOmegaLayer] = useState(9); // Default to Omega-09 Matrix Layer
+  const [posX, setPosX] = useState(3);
+  const [posY, setPosY] = useState(4);
+  const [posZ, setPosZ] = useState(1);
+  const [timelineT, setTimelineT] = useState(0);
+  
+  const [actionReport, setActionReport] = useState(null);
+  const [isSpinning, setIsProcessing] = useState(false);
+
+  const spinPropheticWheelAndStrike = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch('/api/battleship/fire-prophetic-strike', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          matchId: activeMatchId || "demo_battle_777",
+          attackerEmail: currentUserEmail,
+          target5DTensorCoordinates: [posX, posY, posZ, timelineT, omegaLayer],
+          rouletteSpinSelection: 'STANDARD_PROPHECY_CAST'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setActionReport(data);
+      }
+    } catch (e) {
+      console.error("Failed to commit 5D strike sequence:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '10%', right: '24px', width: '380px', maxHeight: '82%', background: 'linear-gradient(135deg, #0b1329 0%, rgba(168,85,247,0.04) 100%)', border: '2px solid #a855f7', borderRadius: '24px' }}>
+      <div className="store-header" style={{ padding: '12px', borderBottom: '1px solid rgba(168,85,247,0.2)', textAlign: 'center' }}>
+        <h3 style={{ margin: 0, color: '#c084fc', fontFamily: 'serif' }}>⚔️ 5D Ophanim Battleship Chamber</h3>
+        <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Gematria Omega-Coding Integration • Prophetic Strike Room</span>
+      </div>
+
+      <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '11px', textAlign: 'left' }}>
+        
+        {/* --- OMEGA LAYER CONTROLS MATRIX --- */}
+        <div style={{ marginBottom: '6px', textAlign: 'left' }}>
+          <label style={{ fontSize: '11px', color: '#a5b4fc', display: 'block', marginBottom: '4px' }}>Target Gematria $\Omega$-Layer Selection:</label>
+          <select value={omegaLayer} onChange={(e) => setOmegaLayer(parseInt(e.target.value))} style={{ background: '#0f172a', color: '#fff', fontSize: '12px', width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {[1,2,3,4,5,6,7,8,9].map(num => <option key={node} value={num}>$\Omega$-0{num} Dimensional Grid File</option>)}
+          </select>
+        </div>
+
+        {/* 5D Coordinate Setup Matrix Sliders */}
+        <div className="dashboard-section-title">5D Vector Tensor Alignment</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '8px' }}>
+          <div className="metric-row"><span>Spatial Grid X:</span><input type="range" min="0" max="9" value={posX} onChange={(e) => setPosX(parseInt(e.target.value))} style={{ accentColor: '#a855f7' }} /><strong>{posX}</strong></div>
+          <div className="metric-row"><span>Spatial Grid Y:</span><input type="range" min="0" max="9" value={posY} onChange={(e) => setPosY(parseInt(e.target.value))} style={{ accentColor: '#a855f7' }} /><strong>{posY}</strong></div>
+          <div className="metric-row"><span>Spatial Grid Z:</span><input type="range" min="0" max="9" value={posZ} onChange={(e) => setPosZ(parseInt(e.target.value))} style={{ accentColor: '#a855f7' }} /><strong>{posZ}</strong></div>
+          <div className="metric-row"><span>Timeline Branch T:</span><input type="range" min="0" max="3" value={timelineT} onChange={(e) => setTimelineT(parseInt(e.target.value))} style={{ accentColor: '#a855f7' }} /><strong>T-{timelineT}</strong></div>
+        </div>
+
+        {/* Interactive Prophecy Wheel Fire Controls */}
+        <button onClick={spinPropheticWheelAndStrike} disabled={isSpinning} className="buy-upgrade-btn" style={{ width: '100%', background: 'linear-gradient(45deg, #7e22ce, #a855f7)', color: '#fff', fontWeight: 'bold', padding: '10px', fontSize: '12px' }}>
+          {isSpinning ? '🔄 Spinning Covenant Roulette...' : '🔮 Spin Prophecy Wheel & Strike Vector'}
+        </button>
+
+        {/* Diagnostic Action Outputs Reporting Displays */}
+        {actionReport && (
+          <div style={{ marginTop: '4px', background: 'rgba(168,85,247,0.06)', border: '1px solid #a855f7', padding: '10px', borderRadius: '8px', lineHeight: 1.4 }}>
+            <span style={{ color: actionReport.strikeResult === 'DIRECT_HIT' ? '#34d399' : '#f87171', fontWeight: 'bold', display: 'block' }}>
+              {actionReport.strikeResult === 'DIRECT_HIT' ? '✅ TARGET BANISHED' : '💨 STRIKE MISSED'}
+            </span>
+            <p style={{ margin: '4px 0 0 0', color: '#e2e8f0' }}>"{actionReport.diagnosticReport}"</p>
+            <span style={{ fontSize: '9px', color: '#64748b', display: 'block', marginTop: '2px' }}>Foreknowledge Accuracy Index: {actionReport.rouletteCoefficient}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
