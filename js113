@@ -1,0 +1,58 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+  
+  // Explicitly initialize the tracking model within our testing memory sandbox
+  mongoose.model('RestrainingOrder', new mongoose.Schema({
+    orderId: String,
+    protectedUserId: mongoose.Schema.Types.ObjectId,
+    restrictedUserEmail: String,
+    geofenceRadiusMeters: Number,
+    isSealedByVirtuesRank: Boolean
+  }));
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('RestrainingOrder')) {
+    await mongoose.model('RestrainingOrder').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🚨 SUITE 26: SCANNER INGESTION & RESTRAINING ORDER RING GATES
+// ==========================================================================
+describe('Archverse Emergency Scanner Ingestion & Protection Ring Gates', () => {
+
+  it('should successfully commit a spiritual restraining order data document and deploy a custom 150m geofence radius', async () => {
+    const protectedUser = await User.create({ username: 'TargetSovereign', tokens: 100 });
+
+    const response = await request(app)
+      .post('/api/protection/file-order')
+      .send({
+        requestorUsername: 'TargetSovereign',
+        targetOffenderEmail: 'handler_node@unaligned.com',
+        customRadiusMeters: 150
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.message).toContain('150m geofence barrier has been deployed');
+
+    const count = await mongoose.model('RestrainingOrder').countDocuments({});
+    expect(count).toBe(1); // Verification gate confirms protection seal locked in DB
+  });
+});
