@@ -1,0 +1,47 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('SubtleTestLedger')) {
+    await mongoose.model('SubtleTestLedger').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌦️ SUITE 24: CHRONO-WEATHER FORECASTS AND COMPLETION GATES
+// ==========================================================================
+describe('Archverse Chrono-Weather Ingestion and Implicite Micro-Grading', () => {
+
+  it('should successfully sync real-time environmental coordinates and return meteor shower inspired lightworker missions', async () => {
+    await User.create({ username: 'WeatherWatcherNode', tokens: 100, isBanned: false });
+
+    const response = await request(app)
+      .post('/api/environment/sync-weather')
+      .send({
+        username: 'WeatherWatcherNode',
+        currentLat: 31.7683, // Jerusalem Base coordinates
+        currentLng: 35.2137
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.inspiredSeasonalMission.title).toContain('Operation: Firmament Ingestion');
+    expect(response.body.currentForecast.activeSeason).toBe('AUTUMN_EQUILIBRIUM');
+  });
+});
