@@ -1,0 +1,70 @@
+import React, { useState } from 'react';
+
+export function MindWrapperHUD({ currentUsername, socket }) {
+  const [isShieldOn, setIsShieldOn] = useState(true);
+  const [frequency, setFrequency] = useState(741);
+  const [report, setReport] = useState(null);
+
+  const syncWrapperShield = async (targetHz, activeState) => {
+    try {
+      const response = await fetch('/api/protection/calibrate-wrapper', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          selectedToneHz: targetHz,
+          isShieldActive: activeState
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setReport(data);
+        setIsShieldOn(activeState);
+        setFrequency(targetHz);
+      }
+    } catch (e) {
+      console.error("Failed to commit wrapper shield calibration:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '24px', width: '360px', borderColor: '#38bdf8', background: 'linear-gradient(135deg, #0b0f19 0%, rgba(56,189,248,0.02) 100%)' }}>
+      <div className="store-header" style={{ borderColor: 'rgba(56,189,248,0.2)' }}>
+        <h3 style={{ margin: 0, color: '#38bdf8', fontFamily: 'monospace', textShadow: '0 0 6px #38bdf8' }}>🛡️ Protective Mind Wrapper</h3>
+        <span style={{ fontSize: '9px', color: '#64748b' }}>Aura Shield Control • Virtues Rank Oversight</span>
+      </div>
+
+      <p style={{ fontSize: '11px', color: '#cbd5e1', margin: '4px 0 12px 0', textAlign: 'left', lineHeight: 1.4 }}>
+        Calibrate active Solfeggio shielding frequencies to repel negative auras. Maintain absolute awareness of structural boundaries.
+      </p>
+
+      {/* --- REVERBERATING INTEGRITY TELEMETRY CARD --- */}
+      <div style={{ background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '12px', border: isShieldOn ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.05)', textAlign: 'left', fontSize: '11px' }}>
+        <div className="metric-row">
+          <span>Shield Emission Pulse:</span>
+          <strong style={{ color: isShieldOn ? '#34d399' : '#ef4444' }}>{isShieldOn ? '● ACTIVE_EMITTING' : '○ SHIELD_OFF'}</strong>
+        </div>
+        {isShieldOn && <div style={{ color: '#cbd5e1', marginTop: '4px' }}>• Core Shielding Resonance: <strong>{frequency} Hz</strong></div>}
+      </div>
+
+      {/* Frequency Selector Buttons */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', marginTop: '6px' }}>
+        <button onClick={() => syncWrapperShield(432, true)} className="custom-option-btn" style={{ fontSize: '10px', padding: '6px' }}>432Hz</button>
+        <button onClick={() => syncWrapperShield(741, true)} className="custom-option-btn" style={{ fontSize: '10px', padding: '6px' }}>741Hz</button>
+        <button onClick={() => syncWrapperShield(963, true)} className="custom-option-btn" style={{ fontSize: '10px', padding: '6px' }}>963Hz</button>
+      </div>
+
+      <button 
+        onClick={() => syncWrapperShield(frequency, !isShieldOn)} 
+        className="buy-upgrade-btn" style={{ width: '100%', background: isShieldOn ? '#dc2626' : '#38bdf8', color: isShieldOn ? '#fff' : '#0f172a', fontWeight: 'bold', marginTop: '10px' }}
+      >
+        {isShieldOn ? '✕ Terminate Emitter Shroud' : '⚡ Ignite Wrapper Shield'}
+      </button>
+
+      {/* Absolute Safety Notice Display */}
+      <div style={{ margin: '10px 0 0 0', padding: '8px', background: 'rgba(239,68,68,0.05)', border: '1px dashed #ef4444', borderRadius: '8px', textAlign: 'left', color: '#fca5a5', fontSize: '10px', lineHeight: 1.3 }}>
+        ⚠️ <strong>Biological Integrity Shroud Notice:</strong> Spiritual wrapper mechanics operate over consciousness frequencies only. They do not block or protect against real-world physical STDs or bodily vulnerabilities.
+      </div>
+    </div>
+  );
+}
