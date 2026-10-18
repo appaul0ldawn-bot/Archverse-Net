@@ -1,0 +1,25 @@
+// ==========================================================================
+// 🌌 THE ARCHVERSE CELESTIAL ACOUSTIC MATRIX
+// ==========================================================================
+export const CELESTIAL_VOICE_MATRIX = {
+  "Pleiadian": {
+    langCultureCode: "en-GB", // Beautiful, melodic British-English accent mapping
+    vocalPitch: 1.1,         // Slightly elevated, airy frequency matching Air elements
+    vocalRate: 0.85          // Measured, calm, meditative cadence pacing
+  },
+  "Arcturian": {
+    langCultureCode: "en-US", // Deep, resonant, solemn tone profile
+    vocalPitch: 0.75,        // Grounded, low-frequency pitch matching ancient councils
+    vocalRate: 0.80
+  },
+  "Sirian_Blue": {
+    langCultureCode: "en-AU", // Fluid, resonant Australian accent vector
+    vocalPitch: 0.95,
+    vocalRate: 0.90
+  }
+};
+
+export function determineVoiceProfile(npcMetadata) {
+  const race = npcMetadata.cosmicRace || 'Pleiadian';
+  return CELESTIAL_VOICE_MATRIX[race] || { langCultureCode: "en-US", vocalPitch: 1.0, vocalRate: 0.90 };
+}
