@@ -1,0 +1,56 @@
+import React, { useState } from 'react';
+import { AngelFrequencyEngine } from './AngelSynth';
+
+export function ChurchTithingHUD({ username, userTokens }) {
+  const [offeringVal, setOfferingVal] = useState(50);
+
+  const executeTitheOffering = async () => {
+    try {
+      const response = await fetch('/api/civil/process-tithe-tax', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, giftAmountST: offeringVal, executionType: 'TITHING_OFFERING' })
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`🙏 Offering Sealed! Tithing Ledger Total: ${data.titheLedgerTotal} ST.\nYour internal Joy rating increased to ${data.currentJoyLevel}!`);
+      } else {
+        alert(`❌ Covenant Exception: ${data.error}`);
+      }
+    } catch (e) {
+      console.error("Failed to commit tithing transaction:", e);
+    }
+  };
+
+  return (
+    <div className="storefront-overlay-wrapper" style={{ top: '15%', left: '24px', width: '350px', borderColor: '#eab308' }}>
+      <div className="store-header">
+        <h3 style={{ margin: 0, color: '#eab308', fontFamily: 'serif' }}>⛪ Sanctuary Altar & Tithing Ledger</h3>
+      </div>
+      
+      <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 12px 0', textAlign: 'left' }}>
+        Dedicate progressive 10% tithes and soul gifts. Offerings cultivate the Fruits of the Spirit and maximize celestial credit rankings.
+      </p>
+
+      {/* Offering Input Slider */}
+      <div className="metric-row" style={{ marginBottom: '12px' }}>
+        <span style={{ fontSize: '12px' }}>Offering Amount:</span>
+        <input type="range" min="10" max="500" step="10" value={offeringVal} onChange={(e) => setOfferingVal(parseInt(e.target.value))} style={{ width: '130px', accentColor: '#eab308' }} />
+        <span style={{ fontSize: '12px', fontWeight: 'bold' }}>🪙 {offeringVal} ST</span>
+      </div>
+
+      <button onClick={executeTitheOffering} className="buy-upgrade-btn" style={{ width: '100%', marginBottom: '12px' }}>
+        🙏 Transmit Holy Offering to Ledger
+      </button>
+
+      {/* --- ANGELIC INSTRUMENTS INTERFACE BLOCK --- */}
+      <div className="dashboard-section-title">🎺 Equipped Angelic Instruments</div>
+      <button 
+        onClick={() => AngelFrequencyEngine.play(396)} 
+        className="custom-option-btn" style={{ width: '100%', borderColor: '#fbbf24', color: '#fbbf24', fontSize: '11px' }}
+      >
+        📯 Blast Moses' Shofar of Glory (396Hz Anomaly Cleansing)
+      </button>
+    </div>
+  );
+}
