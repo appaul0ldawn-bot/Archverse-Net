@@ -1,0 +1,33 @@
+import React, { useState } from 'react';
+
+export function PrayerRequestHUD({ username, socket }) {
+  const [prayerInput, setPrayerInput] = useState('');
+
+  const submitPrayer = () => {
+    if (!prayerInput.trim()) return;
+    socket.emit('submit_prayer_request', { text: prayerInput.trim(), username });
+    setPrayerInput('');
+    alert("Prayer request dispatched to the Council ledger.");
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{ left: '780px', top: '12%', width: '340px', maxHeight: '75%' }}>
+      <div className="dashboard-section-title">🙏 Active Prayer Requests</div>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+        <input 
+          type="text" value={prayerInput} onChange={(e) => setPrayerInput(e.target.value)}
+          placeholder="Enter prayer request or soul wish..."
+          style={{ flex: 1, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '6px', padding: '8px', fontSize: '12px' }}
+        />
+        <button onClick={submitPrayer} className="buy-upgrade-btn">Submit</button>
+      </div>
+
+      <div className="dashboard-section-title">✨ Public Witness Feed (Answers)</div>
+      <div style={{ flex: 1, overflowY: 'auto', fontSize: '11px', lineHeight: 1.4 }}>
+        <div style={{ padding: '6px', background: 'rgba(16,185,129,0.1)', borderRadius: '6px', marginBottom: '6px' }}>
+          💚 <strong>Answered:</strong> Core matrix ripples stabilized over New Jerusalem sector by Elder Node.
+        </div>
+      </div>
+    </div>
+  );
+}
