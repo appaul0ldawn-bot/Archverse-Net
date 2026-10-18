@@ -1,0 +1,47 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🧬 EXTENDED INDIVIDUAL IDENTITY & EXPERIENCE MATRIX SCHEMA
+// ==========================================================================
+const AscensionProfileSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // --- HARDWARE PSYCHOMETRY DATA ---
+  enneagramType: { type: Number, min: 1, max: 9, required: true }, // e.g., Type 5 (The Investigator), Type 9 (The Peacemaker)
+  coreDesireVector: { type: String, enum: ['KNOWLEDGE_SEEKING', 'MATRIX_HARMONY', 'PROTECTION_DRIVE', 'KINETIC_CREATION'] },
+  
+  // --- LIFE PROGRESSION TIERS ---
+  ascensionLevel: { type: Number, default: 1 },
+  experiencePoints: { type: Number, default: 0 },
+  unlockedAbilityBadges: [String], // Array tracking active birthday badges or earned celestial status flags
+  
+  // --- CHRONO-ROUTINES MEMORY DRIVE ---
+  dailyLifestylePatterns: {
+    averageWakeMinute: Number,    // Load-balanced time arrays mapping to fitness apps
+    primaryMotionCadence: String, // 'WALKING_ALIGNMENT', 'KINETIC_PURGE_RUNNING'
+    ambientNoiseToleranceDb: Number
+  }
+});
+
+// --- PROCEDURAL MISSION LEDGER ---
+const AlignedMissionSchema = new mongoose.Schema({
+  missionId: { type: String, required: true, unique: true, index: true },
+  assignedToUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  title: { type: String, required: true },
+  difficulty: { type: String, enum: ['TIER_1_AWAKENING', 'TIER_2_MATRIX_INTERCEPT', 'TIER_3_COSMIC_CONVERGENCE'] },
+  
+  // Multi-Sensor Trigger Goals
+  executionCriteria: {
+    requiredSolfeggioHz: Number,
+    targetGeospatialRadiusMeters: Number,
+    complementaryUserClassNeeded: String // Matches users based on inverse wants/desires
+  },
+  
+  payoutAngelTokens: { type: Number, default: 100 },
+  isSealedAndCompleted: { type: Boolean, default: false }
+});
+
+module.exports = {
+  AscensionProfile: mongoose.model('AscensionProfile', AscensionProfileSchema),
+  AlignedMission: mongoose.model('AlignedMission', AlignedMissionSchema)
+};
