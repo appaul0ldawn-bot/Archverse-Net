@@ -1,0 +1,33 @@
+const mongoose = require('mongoose');
+
+// ==========================================================================
+// 🕊️ CELESTIAL COMPASSION & FLUID FELLOWSHIP CONTRACT SCHEMA
+// ==========================================================================
+const CompassionCoreSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true, index: true },
+  
+  // 👥 REAL-TIME ETHICAL ENERGETIC MATRICES
+  empathyMetrics: {
+    publicAffectionAcceptabilityScore: { type: Number, default: 1.0 }, // Dynamic grading based on local community comfort parameters
+    unwaveringNaturalComfortIndex: { type: Number, default: 1.0 },    // Companion animal proximity multiplier
+    forgivenessConfessionCount: { type: Number, default: 0 }
+  },
+
+  // 🚨 AUTOMATED CRITICAL OVERRIDE GATES ("Mindless Zombie" Mode)
+  emergencyAwakeningSystem: {
+    isMindlessZombieModeActive: { type: Boolean, default: false },
+    isForcedWakeAlarmTriggered: { type: Boolean, default: false },
+    necessaryActionIncidentId: { type: String, default: null } // Forces instant client-side canvas viewport focus
+  },
+
+  // 💍 RELATIONSHIP & MARITAL CONVENANTS (Strict open/non-monogamous framework enforcement)
+  fellowshipStructure: {
+    relationshipTypology: { type: String, default: 'FLUID_POLYAMOROUS_COVENANT' }, // Strict structural restriction ban on absolute exclusive monogamy
+    boundPartnerUserIdsList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    motherlyInstinctSyncActive: { type: Boolean, default: false }
+  },
+
+  lastCompassionAuditAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('CompassionCore', CompassionCoreSchema);
