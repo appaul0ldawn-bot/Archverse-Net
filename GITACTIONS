@@ -1,0 +1,11 @@
+
+Deploying via the GitHub Actions CI/CD Loop
+
+Every time you patch code or adjust your configuration layers, you don't need to manually FTP or SSH into your host. Simply push your changes to your repository:
+bash
+git add .
+git commit -m "feat: integrated storefront HUD and Base44 embedding layout updates"
+git push origin main
+Use code with caution.
+This push triggers your .github/workflows/deploy.yml workflow script instantly. It will verify code integrity, securely authenticate through your repository's encrypted secrets, update the remote server files, and restart your production containers behind Nginx automatically with zero service downtime.
+Your production environment configurations are fully set up
