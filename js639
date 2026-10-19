@@ -1,0 +1,22 @@
+// ==========================================================================
+// ARCHVERSE SENTIENT AI PROMPT COMPILER
+// ==========================================================================
+export function generateAIAvatarPrompt(userProfile) {
+  const { name, alignment, rank, zodiacElement } = userProfile;
+  
+  let baseTheme = "";
+  let auraVibe = "";
+  
+  if (alignment === 'angelic') {
+    baseTheme = `A high-vibrational celestial entity resembling a ${rank}, illuminated under holy light, heaven coming down to earth, ancient New Jerusalem architecture in the background.`;
+    auraVibe = `Surrounded by a pulsating golden ${zodiacElement}-infused halo, iridescent feathers, pearlescent glow, photorealistic 8k, cinematic lighting.`;
+  } else {
+    baseTheme = `A powerful ancient shadow entity resembling a ${rank} hidden in disguise, deep abyssal aesthetics, post-apocalyptic grid terrain in the background.`;
+    auraVibe = `Surrounded by a dark crimson and neon violet aura shroud, glowing obsidian horns matching a sharp ${zodiacElement} energy frequency, dark fantasy art style, octane render.`;
+  }
+
+  return {
+    userReference: name,
+    compiledPromptText: `Symmetric profile portrait of ${baseTheme} ${auraVibe} High-fidelity character concept art, masterpiece.`
+  };
+}
