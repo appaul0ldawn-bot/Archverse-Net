@@ -1,0 +1,69 @@
+
+Automated Architecture Verification Testing Suite (akashic.test.js)
+
+Create this final unit testing script inside your codebase path to verify that the query route successfully strips private data when accessed by the public, while preserving admin records completely:
+javascript
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const AkashicNode = require('./models/AkashicRecords');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await AkashicNode.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 📖 SUITE 8: AKASHIC SECURITY FILTERS & CONTEXT PARSING GATES
+// ==========================================================================
+describe('Akashic Records Public Registry Query Integrity Constraints', () => {
+
+  it('should return non-private logs in public searches and filter out confidential logs', async () => {
+    // 1. Seed one public log row and one private session row into the data schema
+    await AkashicNode.create({
+      recordId: 'rec_01',
+      username: 'PublicAngel',
+      dataType: 'CHAT_TYPED',
+      payloadData: { contentString: 'Praise manifested at the city square core.' },
+      isPrivateField: false // Publicly available record [1]
+    });
+
+    await AkashicNode.create({
+      recordId: 'rec_02',
+      username: 'PrivateSiren',
+      dataType: 'WEBCAM_SESSION_META',
+      payloadData: { contentString: 'Confidential 18+ streaming session trail data.' },
+      isPrivateField: true // Restricted administrative data [1]
+    });
+
+    // 2. Dispatch query request to the public portal API endpoint loop
+    const response = await request(app)
+      .get('/api/akashic/query?search=')
+      .send();
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    
+    // 3. Assert public visibility filtering accuracy constraints
+    const recordsReturned = response.body.records;
+    expect(recordsReturned.length).toBe(1); // Only the public record should pass [1]
+    expect(recordsReturned[0].username).toBe('PublicAngel');
+    expect(recordsReturned.some(r => r.username === 'PrivateSiren')).toBe(false); // Verified filtered out [1]
+  });
+});
+Use code with caution.
+To run this final verification step alongside all other development engine test suites, run your standard terminal test script:
+bash
+npm test
