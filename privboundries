@@ -1,0 +1,4 @@
+
+Upgraded 3D Private Space Boundary Controller
+
+This React Three Fiber component visualizes the Private Estate Matrix over real-world home addresses using the Google 3D Tiles pipeline. It projects an impassable energy shroud that blocks player movement vector paths unless an authorized invite token is found in the player's inventory stack:
