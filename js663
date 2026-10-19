@@ -1,0 +1,49 @@
+const express = require('express');
+const router = express.Router();
+const User = require('./models/User');
+
+// ==========================================================================
+// 🏃 HEALTH APP INTEGRATION & MOTION BIOMETRICS LAYER
+// ==========================================================================
+router.post('/telemetry/lifestyle-update', async (req, res) => {
+  try {
+    const { username, currentActivity, stepCount, sleepStateHours, nutritionalLog, decibelNoiseLevel } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User target not found.' });
+
+    // 1. Process fitness app motion sensors (Running / Walking updates)
+    if (currentActivity === 'RUNNING') {
+      // Allocate small token payouts for active walking/running milestones
+      user.tokens += 10;
+      user.karmaScore += 5; // Positive physiological calibration loops
+    }
+
+    // 2. Process Sleep & Rest States Telemetry
+    if (currentActivity === 'SLEEPING' && sleepStateHours >= 7) {
+      user.auraMoodStatus = 'Radiant_Rest'; // Automatically updates spatial visual aura glow shaders
+    }
+
+    // 3. Background Noise Analysis Layer
+    if (decibelNoiseLevel > 85) {
+      // High noise exposure lowers base regeneration metrics or warns of chaotic grid sectors
+      user.karmaScore -= 2; 
+    }
+
+    // 4. Clothing / Apparel State Validation
+    if (nutritionalLog?.isEating) {
+      user.activeVisualState = 'EATING_ANIMATION';
+    }
+
+    await user.save();
+
+    // Force central 22Hz tick state synchronization updates down the pipeline
+    global.stateHasChanged = true;
+
+    res.json({ success: true, currentAura: user.auraMoodStatus, totalTokens: user.tokens });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Internal lifestyle tracking processing failure.' });
+  }
+});
+
+module.exports = router;
