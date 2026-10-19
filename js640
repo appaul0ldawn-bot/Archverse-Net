@@ -1,0 +1,72 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  if (mongoose.modelNames().includes('TranslationNode')) {
+    await mongoose.model('TranslationNode').deleteMany({});
+  }
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌿 SUITE 10: INTERSPECIES LANGUAGE NODES & CLINICAL REMEDY SAFETY GATES
+// ==========================================================================
+describe('Archverse Biological Wave Translators and Alchemical Remedy Verification', () => {
+
+  it('should incrementally update language establishment scores when capturing valid plant waves', async () => {
+    await User.create({ username: 'GreenMage', tokens: 100 });
+
+    const payload = {
+      username: 'GreenMage',
+      type: 'PLANT_WAVE',
+      sourceId: 'Ancient_Olive_Tree',
+      frequencyHz: 432
+    };
+
+    const response = await request(app)
+      .post('/api/telemetry/translate-bio-wave')
+      .send(payload);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.currentProgress).toBe(15); // Check initial 15% step increments
+    expect(response.body.translatedMessage).toContain('Plant Grid Resonance Alert');
+  });
+
+  it('should block alchemical consultation processing if items interact dangerously with synthetic inputs', async () => {
+    // Instantiate user state carrying conflicting toxic weapon characteristics
+    await User.create({
+      username: 'AfflictedUser',
+      tokens: 0,
+      equippedInventory: { weapon: 'abyss_staff' }
+    });
+
+    const response = await request(app)
+      .post('/api/alchemy/consult-remedy')
+      .send({
+        username: 'AfflictedUser',
+        currentSyntheticInput: 'synthetic_stimulants',
+        loggedCondition: 'Adrenal_Exhaustion'
+      });
+
+    // Integrity firewall must halt processing immediately to protect user well-being
+    expect(response.status).toBe(400);
+    expect(response.body.securityAction).toBe('BLOCK_CRAFTING');
+    expect(response.body.error).toContain('HAZARDOUS REACTION DETECTED');
+  });
+});
