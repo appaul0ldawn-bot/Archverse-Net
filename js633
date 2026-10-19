@@ -1,0 +1,76 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const BeulahNPC = require('./models/BeulahSim');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await BeulahNPC.deleteMany({});
+  await mongoose.model('AkashicNode').deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 11: RENDERING DEGRADATIONS & 144,000 BEULAH LAND SIMULATIONS
+// ==========================================================================
+describe('Archverse High-Fidelity Rendering & Background NPC Simulation Ecosystem', () => {
+
+  it('should verify that the background simulation engine can pull random NPC samples out of the 144,000 database', async () => {
+    // Seed 5 sample Watcher/Council profiles into the active database cache matrix
+    await BeulahNPC.create([
+      { npcId: 'n_01', name: 'Watcher_Ezekiel', rank: 'Veil_Watcher', cosmicRace: 'Pleiadian', alignment: 'light_worker' },
+      { npcId: 'n_02', name: 'Archon_Metatron', rank: 'Ophanim_Archon', cosmicRace: 'Arcturian', alignment: 'light_worker' },
+      { npcId: 'n_03', name: 'Shadow_Agent_Malphas', rank: 'Seraph', cosmicRace: 'Nephilim_Hybrid', alignment: 'shadow_worker' }
+    ]);
+
+    const { tickBeulahNpcSimulationEngine } = require('./BeulahSim');
+    
+    // Mock socket.io layer framework
+    const mockIo = { emit: jest.fn() };
+
+    // Run one tick computation interval
+    await tickBeulahNpcSimulationEngine(mockIo);
+
+    // Verify the engine generated an advisory report inside the public Akashic database registries
+    const createdLogsCount = await mongoose.model('AkashicNode').countDocuments({});
+    expect(createdLogsCount).toBeGreaterThan(0);
+    expect(mockIo.emit).toHaveBeenCalledWith('telemetry_pulse', expect.any(Object));
+  });
+
+  it('should successfully execute automated hotkey positioning vectors upon receiving wink blendshape triggers', () => {
+    const { processBiometricFaceTriggers } = require('./FaceHotkeys');
+    
+    // Mock local player state tracker parameters
+    const mockPlayer = {
+      username: 'TestSeraph',
+      lastHotkeyExecutionTime: 0
+    };
+
+    // Spy on global window dispatch pipelines
+    const spyEvent = jest.spyOn(window, 'dispatchEvent');
+
+    const activeFacePayload = {
+      eyeBlinkLeft: 0.95,  // Simulates an intentional left eye wink expression
+      eyeBlinkRight: 0.1,
+      jawOpen: 0.75,       // Simulates mouth open condition
+      browLowererLeft: 0.2
+    };
+
+    processBiometricFaceTriggers(activeFacePayload, mockPlayer);
+
+    // Check to ensure the smart switch correctly broadcast the hotkey teleport execution signals
+    expect(spyEvent).toHaveBeenCalled();
+    spyEvent.mockRestore();
+  });
+});
