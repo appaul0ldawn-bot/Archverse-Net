@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- 🏠 CORE SITE BRANDING TITLE -->
+  <title>The Archverse — Multi-User Spatial Engine</title>
+  
+  <!-- 🔍 HIGH-RESOLUTION META DESCRIPTIONS FOR LINKS & SEARCH ENGINES -->
+  <meta name="description" content="The Archverse is a real-time 3D multiplayer virtual map and AR ecosystem modeling the Millennial Reign, prophecy timelines, and sacred alchemical elements over physical global terrain.">
+  <meta name="keywords" content="The Archverse, New Jerusalem, Solfeggio Frequencies, Angelic Hierarchy, Apocrypha Library, AR Mobile Tracking, Lovense Integration">
+  
+  <!-- 📱 OPEN GRAPH METADATA (Drives rich link previews on Discord, Telegram, and Facebook) -->
+  <meta property="og:site_name" content="The Archverse">
+  <meta property="og:title" content="The Archverse — Heaven on Earth Simulation">
+  <meta property="og:description" content="Explore real-world geography mapped with celestial architecture, unlock psionic spiritual gifts, interpret dream journals via the Divine Council, and collect Soul Tokens securely.">
+  <meta property="og:image" content="https://duckdns.org">
+  <meta property="og:url" content="https://duckdns.org">
+  
+  <!-- Anonymous Cyber-Security Firewall HTTP Header Directives -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
