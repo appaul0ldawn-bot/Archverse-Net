@@ -1,0 +1,4 @@
+
+Real-Time 3D-to-2D Shader Degradation Pipeline (DegradationEngine.jsx)
+
+This specialized component manages global timed events (e.g., Eschatological Flashbacks or Grid Hardening Phases). It intercepts the scene rendering loop and completely overrides standard 3D depth buffers, forcing your realistic 3D mesh shaders down into a flat, 2D retro canvas layout instantly without resetting the canvas memory context:
