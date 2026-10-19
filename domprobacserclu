@@ -1,0 +1,14 @@
+
+Free Domain Providers for Your Backup Server Cluster
+
+When hosting a secondary backup node of the Archverse to distribute server load and map queries safely, you can connect an absolute free domain provider to your Nginx proxy.
+The top free domain allocation layers available include:
+• DuckDNS (duckdns.org): A completely free, non-expiring Dynamic DNS (DDNS) provider. It allows you to claim a free subdomain (e.g., archverse-backup.duckdns.org) and route it directly to any public VPS IP address. It natively supports free automated Let's Encrypt SSL script registration.
+• No-IP (noip.com): Offers up to 3 free subdomains (e.g., archverse.ddns.net). Note: Free accounts require a brief manual click confirmation via email once every 30 days to stay active.
+• FreeDNS (freedns.afraid.org): A massive public community domain registry offering thousands of free subdomains across various hosting extensions.
+
+🛠️ Direct Backup DNS Configuration Map
+
+Once you claim your free subdomain from DuckDNS, simply map it to your backup cloud server by issuing an update ping script task:
+bash
+curl -k "https://duckdns.org"
