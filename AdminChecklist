@@ -1,0 +1,9 @@
+
+Server Administrator Quick-Start Deployment Checklist
+
+Follow these sequential configuration steps to spin up the production cluster securely:
+1. Environment Variable Verification: Create a .env file in the staging server path root and specify production port mappings (PORT=3000) and the database connection strings (MONGO_URI).
+2. SSL Certificate Binding: Execute Certbot to generate the Let's Encrypt keys. Move or symlink fullchain.pem and privkey.pem directly into your local ./certs directory.
+3. Port Authorization: Ensure your hosting firewall rules allow incoming traffic on ports 80 (HTTP routing) and 443 (HTTPS/WSS secure engine stream).
+4. Database Vector Seeding: Launch the container stack using docker-compose up -d --build. Connect to the MongoDB instance and run the initial library collection configuration scripts to populate ANGELIC_LIBRARY_DB.
+5. Reverse Proxy Status Evaluation: Run docker-compose logs nginx-proxy to ensure the upstream game-server:3000 is mapping connections cleanly without certificate mismatch errors.
