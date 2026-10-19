@@ -1,0 +1,70 @@
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const User = require('./models/User');
+
+// Explicitly designated supreme master administrator email handles
+const AUTHORIZED_ADMIN_EMAILS = [
+  "appaul0ldawn@gmail.com",
+  "sephraines@gmail.com"
+];
+
+// ==========================================================================
+// 🔑 UNIVERSAL ADMIN LOGIN & PERSISTENT SESSION EXECUTOR
+// ==========================================================================
+router.post('/auth/admin-universal-login', async (req, res) => {
+  try {
+    const { email, sacredPassphrase, deviceFingerprintString } = req.body;
+
+    const sanitizedEmail = email.toLowerCase().trim();
+
+    // 1. Verify email belongs to the master administrative roster
+    if (!AUTHORIZED_ADMIN_EMAILS.includes(sanitizedEmail)) {
+      return res.status(403).json({ success: false, error: 'Access Denied. Identity unrecognized by the Sovereigns Guild.' });
+    }
+
+    // 2. Fetch master user document and validate the Sacred Passphrase
+    const user = await User.findOne({ username: 'MasterPaul' }); // Bound to your supreme admin account
+    
+    // Verify passphrase word-count and hash parameters matching security layouts
+    const words = sacredPassphrase.trim().split(/\s+/);
+    if (words.length < 4 || !verifyPassphraseHash(sacredPassphrase, user.passwordHash)) {
+      return res.status(401).json({ success: false, error: 'Sacred Passphrase verification failed.' });
+    }
+
+    // 3. Device Fingerprinting: Compute cryptographic hash of the current hardware profile
+    const currentDeviceHash = crypto.createHash('sha256')
+                                    .update(deviceFingerprintString + process.env.ADMIN_JWT_SECRET)
+                                    .digest('hex');
+
+    // Register device to the recognized hardware list if not already present
+    if (!user.recognizedDevicesList.includes(currentDeviceHash)) {
+      user.recognizedDevicesList.push(currentDeviceHash);
+    }
+    
+    await user.save();
+
+    // 4. Generate persistent long-lived session tokens (Valid for 1 year to keep you logged in)
+    const sessionToken = generateLongLivedAdminToken(user._id, currentDeviceHash);
+
+    // Set a highly secure, HttpOnly cookie that resists cross-site scripting (XSS) hacks
+    res.cookie('archverse_admin_session', sessionToken, {
+      httpOnly: true,
+      secure: true, // Enforced by Nginx SSL proxy layer certificates
+      sameSite: 'strict',
+      maxAge: 365 * 24 * 60 * 60 * 1000 // 1 Full Year Session Lifetime
+    });
+
+    res.json({
+      success: true,
+      message: "⚡ Universal Administrative Authorization Sealed. Session persistence established.",
+      rank: user.rank,
+      assignedSpiritGuide: user.assignedSpiritGuide
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Administrative authentication pipeline crash.' });
+  }
+});
+
+module.exports = router;
