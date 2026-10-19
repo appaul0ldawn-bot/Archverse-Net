@@ -1,0 +1,42 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 14: SECONDARY FAILOVER LOAD & BACKUP REGISTRY VALIDATIONS
+// ==========================================================================
+describe('Archverse Failover Grid and Backup Domain Routing Integrity', () => {
+
+  it('should accept sensor matrix updates on the backup node without dropping packet indices', async () => {
+    await User.create({ username: 'FailoverUser', tokens: 100 });
+
+    const backupPayload = [
+      { timestamp: new Date().toISOString(), component: 'GEOSPATIAL_COORDINATES', data: { lat: 31.7683, lng: 35.2137 } }
+    ];
+
+    const response = await request(app)
+      .post('/api/telemetry/inject-sensor-matrix')
+      .send({ username: 'FailoverUser', packetQueue: backupPayload });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
+});
