@@ -1,0 +1,35 @@
+// ==========================================================================
+// BIOMETRIC FACE MAPPING AUTOMATED SMART SWITCH HOTKEYS
+// ==========================================================================
+export function processBiometricFaceTriggers(faceTrackingPayload, localPlayerObject) {
+  // Capture facial landmark distance coefficients (BlendShapes tracking matrices)
+  const { eyeBlinkLeft, eyeBlinkRight, jawOpen, browLowererLeft } = faceTrackingPayload;
+
+  // 1. BIOMETRIC SMART SWITCH 1: High Brow Tension (Triggers Local Telekinesis Ability)
+  if (browLowererLeft > 0.75) {
+    executeAutomatedHotkeyAction('TRIGGER_TELEKINESIS', localPlayerObject);
+  }
+
+  // 2. BIOMETRIC SMART SWITCH 2: Wink & Open Jaw Combo (Executes Gate Phase Teleport)
+  if (eyeBlinkLeft > 0.85 && eyeBlinkRight < 0.2 && jawOpen > 0.6) {
+    executeAutomatedHotkeyAction('TELEPORT_TO_BEULAH_GATE', localPlayerObject);
+  }
+}
+
+function executeAutomatedHotkeyAction(actionTag, player) {
+  const now = Date.now();
+  if (now - player.lastHotkeyExecutionTime < 3000) return; // 3-second network spam guardrail
+
+  switch (actionTag) {
+    case 'TRIGGER_TELEKINESIS':
+      window.dispatchEvent(new CustomEvent('activate_angel_ability', { detail: { type: 'PSIONIC_PUSH', range: 12 } }));
+      player.lastHotkeyExecutionTime = now;
+      break;
+
+    case 'TELEPORT_TO_BEULAH_GATE':
+      // Overrides current coordinates and transmits an immediate relocation signature across sockets
+      window.dispatchEvent(new CustomEvent('teleport_player', { detail: { x: 0, z: -50, zone: 'BEULAH_LAND' } }));
+      player.lastHotkeyExecutionTime = now;
+      break;
+  }
+}
