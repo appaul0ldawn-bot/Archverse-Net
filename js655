@@ -1,0 +1,26 @@
+const mongoose = require('mongoose');
+
+const AkashicNodeSchema = new mongoose.Schema({
+  recordId: { type: String, required: true, unique: true, index: true },
+  timestamp: { type: Date, default: Date.now },
+  username: { type: String, required: true, index: true },
+  
+  // Data Vector Classification
+  dataType: { 
+    type: String, 
+    enum: ['CHAT_TYPED', 'TRAVEL_GPS', 'PHOTO_UPLOAD', 'WEBCAM_SESSION_META', 'MUSIC_REQUEST'],
+    required: true 
+  },
+  
+  // The Encrypted Content Core
+  payloadData: {
+    contentString: String,      // Chat text, file links, or song titles
+    gpsCoordinates: { lat: Number, lng: Number },
+    sessionParticipants: [String] // Used to track who has access to view private webcam metadata
+  },
+
+  // 🔒 CRITICAL SECURITY CONTROL DIRECTIVE
+  isPrivateField: { type: Boolean, default: false } // TRUE = Restricted to Admins/Viewers; FALSE = Publicly Queryable
+});
+
+module.exports = mongoose.model('AkashicNode', AkashicNodeSchema);
