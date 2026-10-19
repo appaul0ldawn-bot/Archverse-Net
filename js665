@@ -1,0 +1,51 @@
+events {
+    worker_connections 2048;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # --- ANONYMOUS FIREWALL RATELIMITING FILTERS ---
+    # Limits users to a maximum of 30 standard transactions per second
+    limit_req_zone $binary_remote_addr zone=api_limit_mesh:10m rate=30r/s;
+    # Limits structural real-time socket connections to 10 per single IP
+    limit_conn_zone $binary_remote_addr zone=conn_limit_mesh:10m;
+
+    # Complete anti-clickjacking security parameter layers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Content-Security-Policy "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' wss: https:;" always;
+
+    server {
+        listen 443 ssl;
+        server_name yourdomain.com;
+
+        ssl_certificate      /etc/nginx/certs/fullchain.pem;
+        ssl_certificate_key  /etc/nginx/certs/privkey.pem;
+        ssl_protocols        TLSv1.2 TLSv1.3;
+        
+        # Strip internal server version metrics tokens to minimize hacker reconnaissance
+        server_tokens off;
+
+        location /api/ {
+            # Enforce the anonymous security request firewall rate rules instantly
+            limit_req zone=api_limit_mesh burst=20 nodelay;
+            limit_conn conn_limit_mesh 10;
+
+            proxy_pass http://game-server:3000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        location /socket.io/ {
+            proxy_pass http://game-server:3000/socket.io/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+        }
+    }
+}
