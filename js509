@@ -1,0 +1,27 @@
+# ==========================================================================
+# 🚀 THE ARCHVERSE PRODUCTION LAUNCH WORKFLOW
+# ==========================================================================
+
+# STEP 1: Route your free backup subdomain to your server's public IP address
+curl -k "https://duckdns.org"
+
+# STEP 2: Access your repository folder path on the hosting machine
+cd /opt/3d-multiplayer-world
+
+# STEP 3: Shut down any old containers to avoid file memory allocation conflicts
+echo "🛑 Dismantling active staging nodes..."
+docker-compose down --remove-orphans
+
+# STEP 4: Build and optimize your WebGL client bundle using Vite
+echo "📦 Packing production bundles inside the node builder layer..."
+docker-compose run --rm game-server npm run build:client
+
+# STEP 5: Re-launch your container infrastructure live in detached background mode
+echo "🐋 Injecting strict firewall proxy armor and spinning up cluster live..."
+docker-compose up -d --build
+
+# STEP 6: Execute a diagnostic validation check to monitor server logs output stability
+echo "📊 Reviewing live container telemetry loops metrics..."
+sleep 2
+docker-compose ps
+docker-compose logs nginx-proxy --tail=15
