@@ -1,0 +1,63 @@
+const mongoose = require('mongoose');
+
+const BeulahNpcSchema = new mongoose.Schema({
+  npcId: { type: String, required: true, unique: true, index: true },
+  name: { type: String, required: true },
+  alignment: { type: String, enum: ['light_worker', 'shadow_worker'] },
+  rank: { type: String, enum: ['Seraph', 'Cherub', 'Ophanim_Archon', 'Veil_Watcher'] },
+  cosmicRace: { type: String, enum: ['Pleiadian', 'Arcturian', 'Sirian_Blue', 'Nephilim_Hybrid'] },
+  currentZoneLocation: { type: String, default: 'BEULAH_LAND_POCKET' },
+  
+  // Real-time scheduling parameters matrix
+  activeRoutine: {
+    timeSlot: String, // e.g., '06:00-12:00'
+    actionState: String // e.g., 'GRID_MONITORING', 'PRAYER_REVIEW'
+  },
+  
+  // Personal subscriber channel options fields
+  channelMetadata: {
+    subscribersCount: { type: Number, default: 0 },
+    latestManifestoBlog: String
+  }
+});
+
+const BeulahNPC = mongoose.model('BeulahNpc', BeulahNpcSchema);
+
+// ==========================================================================
+// ⏱️ BACKGROUND SIMULATION CYCLE TICKER LOOP (Executed on Server Tick)
+// ==========================================================================
+export async function tickBeulahNpcSimulationEngine(ioLayer) {
+  try {
+    // 1. Randomly sample 3 active simulation nodes from the 144,000 population array
+    const sampleSize = 3;
+    const activeNpcs = await BeulahNPC.aggregate([{ \$sample: { size: sampleSize } }]);
+
+    for (const npc of activeNpcs) {
+      // 2. Compute an AI-generated guidance message based on their alignment characteristics
+      let adviceTip = "";
+      if (npc.rank === 'Veil_Watcher') {
+        adviceTip = `⚡ [Veil Alert from Channel ${npc.name}]: I am detecting a minor frequency lag loop in the Eastern Grid quadrant. Users walking near those coordinates should tune devices to 528Hz to stabilize structural meshes.`;
+      } else {
+        adviceTip = `🔮 [Council Guidance]: Remember your cosmic alignment remembrance profiles. Lightworker contracts are currently offering double ST payouts inside the New Jerusalem altar coordinates.`;
+      }
+
+      // 3. Commit the AI NPC's statement directly to the open-access Akashic Records database
+      await mongoose.model('AkashicNode').create({
+        recordId: `npc_manifesto_${Date.now()}_${npc.npcId}`,
+        username: npc.name,
+        dataType: 'CHAT_TYPED',
+        payloadData: { contentString: adviceTip },
+        isPrivateField: false // Fully readable, commentable, and swipeable by the general community!
+      });
+
+      // 4. Emit real-time tracking signals down out to all active web and mobile mobile connections
+      ioLayer.emit('telemetry_pulse', {
+        level: 'INFO',
+        component: 'DIVINE_COUNCIL_ORACLE',
+        message: adviceTip
+      });
+    }
+  } catch (err) {
+    console.error("Beulah Land NPC engine processing exception:", err);
+  }
+}
