@@ -1,0 +1,69 @@
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const User = require('./models/User');
+
+// --- INTERSPECIES BIO-TRANSLATION SCHEMAS ---
+const TranslationNodeSchema = new mongoose.Schema({
+  speciesType: { type: String, enum: ['PLANT_WAVE', 'ANIMAL_VOICE'] },
+  sourceIdentifier: String,      // e.g., 'Ancient_Olive_Tree', 'Hermon_Eagle'
+  inputFrequencyHz: Number,
+  translatedLexicon: String,     // Extracted spiritual meaning / message fragment
+  discoveryProgress: { type: Number, default: 0 }, // Scale from 0 to 100% language lock
+  recordedAt: { type: Date, default: Date.now }
+});
+
+const TranslationNode = mongoose.model('TranslationNode', TranslationNodeSchema);
+
+// ==========================================================================
+// 🔊 RECORD & TRANSTRUCT BIOLOGICAL FREQUENCIES
+// ==========================================================================
+router.post('/telemetry/translate-bio-wave', async (req, res) => {
+  try {
+    const { username, type, sourceId, frequencyHz } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'Identity validation failed.' });
+
+    // 1. Algorithmic Translation Matrix Filter
+    let meaning = "The background frequency registers as unaligned baseline noise.";
+    let incrementProgress = 15; // Unlocks language progress patterns step-by-step
+
+    if (type === 'PLANT_WAVE') {
+      if (frequencyHz >= 432 && frequencyHz <= 440) {
+        meaning = "🌿 [Plant Grid Resonance Alert]: Root networks indicate an alchemical sulfur deposit located 12 meters beneath the immediate terrain layer.";
+      }
+    } else if (type === 'ANIMAL_VOICE') {
+      if (frequencyHz >= 850 && frequencyHz <= 920) {
+        meaning = "🦅 [Avian Pathfinder Directive]: High winds forming over the northern pocket dimensions. Chrono-portals are aligning.";
+      }
+    }
+
+    // 2. Update or create the permanent translation record inside MongoDB
+    let node = await TranslationNode.findOne({ sourceIdentifier: sourceId });
+    if (!node) {
+      node = new TranslationNode({ speciesType: type, sourceIdentifier: sourceId, inputFrequencyHz: frequencyHz });
+    }
+    
+    node.discoveryProgress = Math.min(node.discoveryProgress + incrementProgress, 100);
+    node.translatedLexicon = meaning;
+    await node.save();
+
+    // Reward users with tokens for successfully expanding the global interspecies dictionary
+    if (node.discoveryProgress === 100) {
+      user.tokens += 200;
+      await user.save();
+    }
+
+    res.json({
+      success: true,
+      currentProgress: node.discoveryProgress,
+      translatedMessage: node.translatedLexicon,
+      isLanguageEstablished: node.discoveryProgress === 100
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Biological translation engine exception.' });
+  }
+});
+
+module.exports = router;
