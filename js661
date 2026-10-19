@@ -1,0 +1,77 @@
+
+Automated Verification Script (security.test.js)
+
+Create this unit testing suite bundle file inside your directory structure to check that your security anonymous firewalls rules and lifestyle telemetry routes run correctly:
+javascript
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🛡️ SUITE 6: ANONYMOUS SECURITY & HEALTH TRACKER PIPELINES
+// ==========================================================================
+describe('Archverse Anonymous Cyber-Security and Fitness App Data Tests', () => {
+
+  it('should allocate tokens correctly based on running/walking fitness telemetry inputs', async () => {
+    const player = await User.create({
+      username: 'FitnessAngel',
+      tokens: 50,
+      karmaScore: 10,
+      alignment: 'angelic'
+    });
+
+    const response = await request(app)
+      .post('/api/telemetry/lifestyle-update')
+      .send({
+        username: 'FitnessAngel',
+        currentActivity: 'RUNNING',
+        stepCount: 5000,
+        decibelNoiseLevel: 45
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.totalTokens).toBe(60); // 50 starting + 10 fitness reward tokens = 60 total
+
+    const checkDb = await User.findOne({ username: 'FitnessAngel' });
+    expect(checkDb.karmaScore).toBe(15);
+  });
+
+  it('should automatically flag profiles if background environmental noise limits exceed safe bounds', async () => {
+    await User.create({ username: 'NoiseSensitiveNode', tokens: 0, karmaScore: 100 });
+
+    const response = await request(app)
+      .post('/api/telemetry/lifestyle-update')
+      .send({
+        username: 'NoiseSensitiveNode',
+        currentActivity: 'WALKING',
+        decibelNoiseLevel: 95 // Intensely chaotic background audio environment
+      });
+
+    expect(response.status).toBe(200);
+    const checkDb = await User.findOne({ username: 'NoiseSensitiveNode' });
+    expect(checkDb.karmaScore).toBe(98); // 100 base - 2 noise penalty = 98 total karma units remaining
+  });
+});
+Use code with caution.
+To run this testing script alongside all prior alchemical and structural testing steps, type:
+bash
+npm test
