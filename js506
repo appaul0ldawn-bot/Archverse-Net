@@ -1,0 +1,29 @@
+# Inside the http {} context block of your nginx.conf file layout:
+map $http_cookie $is_admin_session {
+    default 0;
+    "~*archverse_admin_session=" 1;
+}
+
+server {
+    listen 443 ssl;
+    server_name yourdomain.com;
+
+    location /api/admin/ {
+        # If the request matches an authorized admin cookie profile, ignore standard API limit constraints
+        error_page 418 = @unlimited_admin;
+        if ($is_admin_session = 1) {
+            return 418;
+        }
+
+        # Fallback standard limits wrapper applied to unverified player connections
+        limit_req zone=api_limit_mesh burst=20 nodelay;
+        proxy_pass http://game-server:3000;
+    }
+
+    location @unlimited_admin {
+        # Bypasses all throttling limits to give you uninterrupted universal access anywhere
+        proxy_pass http://game-server:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
