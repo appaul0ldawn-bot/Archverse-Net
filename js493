@@ -1,0 +1,58 @@
+[
+  {
+    "appId": "angels_vs_demons_chess",
+    "title": "Angels VS Demons Custom Chess Set",
+    "externalUrl": "https://www.etsy.com/market/angels_vs_demons_chess_set",
+    "category": "RELIC_TILES",
+    "inGameAnchorStructure": "DIVINE_MARKETPLACE"
+  },
+  {
+    "appId": "unnatural_world_archangels",
+    "title": "Unnatural World Fandom Wiki — Archangels",
+    "externalUrl": "https://unnaturalworld.fandom.com/wiki/Archangels",
+    "category": "MYSTICAL_KNOWLEDGE",
+    "inGameAnchorStructure": "UNIFIED_MULTIVERSE_CODEX"
+  },
+  {
+    "appId": "angelology_archangel",
+    "title": "Angelology Wiki — Archangel",
+    "externalUrl": "https://angelology.fandom.com/wiki/Archangel",
+    "category": "MYSTICAL_KNOWLEDGE",
+    "inGameAnchorStructure": "UNIFIED_MULTIVERSE_CODEX"
+  },
+  {
+    "appId": "creation_of_heaven_archangels",
+    "title": "The Creation of Heaven Wiki — Archangels",
+    "externalUrl": "https://the-creation-of-heaven.fandom.com/wiki/Archangels",
+    "category": "MYSTICAL_KNOWLEDGE",
+    "inGameAnchorStructure": "UNIFIED_MULTIVERSE_CODEX"
+  },
+  {
+    "appId": "ten_great_primordials_archangels",
+    "title": "The Ten Great Primordials Wiki — Archangels",
+    "externalUrl": "https://the-ten-great-primordials.fandom.com/wiki/Archangels",
+    "category": "MYSTICAL_KNOWLEDGE",
+    "inGameAnchorStructure": "UNIFIED_MULTIVERSE_CODEX"
+  },
+  {
+    "appId": "mythos_legends_archangel",
+    "title": "Mythos and Legends Wiki — Archangel",
+    "externalUrl": "https://mythos-and-legends.fandom.com/wiki/Archangel",
+    "category": "MYSTICAL_KNOWLEDGE",
+    "inGameAnchorStructure": "UNIFIED_MULTIVERSE_CODEX"
+  },
+  {
+    "appId": "deviantart_archangels",
+    "title": "DeviantArt Angelic Artwork Portal",
+    "externalUrl": "https://www.deviantart.com/tag/archangels",
+    "category": "CELESTIAL_MEDIA",
+    "inGameAnchorStructure": "EXTERNAL_ART_GALLERY"
+  },
+  {
+    "appId": "free_star_system_generator",
+    "title": "Free Star-System Generator (Vercel Node)",
+    "externalUrl": "https://star-system-generator.vercel.app/",
+    "category": "RELIC_TILES",
+    "inGameAnchorStructure": "STAR_MAP_VIEWPORT"
+  }
+]
