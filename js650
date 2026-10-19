@@ -1,0 +1,5 @@
+
+Secure Financial Integration & Anti-Tamper Token Firewall (finances.js)
+
+This server-side processing controller establishes secure integration bridges for processing external currencies (Bank ACH/Stripe, CashApp Pay vectors, and Cryptocurrency ERC-20 payloads) into Soul Tokens (ST).
+It explicitly embeds the Token Generator Anti-Tamper Firewall. Every transaction request mutating the token balance field must supply a cryptographically signed cryptographic token from the admin keys database. Any unsigned, client-side, or third-party mutation attempts trigger an immediate system lock, a permanent ban, and record the attack vector inside the Akashic Records:
