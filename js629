@@ -1,0 +1,54 @@
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
+export function DimensionalDegradationController({ isTimedEventActive }) {
+  const filterRef = useRef();
+
+  useFrame((state) => {
+    if (!filterRef.current) return;
+    
+    // 1. DYNAMIC RENDERING DEGRADATION GATES
+    if (isTimedEventActive) {
+      // DOWNGRADE TO 2D: Collapse depth buffer scaling, lock matrix perspectives, and enable cell-shading posterization
+      state.camera.projectionMatrix.makeOrthographic(
+        state.size.width / -100, state.size.width / 100,
+        state.size.height / 100, state.size.height / -100,
+        0.1, 1000
+      );
+      filterRef.current.material.uniforms.uPixelSize.value = 4.0; // Enforce pixelated 2D retro grid shader styling
+    } else {
+      // RESTORE 3D CINEMATIC PERSPECTIVE
+      state.camera.projectionMatrix.makePerspective(50, state.size.width / state.size.height, 0.1, 1000);
+      filterRef.current.material.uniforms.uPixelSize.value = 1.0;
+    }
+    state.camera.updateProjectionMatrix();
+  });
+
+  // Custom post-processing shader overlay material wrapper definitions
+  const PixelShader = {
+    uniforms: {
+      tDiffuse: { value: null },
+      uPixelSize: { value: 1.0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D tDiffuse;
+      uniform float uPixelSize;
+      varying vec2 vUv;
+      void main() {
+        // Sample textures utilizing a quantized step matrix to enforce mathematical pixel-snapping
+        vec2 dUv = floor(vUv * 256.0 / uPixelSize) / (256.0 / uPixelSize);
+        gl_FragColor = texture2D(tDiffuse, dUv);
+      }
+    `
+  };
+
+  return null;
+}
