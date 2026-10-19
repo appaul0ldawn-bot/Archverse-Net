@@ -1,0 +1,61 @@
+
+Archverse Spatial Engine Player & Admin Manual
+
+Welcome to the Archverse. This documentation outlines the core game systems, user progression paths, and developer command tools within the 3D Web & Mobile AR ecosystem.
+
+🎖️ Character Progression & Ranks
+
+Your visual aura, wing scale, and avatar character properties evolve automatically based on your permanent Soul Token (ST) bank balance. Tokens are accumulated by completing geo-located real-world operations via the mobile AR application framework.
+
+Angelic Alignment Tiers
+
+• Cherub Cadet (0 ST Unlocked): Baseline celestial model layout. Features standard armor configurations and low-intensity ambient aura mesh rings.
+• Seraph Knight (500 ST Required): Upgrades mesh parameters to the formal armor model wrapper. Unlocks custom color tint options.
+• Archangel Regent (1500 ST Required): Peak tier. Unlocks full emissive glowing textures, an illuminated golden halo accessory, and the animated 6-Wing Seraph Rig loop.
+
+Demonic Alignment Tiers
+
+• Fallen Imp (0 ST Unlocked): Baseline shadow model profile. Features standard crimson textures and minimal smoke effect particles.
+• Arch-Demon (500 ST Required): Upgrades mesh structure to standard heavy obsidian armor plating.
+• Void Overlord (1500 ST Required): Unlocks deep abyssal aura shaders, a high-intensity red emissive eye glow matrix, and glowing horned helmets.
+
+🪙 Relics & Storefront Inventory
+
+Earned tokens can be spent inside the Citadel Storefront HUD Overlay to permanently bind enchanted items directly to your database profile schema:
+• Enchanted Golden Halo (300 ST): Torus geometry head attachment that floats smoothly above the avatar mesh with an added light bloom filter.
+• 6-Wing Seraph Rig (800 ST): Articulated side-wing meshes that oscillate dynamically on inverse sine waves using time-based clock loops.
+• Flaming Cruciform Sword (1000 ST): High-intensity emissive weapon mesh attached directly to the right-hand container node of your avatar.
+
+🎯 Mobile AR Mission Mechanics
+
+Mobile AR applications run a continuous location-based matrix synced directly with the desktop web map. Players can choose to run two styles of missions depending on their playstyle focus:
+
+👼 Lightworker Missions
+
+• Objective: Locate localized spatial grid ripples (displayed on your HUD carousel map).
+• Execution: Move within a 30-meter radius of the real-world GPS coordinates to unlock the interaction button.
+• Reward: 150 ST upon broadcasting the reality shift signature back to the central server database.
+
+🎭 Shadow Agent Missions (In Disguise)
+
+• Objective: Cause calculated cosmic mischief to break grid stagnation, serving a hidden higher purpose.
+• Execution: Approach target geographic coordinates mapped to physical structures via your phone camera.
+• Reward: 120 ST upon completing the task contract loop.
+
+🎛️ Console Developer & Admin Commands
+
+Authorized developers can input specialized text parameters straight into the main text input HUD box to execute instant coordinate shifts and movement tests.
+• System Constraint: Any text string starting with a forward slash (/) is intercepted by the local command parser matrix and will never be broadcast into the public scrolling chat history log sidebar.
+
+Command Syntax	Operational Purpose	Boundaries / Constraints
+/speed [value]	Alters the local user's vector movement processing speed inside the WASD physics engine loop.	value must be a positive float between 1 and 25. Defaults to 6.
+/tp [X] [Z]	Instantly updates the player mesh coordinates on the 3D helper floor and fires an absolute location packet across WebSockets.	Must contain valid numeric coordinates inside the active global map limits.
+
+
+📻 Solfeggio & Binaural Jukebox Control
+
+The global background music player uses pure mathematical wave generation via the client browser's Web Audio API to construct soothing background frequencies. Players can toggle between the following ambient channels:
+• 396 Hz (Grounding Resonance): Tones engineered to clear low-vibrational loops, fears, and spatial blockages.
+• 432 Hz (Harmonic Alignment): Deep ambient wave that mirrors natural geometry, ideal for exploring wide fields.
+• 528 Hz (Miracle Transformation): High-resonance sine wave designed to trigger environmental repair animations.
+• 963 Hz (Pure Angelic Crown): High-tier spiritual drone that pan-splits left and right frequencies by 4 Hz to generate an immersive binaural alpha brainwave pulse.
