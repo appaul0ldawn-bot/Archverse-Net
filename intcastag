@@ -1,0 +1,9 @@
+
+ Integrating Your CashApp Cashtag ($Sephraines)
+
+To route player payments and token purchase fund donations directly to your personal CashApp, you can deploy a Direct CashTag Deep-Linking Matrix.
+When a user opens the Divine Marketplace to purchase upgrades or send donations to support the site, the interface generates a dynamic payment button. On mobile devices, this button automatically fires an intent link that launches the native CashApp on the user's phone, pre-populating your Cashtag and the chosen donation amount. On desktop browsers, it renders a secure transaction gateway displaying a QR code wrapper pointing straight to your link profile.
+
+The Translucent Billing HUD Component (CashAppBilling.jsx)
+
+Add this component layout directly into your Divine Storefront Overlay HUD:
