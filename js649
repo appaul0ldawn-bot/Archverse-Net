@@ -1,0 +1,91 @@
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const User = require('./models/User');
+const AkashicNode = require('./models/AkashicRecords');
+
+// Secure server-side signature validation helper configuration
+function verifyAdminSignature(payload, signature) {
+  const adminSecret = process.env.ADMIN_JWT_SECRET || "SECRET_HEAVEN_KEY_999";
+  const expectedSignature = crypto.createHmac('sha256', adminSecret)
+                                  .update(JSON.stringify(payload))
+                                  .digest('hex');
+  return signature === expectedSignature;
+}
+
+// ==========================================================================
+// 🪙 1. MULTI-CHANNEL FINANCIAL EXCHANGE ROUTER
+// ==========================================================================
+router.post('/billing/purchase-tokens', async (req, res) => {
+  try {
+    const { username, paymentMethod, amountUSD, paymentTxId } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'User node invalid.' });
+
+    // Calculate currency scaling logic parameters: \$1.00 USD maps precisely to 100 ST
+    const tokensBought = amountUSD * 100;
+
+    // Generate an authorized internal admin payload stamp to pass the token firewall rules safely
+    const txPayload = { username, tokensBought, paymentTxId, timestamp: Date.now() };
+    const adminSecret = process.env.ADMIN_JWT_SECRET || "SECRET_HEAVEN_KEY_999";
+    const secureServerStamp = crypto.createHmac('sha256', adminSecret)
+                                    .update(JSON.stringify(txPayload))
+                                    .digest('hex');
+
+    // Route internally straight into our protected firewall ledger endpoint box
+    const transactionRecord = await executeTokenAllocation(username, tokensBought, txPayload, secureServerStamp);
+
+    res.json({
+      success: true,
+      message: `Successfully processed ${paymentMethod} payment. Unlocked 🪙 ${tokensBought} ST.`,
+      newBalance: transactionRecord.newBalance
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Payment gateway transaction failure.' });
+  }
+});
+
+// ==========================================================================
+// 🛡️ 2. ANTI-TAMPER TOKEN GENERATOR FIREWALL ENGINE
+// ==========================================================================
+async function executeTokenAllocation(username, amount, validationPayload, signatureToken) {
+  const user = await User.findOne({ username });
+
+  // FIREWALL INTERCEPT: Block unauthorized client-side token generation attempts
+  const isSignatureValid = verifyAdminSignature(validationPayload, signatureToken);
+
+  if (!isSignatureValid) {
+    // 🚷 CRITICAL SECURITY PROTOCOL BRIGADE ENGAGED
+    user.isBanned = true;
+    user.tokens = 0; // Strip all current items balances instantly as asset penalty
+    user.warningCount = 99;
+    await user.save();
+
+    // Log the attempted hack attack vector directly inside the Akashic Records database logs
+    await AkashicNode.create({
+      recordId: `hack_exploit_${Date.now()}`,
+      username: username,
+      dataType: 'WEBCAM_SESSION_META', // Categorized as critical tracking analytics info
+      payloadData: { contentString: `❌ ILLEGAL TOKEN GENERATOR INJECTION DETECTED. SECTOR ANOMALY CONTAINED. CLIENT DISCONNECTED.` },
+      isPrivateField: false // Exposed publicly to warn the community inside the records terminal
+    });
+
+    if (global.io) {
+      const maliciousSocket = Object.values(global.players).find(p => p.name === username);
+      if (maliciousSocket) {
+        global.io.to(maliciousSocket.id).emit('moderation_event', { type: 'BAN', reason: 'Token Generator Hack Vector Extracted.' });
+        global.io.sockets.sockets.get(maliciousSocket.id)?.disconnect(true);
+      }
+    }
+    throw new Error('SECURITY_BREACH_CONTAINED');
+  }
+
+  // Authorize mutation only if signature token evaluates perfectly clean
+  user.tokens += amount;
+  await user.save();
+  
+  global.stateHasChanged = true;
+  return { newBalance: user.tokens };
+}
