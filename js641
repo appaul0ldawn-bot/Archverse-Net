@@ -1,0 +1,56 @@
+// ==========================================================================
+// 💊 CLINICAL DRUG TO ALCHEMICAL REMEDIES TRANSLATION SYSTEM
+// ==========================================================================
+const REMEDIES_CROSS_REFERENCE_DATABASE = {
+  "synthetic_stimulants": {
+    contraindications: ["High_Blood_Pressure", "Arrhythmia_Grid_Loops"],
+    dangerousInteractions: ["Abyssal_Brimstone_Extract"], // Blocks fatal alchemical combinations
+    sacredRemedyRecommendation: {
+      name: "Tincture of Solar Eleuthero (Siberian Ginseng)",
+      sacredElement: "Sulfur Core / Fire Realignment",
+      remediatingAction: "Stabilizes the adrenal nervous platform matrix natively, bringing target frequency states back to 432Hz balance without causing cellular exhaust loops."
+    }
+  },
+  "synthetic_sedatives": {
+    contraindications: ["Respiratory_Depression"],
+    dangerousInteractions: ["Mercury_Quicksilver_Draught"],
+    sacredRemedyRecommendation: {
+      name: "Infusion of Celestial Passionflower & Organic Valerian Root",
+      sacredElement: "Salt Core / Water Realignment",
+      remediatingAction: "Binds gently to GABA receptor grid channels, flushing negative psychic energy residues from the aura mood field to unlock deeper rest states safely."
+    }
+  }
+};
+
+app.post('/api/alchemy/consult-remedy', async (req, res) => {
+  try {
+    const { username, currentSyntheticInput, loggedCondition } = req.body;
+    const user = await User.findOne({ username });
+
+    if (!user) return res.status(404).json({ success: false, error: 'Identity not found.' });
+
+    const lookupMatch = REMEDIES_CROSS_REFERENCE_DATABASE[currentSyntheticInput];
+    if (!lookupMatch) {
+      return res.status(400).json({ success: false, error: 'Target chemical entry details not registered in database matrices.' });
+    }
+
+    // Safety Constraint Check: Verify user isn't carrying hazardous conflicting inventory items
+    const hasDangerousWeapon = user.equippedInventory?.weapon === 'abyss_staff'; 
+    if (hasDangerousWeapon && currentSyntheticInput === 'synthetic_stimulants') {
+      return res.status(400).json({
+        success: false,
+        securityAction: 'BLOCK_CRAFTING',
+        error: '⚠️ HAZARDOUS REACTION DETECTED: Combining synthetic compounds with Abyssal item frequencies causes severe cellular grid toxicity. Crafting operation blocked.'
+      });
+    }
+
+    res.json({
+      success: true,
+      safetyWarnings: `Contraindications tracked: ${lookupMatch.contraindications.join(', ')}`,
+      remedy: lookupMatch.sacredRemedyRecommendation
+    });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Remedy consultation data pipeline crash.' });
+  }
+});
