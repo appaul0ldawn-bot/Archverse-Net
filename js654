@@ -1,0 +1,35 @@
+// ==========================================================================
+// 🏠 VAMPIRIC INTERIOR PRIVACY & WEBCAM VISIBILITY MATRIX
+// ==========================================================================
+app.post('/api/sanctuary/toggle-webcam-stream', async (req, res) => {
+  try {
+    const { hostUsername, guestUsername, addressId, actionState } = req.body;
+
+    if (actionState === 'START_STREAM') {
+      // 1. Elevate visibility: inside house privacy drops ONLY between the active participants
+      global.io.to(guestUsername).emit('sanctuary_feed_active', {
+        streamSource: hostUsername,
+        estateId: addressId,
+        privacyStatus: 'RESTRICTED_MUTUAL_VIEW' // Bypasses default blank interior mapping
+      });
+
+      // 2. Commit session lifecycle telemetry directly into the Akashic database node array
+      await mongoose.model('AkashicNode').create({
+        recordId: `webcam_${Date.now()}`,
+        username: hostUsername,
+        dataType: 'WEBCAM_SESSION_META',
+        payloadData: {
+          contentString: `Secure 18+ WebRTC video channel activated inside address: ${addressId}`,
+          sessionParticipants: [hostUsername, guestUsername]
+        },
+        isPrivateField: true // Locked securely against public terminal search loops
+      });
+
+      return res.json({ success: true, message: 'Webcam feed established. Interior privacy suspended between active viewers.' });
+    }
+
+    res.status(400).json({ success: false, error: 'Invalid streaming modification parameters.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Webcam privacy engine exception.' });
+  }
+});
