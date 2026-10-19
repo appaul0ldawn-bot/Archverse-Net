@@ -1,0 +1,87 @@
+const express = require('express');
+const router = express.Router();
+const crypto = require('crypto');
+const User = require('./models/User');
+
+// Helper to validate multi-word sacred passphrases (Min 4 holy words constraint)
+function validateSacredPassphrase(passphrase) {
+  if (!passphrase) return false;
+  const words = passphrase.trim().split(/\s+/);
+  return words.length >= 4; 
+}
+
+// ==========================================================================
+// 💋 1. SEDUCTION MECHANICS & HARASSMENT SAFEGUARDS
+// ==========================================================================
+router.post('/interaction/seduce', async (req, res) => {
+  try {
+    const { senderUsername, targetUsername } = req.body;
+    
+    const sender = await User.findOne({ username: senderUsername });
+    const target = await User.findOne({ username: targetUsername });
+
+    if (!sender || !target) return res.status(404).json({ success: false, error: 'Nodes not found.' });
+
+    // Track active interactions inside the running state clock
+    const now = Date.now();
+    sender.lastInteractionTime = now;
+
+    // Check for spam harassment loops (e.g., clicking the target more than 4 times within 10 seconds)
+    if (now - target.lastInteractionTime < 10000) {
+      target.harassmentClickCounter = (target.harassmentClickCounter || 0) + 1;
+    } else {
+      target.harassmentClickCounter = 1;
+    }
+    target.lastInteractionTime = now;
+
+    // HARASSMENT ESCALATION PROTOCOL: Kick and automatically trigger peer isolation blocks
+    if (target.harassmentClickCounter > 4) {
+      sender.warningCount = (sender.warningCount || 0) + 1;
+      sender.tokens = Math.max(0, sender.tokens - 300); // Immediate financial karma penalty
+      
+      // Auto-inject sender into target's personal blocked list structure array
+      if (!target.blockedUsersList.includes(senderUsername)) {
+        target.blockedUsersList.push(senderUsername);
+      }
+      await sender.save();
+      await target.save();
+
+      if (global.io) {
+        const maliciousSocket = Object.values(global.players).find(p => p.name === senderUsername);
+        if (maliciousSocket) {
+          global.io.to(maliciousSocket.id).emit('moderation_event', { type: 'HARASSMENT_BOOT', reason: 'Repeated unauthorized tracking loops.' });
+          global.io.sockets.sockets.get(maliciousSocket.id)?.disconnect(true);
+        }
+      }
+      return res.json({ success: true, actionStatus: 'BOOTED_FOR_HARASSMENT', message: 'Target boundaries violated. Connection terminated.' });
+    }
+
+    // Standard consensual seduction modifier: updates visual aura particles slightly
+    res.json({ success: true, actionStatus: 'CHARM_APPLIED', message: `Seduction aura drifted toward ${targetUsername}.` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Interaction processing exception.' });
+  }
+});
+
+// ==========================================================================
+// 🏠 2. VAMPIRIC PROPERTY ACCESS REGULATION (REAL-WORLD ADDR)
+// ==========================================================================
+router.post('/sanctuary/request-entry', async (req, res) => {
+  try {
+    const { guestUsername, hostUsername, addressId } = req.body;
+    
+    // Dispatch an invite request directly over the target player socket channel
+    if (global.io) {
+      const hostSocket = Object.values(global.players).find(p => p.name === hostUsername);
+      if (hostSocket) {
+        global.io.to(hostSocket.id).emit('entry_request_received', { from: guestUsername, estate: addressId });
+        return res.json({ success: true, status: 'REQUEST_PENDING', message: 'Standing at the threshold. Awaiting permission to cross.' });
+      }
+    }
+    res.status(400).json({ success: false, error: 'Host is currently offline in the veil.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Estate system processing error.' });
+  }
+});
+
+module.exports = router;
