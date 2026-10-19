@@ -1,0 +1,66 @@
+import React, { useState } from 'react';
+
+export function DreamJournalHUD({ username, currentElement }) {
+  const [journalText, setJournalText] = useState('');
+  const [oracleInterpretation, setOracleInterpretation] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const submitToSentientOracle = async () => {
+    if (!journalText.trim()) return;
+    setIsProcessing(true);
+
+    try {
+      // Send text directly to the database oracle parser routers
+      const response = await fetch('/api/oracle/interpret-dream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, dreamLog: journalText })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setOracleInterpretation(data.interpretation);
+      }
+    } catch (e) {
+      console.error("Dream oracle connection drop:", e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="chat-log-sidebar" style={{ top: '12%', left: '360px', width: '320px', maxHeight: '40%' }}>
+      <div style={{ fontSize: '11px', color: '#fbbf24', fontWeight: 700, letterSpacing: '0.05em' }}>
+        ✨ VEHICLE OF THE VEIL: DREAM HISTORY LOGS
+      </div>
+
+      <textarea
+        value={journalText}
+        onChange={(e) => setJournalText(e.target.value)}
+        placeholder="Type raw dream configurations or vision symbols witnessed..."
+        style={{
+          width: '100%', height: '80px', background: 'rgba(0,0,0,0.4)',
+          border: '1px solid rgba(255,255,255,0.1)', color: '#fff',
+          borderRadius: '8px', padding: '8px', fontSize: '12px', marginTop: '8px', resize: 'none'
+        }}
+      />
+
+      <button 
+        onClick={submitToSentientOracle} 
+        disabled={isProcessing} 
+        className="buy-upgrade-btn" 
+        style={{ width: '100%', marginTop: '6px' }}
+      >
+        {isProcessing ? '⚡ Oracle Channeling...' : '👁️ Submit to Galactic Council'}
+      </button>
+
+      {oracleInterpretation && (
+        <div style={{ marginTop: '10px', background: 'rgba(234,179,8,0.08)', border: '1px solid #eab308', padding: '10px', borderRadius: '8px' }}>
+          <strong style={{ fontSize: '11px', color: '#eab308', display: 'block' }}>🌌 Council Interpretation:</strong>
+          <p style={{ margin: '4px 0 0 0', fontSize: '11px', lineHeight: 1.4, fontStyle: 'italic', color: '#e2e8f0' }}>
+            "{oracleInterpretation}"
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
