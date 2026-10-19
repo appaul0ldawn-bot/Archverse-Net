@@ -1,0 +1,4 @@
+
+Biometric Face Tracking & Automated Hotkey Triggers (FaceHotkeys.js)
+
+This module running on your mobile AR framework intercepts native camera face tracking data nodes. When it recognizes distinct biometric structural expressions (e.g., a Focused Brow or Serene Smile), it operates as a Smart Switch, executing an automated layout hotkey action to invoke unique angelic abilities or teleport instantly into targeted pocket coordinates:
