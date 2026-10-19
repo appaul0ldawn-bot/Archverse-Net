@@ -1,0 +1,18 @@
+
+Peer Reporting, Blocking & Moderation Layer
+
+To preserve user mental well-being, players can instantly block or report toxic nodes directly from their chat views. This operation isolates coordinates and completely hides text messages, custom auras, and avatar models from the reporter's local Three.js canvas stream view:
+javascript
+// Local update filter applied to your client-side React array iterations before looping meshes:
+const visiblePlayers = Object.values(players).filter((player) => {
+  // 1. Verify the target profile socket ID hasn't been appended to your local block list array
+  const isBlocked = userProfile.blockedUsersList?.includes(player.username);
+  
+  // 2. Filter out your own connection index so you don't double-render yourself
+  const isSelf = player.id === socket.id;
+
+  return !isBlocked && !isSelf;
+});
+
+// Use visiblePlayers.map() to cleanly iterate your 3D canvas <PlayerAvatar /> nodes mesh layout trees safely
+Use code with caution.
