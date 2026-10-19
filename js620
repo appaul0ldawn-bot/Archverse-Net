@@ -1,0 +1,28 @@
+const mongoose = require('mongoose');
+
+const PlayerPsychologySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
+  
+  // --- SPATIAL BEHAVIORAL PATTERNS ---
+  movementCadence: { type: String, enum: ['ERRATIC_TRANSIT', 'GROUNDED_ANCHOR', 'HYPER_FOCUS'] }, 
+  interactionPosture: { type: String, enum: ['BENEVOLENT_LIGHT', 'MISCHIEVOUS_SHADOW', 'ISOLATED_VEIL'] },
+  
+  // --- INTEGRATED CLINICAL-ALCHEMICAL EVALUATIONS ---
+  archetypeMetrics: {
+    mercuryVolatilityIndex: { type: Number, default: 0.5 }, // Formerly associated with rapid thought-jumping
+    sulfurDriveIntensity: { type: Number, default: 0.5 },   // Formerly associated with hyper-focused energy bursts
+    saltStabilityRoot: { type: Number, default: 0.5 }       // Capacity for grounding and boundary retention
+  },
+
+  // --- AUTOMATED COUNSELING REMEDIAL FLAGS ---
+  remedyRecommendations: [{
+    triggerEvent: String,
+    sacredHerbName: String,
+    suggestedTuningHz: Number,
+    counselingGuildAdviceText: String
+  }],
+  
+  lastEvaluatedAt: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('PlayerPsychology', PlayerPsychologySchema);
