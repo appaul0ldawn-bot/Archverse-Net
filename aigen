@@ -1,0 +1,8 @@
+
+The AI Generation & Visual Style Engine Blueprint
+
+While waiting for your image uploads, here is the complete frontend AI Prompt Generator Utility File and the Dynamic Camera Shader Matrix to style user portraits into High-Rank Angels or Demonic entities across the web app and phone screens:
+
+1. Client-Side AI Prompt Generator (AIPromptBuilder.js)
+
+This script automatically reads a user's Zodiac Element, Token Rank, and Alignment from their saved cache configuration data to compile structured generative descriptors for stable AI image transformations
