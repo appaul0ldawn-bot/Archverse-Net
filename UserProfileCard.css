@@ -1,0 +1,45 @@
+
+Extended User Profile, Inventory & Apparel Inspector
+
+This module allows players to click on any active avatar on the map (or their own profile badge) to open a complete data layout card displaying their equipped cosmetics, rank standing, and active alignment status.
+
+🎨 Add Profile View CSS Layout Rules (UserProfileCard.css)
+
+css
+.profile-inspector-card {
+  position: absolute;
+  top: 80px;
+  right: 24px;
+  width: 350px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  color: #f8fafc;
+  z-index: 104;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.apparel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.apparel-slot {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.apparel-slot strong {
+  display: block;
+  color: #a5b4fc;
+  font-size: 10px;
+  text-transform: uppercase;
+}
