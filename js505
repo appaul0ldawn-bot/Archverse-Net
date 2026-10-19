@@ -1,0 +1,72 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🔑 SUITE 16: UNIVERSAL ADMINISTRATIVE PERSISTENT GATEWAYS
+// ==========================================================================
+describe('Archverse Universal Admin Gate and Device Persistence Checks', () => {
+
+  it('should grant access and register device fingerprints for authorized master admin email signatures', async () => {
+    // Instantiate master user document matching the administration credentials layout
+    await User.create({
+      username: 'MasterPaul',
+      rank: 'Council',
+      passwordHash: 'MOCKED_HASHED_PASSPHRASE', // Representation of your 4+ word passphrase
+      recognizedDevicesList: [],
+      assignedSpiritGuide: 'Phoenix'
+    });
+
+    const adminLoginPayload = {
+      email: 'sephraines@gmail.com',
+      sacredPassphrase: 'The Light Reigns Eternal', // Valid 4-word holy passphrase
+      deviceFingerprintString: 'MAC_ADDR_IPHONE_16_PRO'
+    };
+
+    const response = await request(app)
+      .post('/api/auth/admin-universal-login')
+      .send(adminLoginPayload);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.headers['set-cookie']).toBeDefined(); // Confirms persistent secure cookie issued
+
+    // Assert the device fingerprint signature token was successfully written to the MongoDB list
+    const checkUser = await User.findOne({ username: 'MasterPaul' });
+    expect(checkUser.recognizedDevicesList.length).toBe(1);
+  });
+
+  it('should strictly reject access requests if email falls outside authorized master parameters', async () => {
+    const maliciousPayload = {
+      email: 'unauthorized_hacker@gmail.com',
+      sacredPassphrase: 'Some Guess Work Phrase',
+      deviceFingerprintString: 'UNKNOWN_HARDWARE_TERMINAL'
+    };
+
+    const response = await request(app)
+      .post('/api/auth/admin-universal-login')
+      .send(maliciousPayload);
+
+    // Pipeline must intercept the authentication route and throw a 403 Forbidden protection error
+    expect(response.status).toBe(403);
+    expect(response.body.success).toBe(false);
+  });
+});
