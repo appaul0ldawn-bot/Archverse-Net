@@ -1,0 +1,45 @@
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
+
+export function CelestialFluidMesh({ position, scale =, fluidColor = "#38bdf8" }) {
+  const meshRef = useRef();
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const time = state.clock.getElapsedTime();
+
+    // 1. Dynamic Vertex Wave Displacement Loop
+    const positionAttribute = meshRef.current.geometry.attributes.position;
+    const vertex = new THREE.Vector3();
+
+    for (let i = 0; i < positionAttribute.count; i++) {
+      vertex.fromBufferAttribute(positionAttribute, i);
+      
+      // Apply layered sine/cosine wave distortion matrices to simulate organic fluid motion
+      const waveX = Math.sin(time * 2 + vertex.x * 1.5) * 0.12;
+      const waveZ = Math.cos(time * 1.8 + vertex.z * 1.5) * 0.12;
+      
+      positionAttribute.setY(i, waveX + waveZ);
+    }
+    positionAttribute.needsUpdate = true; // Force WebGL execution re-render
+
+    // 2. Continuous structural liquid rotation
+    meshRef.current.rotation.y = time * 0.05;
+  });
+
+  return (
+    <mesh ref={meshRef} position={position} scale={scale} castShadow receiveShadow>
+      <sphereGeometry args={[1, 64, 64]} />
+      <meshStandardMaterial
+        color={fluidColor}
+        roughness={0.1}
+        metalness={0.8}
+        transparent
+        opacity={0.85}
+        transmission={0.6} // High-fidelity refraction simulation physics
+        thickness={0.5}
+      />
+    </mesh>
+  );
+}
