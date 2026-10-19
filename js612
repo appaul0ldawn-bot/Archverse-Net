@@ -1,0 +1,51 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+const PlayerPsychology = require('./models/PlayerPsychology');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  await PlayerPsychology.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🌌 SUITE 12: PSYCHOMETRY, TELEPHONY AND MARKETING AD SCHEMAS
+// ==========================================================================
+describe('Archverse External API Integrations and Player Analytics Suite', () => {
+
+  it('should generate properly targeted Google Ads copy sets based on site criteria definitions', () => {
+    const { generateArchverseGoogleAds } = require('./AIPromptBuilder');
+    const adCampaign = generateArchverseGoogleAds();
+
+    expect(adCampaign.campaignName).toBe('Archverse_Global_Awakening_Search');
+    expect(adCampaign.targetingKeywords).toContain('New Jerusalem 3D map');
+    expect(adCampaign.adAssets.headlines[0]).toContain('Archverse');
+  });
+
+  it('should successfully commit encrypted invite tracking hashes during client sharing actions', async () => {
+    await User.create({ username: 'SharingSeraph', tokens: 100 });
+
+    const response = await request(app)
+      .post('/api/sharing/generate-invite')
+      .send({ referrerUsername: 'SharingSeraph', targetRealm: 'Agartha Hollows' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.inviteLink).toContain('https://yourdomain.com');
+    expect(response.body.trackingHash).toBeDefined();
+  });
+});
