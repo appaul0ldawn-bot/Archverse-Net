@@ -1,0 +1,7 @@
+const DIVINE_CATALOG_MODS = {
+  modifications: [
+    { id: 'mod_vamp_cloak', name: 'Vampiric Veil Phase Mod', cost: 900, desc: 'Completely silences local movement footsteps within private sectors.' },
+    { id: 'mod_siren_resonance', name: 'Siren Aura Pulse Mod', cost: 1100, desc: 'Expands the radius of your emotional seduction aura fields by 5 meters.' },
+    { id: 'mod_gospel_shield', name: 'Automatic Gospel Counter Mod', cost: 1500, desc: 'Instantly reads the appropriate protection verse when hit by a demonic spell.' }
+  ]
+};
