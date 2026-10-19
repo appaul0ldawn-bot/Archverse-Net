@@ -1,0 +1,11 @@
+const mongoose = require('mongoose');
+
+// Schema model tracking the multi-hierarchy Solfeggio soundboard pages
+const DivineFrequencySchema = new mongoose.Schema({
+  frequencyHz: { type: Number, required: true, unique: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  angelicTierLevel: String // e.g., 'Seraphim', 'Cherubim', 'Ophanim'
+});
+
+const DivineFrequency = mongoose.model('DivineFrequency', DivineFrequencySchema);
