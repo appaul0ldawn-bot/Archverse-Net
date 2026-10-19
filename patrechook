@@ -1,0 +1,4 @@
+
+Automated Multi-Sensor Pattern Recognition Hook (SensorIngest.js)
+
+This client-side script runs persistently inside the background thread processing pools of the mobile application. It captures device sensor arrays, matches the incoming telemetry loops to extract clean environment characteristics, and transmits throttled packets out to the centralized 22Hz Redis/Node server cache:
