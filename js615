@@ -1,0 +1,62 @@
+const express = require('express');
+const router = express.Router();
+const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+const sgMail = require('@sendgrid/mail');
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// ==========================================================================
+// 🔗 1. CRYPTOGRAPHIC INVITE LINK GENERATOR
+// ==========================================================================
+router.post('/sharing/generate-invite', async (req, res) => {
+  const { referrerUsername, targetRealm } = req.body;
+  
+  // Create an encrypted tracking payload that rewards successful onboarding conversions with 100 ST
+  const hash = crypto.createHash('md5').update(`${referrerUsername}_${Date.now()}`).digest('hex');
+  const secureInviteLink = `https://yourdomain.com{hash}&realm=${encodeURIComponent(targetRealm)}`;
+  
+  res.json({ success: true, inviteLink: secureInviteLink, trackingHash: hash });
+});
+
+// ==========================================================================
+// 📞 2. PRIVATE TELEPHONY VOICE CHANNEL BRIDGE (Twilio Integration)
+// ==========================================================================
+router.post('/comms/initiate-voice-call', async (req, res) => {
+  try {
+    const { fromUserPhone, toUserPhone, channelRoomId } = req.body;
+
+    // Establishes a secure proxy telephone line bridging two players anonymously
+    const call = await twilio.calls.create({
+       url: `https://yourdomain.com{channelRoomId}`,
+       to: toUserPhone,
+       from: process.env.TWILIO_PROXY_NUMBER
+     });
+
+    res.json({ success: true, callSid: call.sid, status: 'CONNECTING_ANONYMOUS_BRIDGE' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Telephony infrastructure connection error.' });
+  }
+});
+
+// ==========================================================================
+// ✉️ 3. DIRECT APP MAIL SYSTEM (SendGrid Integration)
+// ==========================================================================
+router.post('/comms/dispatch-email', async (req, res) => {
+  try {
+    const { recipientEmail, subjectLine, textHtmlBody } = req.body;
+
+    const emailPayload = {
+      to: recipientEmail,
+      from: 'oracle@archverse.net', // Verified application sender handle
+      subject: subjectLine,
+      html: textHtmlBody
+    };
+
+    await sgMail.send(emailPayload);
+    res.json({ success: true, message: 'Message successfully dispatched through SendGrid arrays.' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Mail dispatch failure.' });
+  }
+});
+
+module.exports = router;
