@@ -1,0 +1,52 @@
+import React from 'react';
+
+export function CashAppPaymentPanel({ donationAmountUSD, currentUsername }) {
+  // Your explicit Cashtag handle configuration
+  const cashTagHandle = "Sephraines"; 
+  
+  // Format the uniform URI string scheme to fire the native CashApp payment intent
+  const cashAppDeepLink = `https://cash.app{cashTagHandle}/${donationAmountUSD}`;
+
+  const handleCommitTransaction = async () => {
+    // Open the CashApp portal instantly inside a clean browser viewport window
+    window.open(cashAppDeepLink, '_blank');
+
+    // Emit a pending verification signature block to the backend logs
+    try {
+      await fetch('/api/billing/purchase-tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: currentUsername,
+          paymentMethod: 'CashApp_Mobile_Gateway',
+          amountUSD: donationAmountUSD,
+          paymentTxId: `PENDING_CASH_${Date.now()}`
+        })
+      });
+    } catch (e) {
+      console.error("Failed to log internal transaction state", e);
+    }
+  };
+
+  return (
+    <div style={{
+      background: 'rgba(30, 41, 59, 0.5)', border: '1px solid #10b981',
+      padding: '14px', borderRadius: '12px', marginTop: '12px', textAlign: 'center'
+    }}>
+      <div style={{ fontSize: '11px', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+        🟢 CashApp Integration Active
+      </div>
+      <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#cbd5e1' }}>
+        Support **The Archverse** updates by sending **\${donationAmountUSD} USD** directly to **\$\${cashTagHandle}**.
+      </p>
+      
+      <button 
+        onClick={handleCommitTransaction}
+        className="buy-upgrade-btn" 
+        style={{ background: '#10b981', color: '#fff', width: '100%', fontSize: '13px' }}
+      >
+        💸 Pay with CashApp
+      </button>
+    </div>
+  );
+}
