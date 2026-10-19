@@ -1,0 +1,81 @@
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const app = require('./app'); // Core Express configuration target file
+const User = require('./models/User');
+const AkashicNode = require('./models/AkashicRecords');
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  await mongoose.connect(mongoServer.getUri());
+});
+
+afterEach(async () => {
+  await User.deleteMany({});
+  await AkashicNode.deleteMany({});
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
+
+// ==========================================================================
+// 🛡️ SUITE 9: GATEWAY FINANCIAL PAYMENT LOOPS & HACKING FIREWALLS
+// ==========================================================================
+describe('Archverse Financial Ingestion and Anti-Hack Token Generator Firewall', () => {
+
+  it('should process legitimate CashApp/Crypto transaction payloads and update token balances correctly', async () => {
+    await User.create({ username: 'StripePatron', tokens: 100, isBanned: false });
+
+    const paymentPayload = {
+      username: 'StripePatron',
+      paymentMethod: 'Crypto_Bitcoin_Wallet',
+      amountUSD: 10, // $10.00 maps to +1000 Soul Tokens
+      paymentTxId: 'tx_btc_abc123'
+    };
+
+    const response = await request(app)
+      .post('/api/billing/purchase-tokens')
+      .send(paymentPayload);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.newBalance).toBe(1100); // 100 base + 1000 purchased = 1100 ST total
+  });
+
+  it('should intercept unsigned token generator attempts, wipe assets, and ban the malicious user profile', async () => {
+    await User.create({ username: 'HackerNode', tokens: 400, isBanned: false });
+
+    // Malicious payload trying to inject +99,999 free tokens with an invalid/forged signature token stamp
+    const maliciousPayload = {
+      username: 'HackerNode',
+      tokensBought: 99999,
+      paymentTxId: 'FORGED_EXPLOIT_ID',
+      timestamp: Date.now()
+    };
+
+    // Trigger post direct to internal allocation method with broken signature parameter layers
+    const response = await request(app)
+      .post('/api/billing/admin-inject-token-bypass') // Mock entry endpoint simulation
+      .send({
+        username: 'HackerNode',
+        amount: 99999,
+        validationPayload: maliciousPayload,
+        signatureToken: 'INVALID_COUNTERFEIT_SIGNATURE_STAMP'
+      });
+
+    // The Anti-Tamper Firewall must lock the query down instantly with a validation error
+    expect(response.status).toBe(400);
+
+    const checkedHacker = await User.findOne({ username: 'HackerNode' });
+    expect(checkedHacker.isBanned).toBe(true);
+    expect(checkedHacker.tokens).toBe(0); // Vault assets completely zeroed out by firewall reprimand rules
+
+    // Verify hacking incident was written straight to public Akashic registry logs
+    const hackLog = await AkashicNode.findOne({ username: 'HackerNode' });
+    expect(hackLog.payloadData.contentString).toContain('ILLEGAL TOKEN GENERATOR INJECTION DETECTED');
+  });
+});
